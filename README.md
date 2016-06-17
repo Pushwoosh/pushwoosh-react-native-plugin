@@ -48,11 +48,34 @@ public class MainActivity extends ReactActivity {
 }
 ```
 
-## Step 3 - Use module
+### Step 3 - Use module
 
 ```js
 var Pushwoosh = require('pushwoosh-react-native-plugin');
 
 Pushwoosh.init({ "pw_appid" : "YOUR_PUSHWOOSH_PROJECT_ID" , "project_number" : "YOUR_GCM_PROJECT_NUMBER" });
+Pushwoosh.register();
+```
+
+
+## iOS Setup
+
+### Step 1 - Install plugin
+
+```
+npm install pushwoosh-react-native-plugin --save
+```
+
+### Step 2 - Include PushwooshPlugin project
+
+Drag the **PushwooshPlugin.xcodeproj** (located in **node_modules/pushwoosh-react-native-plugin/src/ios**) as a dependency project into your React Native XCode project.
+Link your project with **libPushwooshPlugin.a**, **libstdc++** and **libz** libraries.
+
+### Step 3 - Use module
+
+```js
+var Pushwoosh = require('pushwoosh-react-native-plugin');
+
+Pushwoosh.init({ "pw_appid" : "YOUR_PUSHWOOSH_PROJECT_ID" });
 Pushwoosh.register();
 ```

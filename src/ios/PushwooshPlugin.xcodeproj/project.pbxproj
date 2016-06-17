@@ -1,0 +1,284 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		46ACA26C1D13D57900717D7F /* Pushwoosh.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 46ACA26B1D13D57900717D7F /* Pushwoosh.a */; };
+		46ACA2A71D14079000717D7F /* PWEventDispatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 46ACA2A61D14079000717D7F /* PWEventDispatcher.m */; };
+		46D37B361D12BB4900D5EC47 /* Pushwoosh.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 46D37B351D12BB4900D5EC47 /* Pushwoosh.h */; };
+		46D37B381D12BB4900D5EC47 /* Pushwoosh.m in Sources */ = {isa = PBXBuildFile; fileRef = 46D37B371D12BB4900D5EC47 /* Pushwoosh.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		46D37B301D12BB4900D5EC47 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
+			files = (
+				46D37B361D12BB4900D5EC47 /* Pushwoosh.h in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		46ACA26B1D13D57900717D7F /* Pushwoosh.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = Pushwoosh.a; sourceTree = "<group>"; };
+		46ACA26D1D13D58900717D7F /* PushNotificationManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PushNotificationManager.h; sourceTree = SOURCE_ROOT; };
+		46ACA2A51D14079000717D7F /* PWEventDispatcher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PWEventDispatcher.h; sourceTree = "<group>"; };
+		46ACA2A61D14079000717D7F /* PWEventDispatcher.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PWEventDispatcher.m; sourceTree = "<group>"; };
+		46D37B321D12BB4900D5EC47 /* libPushwooshPlugin.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPushwooshPlugin.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		46D37B351D12BB4900D5EC47 /* Pushwoosh.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Pushwoosh.h; sourceTree = "<group>"; };
+		46D37B371D12BB4900D5EC47 /* Pushwoosh.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Pushwoosh.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		46D37B2F1D12BB4900D5EC47 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				46ACA26C1D13D57900717D7F /* Pushwoosh.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		46D37B291D12BB4900D5EC47 = {
+			isa = PBXGroup;
+			children = (
+				46ACA26B1D13D57900717D7F /* Pushwoosh.a */,
+				46D37B341D12BB4900D5EC47 /* PushwooshPlugin */,
+				46D37B331D12BB4900D5EC47 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		46D37B331D12BB4900D5EC47 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				46D37B321D12BB4900D5EC47 /* libPushwooshPlugin.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		46D37B341D12BB4900D5EC47 /* PushwooshPlugin */ = {
+			isa = PBXGroup;
+			children = (
+				46ACA26D1D13D58900717D7F /* PushNotificationManager.h */,
+				46D37B351D12BB4900D5EC47 /* Pushwoosh.h */,
+				46D37B371D12BB4900D5EC47 /* Pushwoosh.m */,
+				46ACA2A51D14079000717D7F /* PWEventDispatcher.h */,
+				46ACA2A61D14079000717D7F /* PWEventDispatcher.m */,
+			);
+			path = PushwooshPlugin;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		46D37B311D12BB4900D5EC47 /* PushwooshPlugin */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 46D37B3B1D12BB4900D5EC47 /* Build configuration list for PBXNativeTarget "PushwooshPlugin" */;
+			buildPhases = (
+				46D37B2E1D12BB4900D5EC47 /* Sources */,
+				46D37B2F1D12BB4900D5EC47 /* Frameworks */,
+				46D37B301D12BB4900D5EC47 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PushwooshPlugin;
+			productName = PushwooshPlugin;
+			productReference = 46D37B321D12BB4900D5EC47 /* libPushwooshPlugin.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		46D37B2A1D12BB4900D5EC47 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0720;
+				ORGANIZATIONNAME = Pushwoosh;
+				TargetAttributes = {
+					46D37B311D12BB4900D5EC47 = {
+						CreatedOnToolsVersion = 7.2;
+					};
+				};
+			};
+			buildConfigurationList = 46D37B2D1D12BB4900D5EC47 /* Build configuration list for PBXProject "PushwooshPlugin" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 46D37B291D12BB4900D5EC47;
+			productRefGroup = 46D37B331D12BB4900D5EC47 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				46D37B311D12BB4900D5EC47 /* PushwooshPlugin */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		46D37B2E1D12BB4900D5EC47 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				46ACA2A71D14079000717D7F /* PWEventDispatcher.m in Sources */,
+				46D37B381D12BB4900D5EC47 /* Pushwoosh.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		46D37B391D12BB4900D5EC47 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		46D37B3A1D12BB4900D5EC47 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		46D37B3C1D12BB4900D5EC47 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/../../../react-native/React/**";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		46D37B3D1D12BB4900D5EC47 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/../../../react-native/React/**";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+				);
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		46D37B2D1D12BB4900D5EC47 /* Build configuration list for PBXProject "PushwooshPlugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				46D37B391D12BB4900D5EC47 /* Debug */,
+				46D37B3A1D12BB4900D5EC47 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		46D37B3B1D12BB4900D5EC47 /* Build configuration list for PBXNativeTarget "PushwooshPlugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				46D37B3C1D12BB4900D5EC47 /* Debug */,
+				46D37B3D1D12BB4900D5EC47 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 46D37B2A1D12BB4900D5EC47 /* Project object */;
+}

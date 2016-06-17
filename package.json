@@ -1,15 +1,19 @@
 {
   "name": "pushwoosh-react-native-plugin",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "This plugin allows you to send and receive push notifications. Powered by Pushwoosh (www.pushwoosh.com).",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Pushwoosh/pushwoosh-react-native-plugin.git"
   },
   "keywords": [
     "push",
     "notification"
   ],
   "author": "Pushwoosh",
-  "license": "MIT"
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Pushwoosh/pushwoosh-react-native-plugin/issues"
+  }
 }

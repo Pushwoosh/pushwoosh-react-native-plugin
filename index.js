@@ -15,6 +15,12 @@ function PushNotification() {}
 //	Pushwoosh.init({ projectid: "XXXXXXXXXXXXXXX", pw_appid : "XXXXX-XXXXX" });
 //(end)
 PushNotification.prototype.init = function(config, success, fail) {
+	if (!success) {
+		success = function() {};
+	}
+	if (!fail) {
+		fail = function(error) {};
+	}
 	PushwooshModule.init(config, success, fail);
 };
 
@@ -35,12 +41,24 @@ PushNotification.prototype.init = function(config, success, fail) {
 //	);
 //(end)
 PushNotification.prototype.register = function(success, fail) {
+	if (!success) {
+		success = function(token) {};
+	}
+	if (!fail) {
+		fail = function(error) {};
+	}
 	PushwooshModule.register(success, fail);
 };
 
 //Function: unregister
 //Unregisters device from push notifications
 PushNotification.prototype.unregister = function(success, fail) {
+	if (!success) {
+		success = function(token) {};
+	}
+	if (!fail) {
+		fail = function(error) {};
+	}
 	PushwooshModule.unregister(success, fail);
 };
 
@@ -69,6 +87,12 @@ PushNotification.prototype.onPushOpen = function(callback) {
 //	pushNotification.setTags({"MyTag":["hello", "world"]});
 //(end)
 PushNotification.prototype.setTags = function(tags, success, fail) {
+	if (!success) {
+		success = function() {};
+	}
+	if (!fail) {
+		fail = function(error) {};
+	}
 	PushwooshModule.setTags(tags, success, fail);
 };
 
@@ -89,6 +113,9 @@ PushNotification.prototype.setTags = function(tags, success, fail) {
 //	);
 //(end)
 PushNotification.prototype.getTags = function(success, fail) {
+	if (!fail) {
+		fail = function(error) {};
+	}
 	PushwooshModule.getTags(success, fail);
 };
 
