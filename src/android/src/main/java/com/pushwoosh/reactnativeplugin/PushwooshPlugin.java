@@ -200,7 +200,7 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
             @Override
             public void onSentTagsSuccess(Map<String, String> result) {
                 if (success != null) {
-                    success.invoke(result);
+                    success.invoke();
                 }
             }
 
