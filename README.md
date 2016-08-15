@@ -33,7 +33,20 @@ dependencies {
 }
 ```
 
-In **MainActivity.java** add:
+Optional: To use non-default `play-service-gcm` version (the plugin uses 8.4.0), modify your `android/app/build.gradle` dependencies.
+This might be required in case of conflicts with other react-native plugins.
+```gradle
+...
+
+dependencies {
+    ...
+    compile project(':pushwooshplugin')
+    compile ('com.google.android.gms:play-services-gcm:9.+') {force = true;}
+    compile ('com.google.android.gms:play-services-location:9.+') {force = true;}
+}
+```
+
+For RN < v.0.29.0 In **MainActivity.java** add:
 
 ```java
 ...
@@ -41,6 +54,24 @@ import com.pushwoosh.reactnativeplugin.PushwooshPackage;
 
 public class MainActivity extends ReactActivity {
 
+    ...
+
+    @Override
+    protected List<ReactPackage> getPackages() {
+        return Arrays.<ReactPackage>asList(
+            new MainReactPackage(),
+            new PushwooshPackage() // register Pushwoosh plugin here
+        );
+    }
+}
+```
+For RN >= v.0.29.0 In **MainApplication.java** add:
+
+```java
+...
+import com.pushwoosh.reactnativeplugin.PushwooshPackage;
+
+public class MainApplication extends Application implements ReactApplication {
     ...
 
     @Override
