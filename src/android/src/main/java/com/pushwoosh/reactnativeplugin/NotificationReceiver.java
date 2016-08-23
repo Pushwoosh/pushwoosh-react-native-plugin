@@ -28,7 +28,7 @@ public class NotificationReceiver extends BroadcastReceiver {
         Intent launchIntent  = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
         launchIntent.addCategory("android.intent.category.LAUNCHER");
 
-        launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
         launchIntent.putExtras(pushBundle);
         launchIntent.putExtra(PushManager.PUSH_RECEIVE_EVENT, dataObject.toString());

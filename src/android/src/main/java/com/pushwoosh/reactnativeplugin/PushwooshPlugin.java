@@ -182,6 +182,8 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
         synchronized (mStartPushLock) {
             if (!mPushCallbackRegistered && mStartPushData != null) {
                 callback.invoke(ConversionUtil.toWritableMap(ConversionUtil.stringToMap(mStartPushData)));
+                mPushCallbackRegistered = true;
+                return;
             }
 
             mPushCallbackRegistered = true;
@@ -262,7 +264,10 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 
     @Override
     public void onHostDestroy() {
+        Log.noise(TAG, "Host destroyed");
 
+        mPushCallbackRegistered = false;
+        mStartPushData = null;
     }
 
     ///
