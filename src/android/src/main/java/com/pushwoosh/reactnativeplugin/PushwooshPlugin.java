@@ -1,5 +1,6 @@
 package com.pushwoosh.reactnativeplugin;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -19,6 +20,7 @@ import com.pushwoosh.BasePushMessageReceiver;
 import com.pushwoosh.BaseRegistrationReceiver;
 import com.pushwoosh.PushManager;
 import com.pushwoosh.SendPushTagsCallBack;
+import com.pushwoosh.inapp.InAppFacade;
 import com.pushwoosh.internal.utils.JsonUtils;
 import com.pushwoosh.internal.utils.Log;
 
@@ -242,6 +244,17 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
     @ReactMethod
     public void getHwid(Callback callback) {
         callback.invoke(mPushManager.getPushwooshHWID(getReactApplicationContext()));
+    }
+
+    @ReactMethod
+    public void setUserId(String userId) {
+        mPushManager.setUserId(getReactApplicationContext(), userId);
+    }
+
+    @ReactMethod
+    public void postEvent(String event, ReadableMap attributes) {
+        Intent intent = PostEventActivity.createIntent(getReactApplicationContext(), event, ConversionUtil.toMap(attributes));
+        getReactApplicationContext().startActivity(intent);
     }
 
     ///

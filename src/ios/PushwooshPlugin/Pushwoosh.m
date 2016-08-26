@@ -109,6 +109,15 @@ RCT_EXPORT_METHOD(getTags:(RCTResponseSenderBlock)successCallback error:(RCTResp
 	}];
 }
 
+RCT_EXPORT_METHOD(setUserId:(NSString*)userId) {
+	[[PushNotificationManager pushManager] setUserId:userId];
+}
+
+RCT_EXPORT_METHOD(postEvent:(NSString*)event withAttributes:(NSDictionary*)attributes) {
+	[[PushNotificationManager pushManager] postEvent:event withAttributes:attributes];
+}
+
+
 #pragma mark - PushNotificationDelegate
 
 - (void)onDidRegisterForRemoteNotificationsWithDeviceToken:(NSString *)token {

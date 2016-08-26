@@ -150,4 +150,34 @@ PushNotification.prototype.getHwid = function(success) {
 	PushwooshModule.getHwid(success);
 };
 
+//Function: setUserId
+//[android, ios] Set User indentifier. This could be Facebook ID, username or email, or any other user ID.
+//This allows data and events to be matched across multiple user devices.
+//
+//Parameters:
+// "userId" - user string identifier
+//
+PushNotification.prototype.setUserId = function(userId) {
+	PushwooshModule.setUserId(userId);
+};
+
+//Function: postEvent
+//[android, ios] Post events for In-App Messages. This can trigger In-App message display as specified in Pushwoosh Control Panel.
+//
+//Parameters:
+// "event" - event to trigger
+// "attributes" - object with additional event attributes
+// 
+// Example:
+//(start code)
+// Pushwoosh.setUserId("XXXXXX");
+// Pushwoosh.postEvent("buttonPressed", { "buttonNumber" : 4, "buttonLabel" : "banner" });
+//(end)
+PushNotification.prototype.postEvent = function(event, attributes) {
+	if (!attributes) {
+		attributes = {};
+	}
+	PushwooshModule.postEvent(event, attributes);
+};
+
 module.exports = new PushNotification();

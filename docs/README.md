@@ -136,3 +136,25 @@ getHwid(success)
 ```
 
 * **success** - method success callback. Receives Pushwoosh HWID as parameter.
+
+
+### setUserId
+
+Set User indentifier. This could be Facebook ID, username or email, or any other user ID.
+This allows data and events to be matched across multiple user devices.
+
+```js
+setUserId(userId)
+```
+
+
+### postEvent
+
+Post events for In-App Messages. This can trigger In-App message display as specified in Pushwoosh Control Panel.
+
+```js
+postEvent(event, attributes)
+```
+
+* **event** - event to trigger
+* **attributes** - object with additional event attributes
