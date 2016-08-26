@@ -36,10 +36,10 @@ td {
 <tr class="even"><td><a href="#init">init(config, success, fail)</a></td></tr>
 <tr class="odd"><td><a href="#register">register(success, fail)</a></td></tr>
 <tr class="even"><td><a href="#unregister">unregister(success, fail)</a></td></tr>
-<tr class="odd"><td><a href="#setTags">setTags(tags, success, fail)</a></td></tr>
-<tr class="even"><td><a href="#getTags">getTags(success, fail)</a></td></tr>
-<tr class="odd"><td><a href="#getPushToken">getPushToken(success)</a></td></tr>
-<tr class="even"><td><a href="#getHwid">getHwid(success)</a></td></tr>
+<tr class="odd"><td><a href="#settags">setTags(tags, success, fail)</a></td></tr>
+<tr class="even"><td><a href="#gettags">getTags(success, fail)</a></td></tr>
+<tr class="odd"><td><a href="#getpushtoken">getPushToken(success)</a></td></tr>
+<tr class="even"><td><a href="#gethwid">getHwid(success)</a></td></tr>
 <tr class="even"><td><a href="#setuserid">setUserId(userId)</a></td></tr>
 <tr class="even"><td><a href="#postevent">postEvent(event, attributes)</a></td></tr>
 </tbody>
