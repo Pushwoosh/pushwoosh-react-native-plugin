@@ -1,9 +1,8 @@
 React Native Pushwoosh Push Notifications module
 ===================================================
 
-## Documentation
-
-https://github.com/Pushwoosh/pushwoosh-react-native-plugin/tree/master/docs
+| [Guide](http://docs.pushwoosh.com/docs/react-native-pushwoosh-push-notifications-module-for-android) | [Documentation](docs/README.md) | [Sample](https://github.com/Pushwoosh/pushwoosh-react-native-sample) |
+| ------------------------------------------------------------- | ---------------------------------------- | ------------------------------------- |
 
 
 ## Android Setup

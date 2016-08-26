@@ -19,68 +19,135 @@ Pushwoosh.register(
 );
 ```
 
----
-## Method summary
-[init(config, success, fail)](#init)  
-[register(success, fail)](#register)  
-[unregister(success, fail)](#unregister)  
-[setTags(tags, success, fail)](#setTags)  
-[getTags(success, fail)](#getTags)  
-[getPushToken(success)](#getPushToken)  
-[getHwid(success)](#getHwid)  
----
+<style>
+td {
+  background-color:#FFFFFF;
+}
+</style>
+
+<br>
+<h3>Summary</h3>
+<hr />
+<table width=100% style='background-color:#0EA7ED;'>
+<tbody>
+<tr>
+<th align="left" colspan="2"><strong>Functions</strong></th>
+</tr>
+<tr class="even"><td><a href="#init">init(config, success, fail)</a></td></tr>
+<tr class="odd"><td><a href="#register">register(success, fail)</a></td></tr>
+<tr class="even"><td><a href="#unregister">unregister(success, fail)</a></td></tr>
+<tr class="odd"><td><a href="#setTags">setTags(tags, success, fail)</a></td></tr>
+<tr class="even"><td><a href="#getTags">getTags(success, fail)</a></td></tr>
+<tr class="odd"><td><a href="#getPushToken">getPushToken(success)</a></td></tr>
+<tr class="even"><td><a href="#getHwid">getHwid(success)</a></td></tr>
+<tr class="even"><td><a href="#setuserid">setUserId(userId)</a></td></tr>
+<tr class="even"><td><a href="#postevent">postEvent(event, attributes)</a></td></tr>
+</tbody>
+</table>
+<hr />
+
 
 ### init
-
-Initializes Pushwoosh module with application id and google project number.
 
 ```js
 init(config, success, fail)
 ```
 
-* **config.pw_appid** - Pushwoosh application id
-* **config.project_number** - GCM project number (for Android push notifications)
-* **success** - (optional) initialization success callback
-* **fail** - (optional) initialization failure callback
+Initializes Pushwoosh module with application id and google project number.
 
+<table width=100% style='background-color:#0EA7ED;'>
+<colgroup>
+<col width="10%" />
+<col width="20%" />
+<col width="70%" />
+</colgroup>
+<tbody>
+<tr>
+<th align="left" colspan="3"><strong>Parameters</strong></th>
+</tr>
+<tr class="even"><td>object</td><td><b>config</b></td><td>Pushwoosh initialization config.</td></tr>
+<tr class="even"><td>string</td><td><b>config.pw_appid</b></td><td>Pushwoosh application id.</td></tr>
+<tr class="even"><td>string</td><td><b>config.project_number</b></td><td>GCM project number (for Android push notifications).</td></tr>
+<tr class="even"><td>function</td><td><b>success</b></td><td>(optional) initialization success callback.</td></tr>
+<tr class="even"><td>function</td><td><b>fail</b></td><td>(optional) initialization failure callback.</td></tr>
+</tbody>
+</table>
 
 ### register
-
-Registers current device for push notifications.
 
 ```js
 register(success, fail)
 ```
 
-* **success** - (optional) registration success callback. Receives push token as parameter.
-* **fail** - (optional) registration failure callback.
+Registers current device for push notifications.
+
+
+<table width=100% style='background-color:#0EA7ED;'>
+<colgroup>
+<col width="10%" />
+<col width="20%" />
+<col width="70%" />
+</colgroup>
+<tbody>
+<tr>
+<th align="left" colspan="3"><strong>Parameters</strong></th>
+</tr>
+<tr class="even"><td>function</td><td><b>success</b></td><td>(optional) registration success callback. Receives push token as parameter.</td></tr>
+<tr class="even"><td>function</td><td><b>fail</b></td><td>(optional) registration failure callback.</td></tr>
+</tbody>
+</table>
 
 NOTE: if user does not allow application to receive push notifications and `UIBackgroundModes remote-notificaion` is not set in **Info.plist** none of these callbacks will be called.
 
 
 ### unregister
 
-Unregisters current deivce from receiving push notifications.
-
 ```js
 unregister(success, fail)
 ```
 
-* **success** - (optional) deregistration success callback
-* **fail** - (optional) deregistration failure callback
+Unregisters current deivce from receiving push notifications.
+
+
+<table width=100% style='background-color:#0EA7ED;'>
+<colgroup>
+<col width="10%" />
+<col width="20%" />
+<col width="70%" />
+</colgroup>
+<tbody>
+<tr>
+<th align="left" colspan="3"><strong>Parameters</strong></th>
+</tr>
+<tr class="even"><td>function</td><td><b>success</b></td><td>(optional) deregistration success callback.</td></tr>
+<tr class="even"><td>function</td><td><b>fail</b></td><td>(optional) deregistration failure callback.</td></tr>
+</tbody>
+</table>
 
 
 ### setTags
-
-Set tags associated with current device and application.
 
 ```js
 setTags(tags, success, fail)
 ```
 
-* **tags** - object containing device tags
-* **success** - (optional) method success callback
-* **fail** - (optional) method failure callback
+Set tags associated with current device and application.
+
+<table width=100% style='background-color:#0EA7ED;'>
+<colgroup>
+<col width="10%" />
+<col width="20%" />
+<col width="70%" />
+</colgroup>
+<tbody>
+<tr>
+<th align="left" colspan="3"><strong>Parameters</strong></th>
+</tr>
+<tr class="even"><td>object</td><td><b>tags</b></td><td>Tags associated with current device.</td></tr>
+<tr class="even"><td>function</td><td><b>success</b></td><td>(optional) method success callback.</td></tr>
+<tr class="even"><td>function</td><td><b>fail</b></td><td>(optional) method failure callback.</td></tr>
+</tbody>
+</table>
 
 Example:
 
@@ -91,14 +158,26 @@ pushNotification.setTags({ "string_tag" : "Hello world", "int_tag" : 42, "list_t
 
 ### getTags
 
-Get tags associated with current device and application.
-
 ```js
 getTags(success, fail)
 ```
 
-* **success** - method success callback. Receives object containing tags as parameter.
-* **fail** - (optional) method failure callback. 
+Get tags associated with current device and application.
+
+<table width=100% style='background-color:#0EA7ED;'>
+<colgroup>
+<col width="10%" />
+<col width="20%" />
+<col width="70%" />
+</colgroup>
+<tbody>
+<tr>
+<th align="left" colspan="3"><strong>Parameters</strong></th>
+</tr>
+<tr class="even"><td>function</td><td><b>success</b></td><td>(optional) method success callback. Receives object containing tags as parameter.</td></tr>
+<tr class="even"><td>function</td><td><b>fail</b></td><td>(optional) method failure callback.</td></tr>
+</tbody>
+</table>
 
 Example:
 
@@ -118,43 +197,100 @@ Pushwoosh.getTags(
 
 ### getPushToken
 
-Returns push token or null if device is not registered for push notifications.
-
 ```js
 getPushToken(success)
 ```
 
-* **success** - method success callback. Receives push token as parameter.
+Returns push token or null if device is not registered for push notifications.
+
+<table width=100% style='background-color:#0EA7ED;'>
+<colgroup>
+<col width="10%" />
+<col width="20%" />
+<col width="70%" />
+</colgroup>
+<tbody>
+<tr>
+<th align="left" colspan="3"><strong>Parameters</strong></th>
+</tr>
+<tr class="even"><td>function</td><td><b>success</b></td><td>Method success callback. Receives push token as parameter.</td></tr>
+</tbody>
+</table>
 
 
 ### getHwid
-
-Returns Pushwoosh HWID used for communications with Pushwoosh API.
 
 ```js
 getHwid(success)
 ```
 
-* **success** - method success callback. Receives Pushwoosh HWID as parameter.
+Returns Pushwoosh HWID used for communications with Pushwoosh API.
+
+<table width=100% style='background-color:#0EA7ED;'>
+<colgroup>
+<col width="10%" />
+<col width="20%" />
+<col width="70%" />
+</colgroup>
+<tbody>
+<tr>
+<th align="left" colspan="3"><strong>Parameters</strong></th>
+</tr>
+<tr class="even"><td>function</td><td><b>success</b></td><td>Method success callback. Receives Pushwoosh HWID as parameter.</td></tr>
+</tbody>
+</table>
 
 
 ### setUserId
-
-Set User indentifier. This could be Facebook ID, username or email, or any other user ID.
-This allows data and events to be matched across multiple user devices.
 
 ```js
 setUserId(userId)
 ```
 
+Set User indentifier. This could be Facebook ID, username or email, or any other user ID.
+This allows data and events to be matched across multiple user devices.
+
+<table width=100% style='background-color:#0EA7ED;'>
+<colgroup>
+<col width="10%" />
+<col width="20%" />
+<col width="70%" />
+</colgroup>
+<tbody>
+<tr>
+<th align="left" colspan="3"><strong>Parameters</strong></th>
+</tr>
+<tr class="even"><td>string</td><td><b>userId</b></td><td>Identifier of currently logged in user</td></tr>
+</tbody>
+</table>
+
 
 ### postEvent
-
-Post events for In-App Messages. This can trigger In-App message display as specified in Pushwoosh Control Panel.
 
 ```js
 postEvent(event, attributes)
 ```
 
-* **event** - event to trigger
-* **attributes** - object with additional event attributes
+Post events for In-App Messages. This can trigger In-App message display as specified in Pushwoosh Control Panel.
+
+<table width=100% style='background-color:#0EA7ED;'>
+<colgroup>
+<col width="10%" />
+<col width="20%" />
+<col width="70%" />
+</colgroup>
+<tbody>
+<tr>
+<th align="left" colspan="3"><strong>Parameters</strong></th>
+</tr>
+<tr class="even"><td>string</td><td><b>event</b></td><td>Event name.</td></tr>
+<tr class="even"><td>object</td><td><b>attributes</b></td><td>Additional event data.</td></tr>
+</tbody>
+</table>
+
+
+Example:
+
+```js
+Pushwoosh.postEvent("buttonPressed", { "buttonNumber" : "4", "buttonLabel" : "Banner" })
+```
