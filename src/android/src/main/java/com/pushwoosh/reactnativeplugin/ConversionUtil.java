@@ -9,7 +9,7 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeArray;
 import com.facebook.react.bridge.WritableNativeMap;
 import com.pushwoosh.internal.utils.JsonUtils;
-import com.pushwoosh.internal.utils.Log;
+import com.pushwoosh.internal.utils.PWLog;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -48,7 +48,7 @@ public final class ConversionUtil {
                     result.put(key, toArray(readableMap.getArray(key)));
                     break;
                 default:
-                    Log.error(PushwooshPlugin.TAG, "Could not convert object with key: " + key + ".");
+                    PWLog.error(PushwooshPlugin.TAG, "Could not convert object with key: " + key + ".");
             }
 
         }
@@ -79,7 +79,7 @@ public final class ConversionUtil {
                     result.add(i, toArray(readableArray.getArray(i)));
                     break;
                 default:
-                    Log.error(PushwooshPlugin.TAG, "Could not convert object at index " + i + ".");
+                    PWLog.error(PushwooshPlugin.TAG, "Could not convert object at index " + i + ".");
             }
         }
         return result;
@@ -91,7 +91,7 @@ public final class ConversionUtil {
             return JsonUtils.jsonToMap(json);
         }
         catch (JSONException e) {
-            Log.exception(e);
+            PWLog.exception(e);
         }
 
         return Collections.<String, Object>emptyMap();
@@ -125,7 +125,7 @@ public final class ConversionUtil {
                 result.putDouble(key, (Double)value);
             }
             else {
-                Log.error(PushwooshPlugin.TAG, "Could not convert object " + value.toString());
+                PWLog.error(PushwooshPlugin.TAG, "Could not convert object " + value.toString());
             }
         }
 
@@ -158,7 +158,7 @@ public final class ConversionUtil {
                 result.pushDouble((Double) value);
             }
             else {
-                Log.error(PushwooshPlugin.TAG, "Could not convert object " + value.toString());
+                PWLog.error(PushwooshPlugin.TAG, "Could not convert object " + value.toString());
             }
         }
 

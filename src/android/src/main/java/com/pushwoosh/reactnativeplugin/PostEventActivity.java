@@ -6,7 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.pushwoosh.inapp.InAppFacade;
-import com.pushwoosh.internal.utils.Log;
+import com.pushwoosh.internal.utils.PWLog;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -36,7 +36,7 @@ public class PostEventActivity extends AppCompatActivity {
             InAppFacade.postEvent(this, event, attributes);
         }
         catch (Exception e) {
-            Log.exception(e);
+            PWLog.exception(e);
         }
         finally {
             finish();

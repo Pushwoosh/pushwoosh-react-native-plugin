@@ -7,7 +7,7 @@ import android.os.Bundle;
 
 import com.pushwoosh.PushManager;
 import com.pushwoosh.internal.PushManagerImpl;
-import com.pushwoosh.internal.utils.Log;
+import com.pushwoosh.internal.utils.PWLog;
 
 import org.json.JSONObject;
 
@@ -17,7 +17,7 @@ public class NotificationReceiver extends BroadcastReceiver {
         if (intent == null)
             return;
 
-        Log.debug(PushwooshPlugin.TAG, "NotificationReceiver onReceive");
+        PWLog.debug(PushwooshPlugin.TAG, "NotificationReceiver onReceive");
 
         Bundle pushBundle = PushManagerImpl.preHandlePush(context, intent);
         if(pushBundle == null)

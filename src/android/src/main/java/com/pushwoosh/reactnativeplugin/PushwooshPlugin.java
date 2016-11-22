@@ -22,7 +22,7 @@ import com.pushwoosh.PushManager;
 import com.pushwoosh.SendPushTagsCallBack;
 import com.pushwoosh.inapp.InAppFacade;
 import com.pushwoosh.internal.utils.JsonUtils;
-import com.pushwoosh.internal.utils.Log;
+import com.pushwoosh.internal.utils.PWLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -93,10 +93,10 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
             }
         }
         catch (Exception e) {
-            Log.exception(e);
+            PWLog.exception(e);
         }
 
-        Log.debug(TAG, "broadcastPush = " + mBroadcastPush);
+        PWLog.debug(TAG, "broadcastPush = " + mBroadcastPush);
 
         registerPushReceiver();
 
@@ -104,7 +104,7 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
     }
 
     public static void openPush(String pushData) {
-        Log.info(TAG, "Push open: " + pushData);
+        PWLog.info(TAG, "Push open: " + pushData);
 
         try {
             synchronized (mStartPushLock) {
@@ -116,7 +116,7 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
         }
         catch (Exception e) {
             // React Native is highly unstable
-            Log.exception(e);
+            PWLog.exception(e);
         }
     }
 
@@ -153,7 +153,7 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
             mPushManager.onStartup(context);
         }
         catch (Exception e) {
-            Log.exception(e);
+            PWLog.exception(e);
             if (error != null) {
                 error.invoke(e.getMessage());
             }
@@ -263,21 +263,21 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 
     @Override
     public void onHostResume() {
-        Log.noise(TAG, "Host resumed");
+        PWLog.noise(TAG, "Host resumed");
 
         registerPushReceiver();
     }
 
     @Override
     public void onHostPause() {
-        Log.noise(TAG, "Host paused");
+        PWLog.noise(TAG, "Host paused");
 
         unregisterPushReceiver();
     }
 
     @Override
     public void onHostDestroy() {
-        Log.noise(TAG, "Host destroyed");
+        PWLog.noise(TAG, "Host destroyed");
 
         mPushCallbackRegistered = false;
         mStartPushData = null;
