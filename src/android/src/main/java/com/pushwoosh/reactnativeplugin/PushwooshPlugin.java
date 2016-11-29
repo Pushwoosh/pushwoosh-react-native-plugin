@@ -23,6 +23,8 @@ import com.pushwoosh.SendPushTagsCallBack;
 import com.pushwoosh.inapp.InAppFacade;
 import com.pushwoosh.internal.utils.JsonUtils;
 import com.pushwoosh.internal.utils.PWLog;
+import com.pushwoosh.notification.SoundType;
+import com.pushwoosh.notification.VibrateType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,6 +35,8 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 
     static final String TAG = "ReactNativePlugin";
 
+    static final String PUSH_OPEN_JS_EVENT = "pushOpened";
+
     private PushManager mPushManager;
 
     private static EventDispatcher mEventDispatcher = new EventDispatcher();
@@ -42,6 +46,9 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
     private static String mStartPushData;
     private static Object mStartPushLock = new Object();
     private static boolean mPushCallbackRegistered = false;
+    private static boolean mInitialized = false;
+
+    private static PushwooshPlugin INSTANCE = null;
 
     BroadcastReceiver mRegistationReceiver = new BaseRegistrationReceiver() {
         @Override
@@ -84,6 +91,8 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
     public PushwooshPlugin(ReactApplicationContext reactContext) {
         super(reactContext);
 
+        INSTANCE = this;
+
         try {
             String packageName = reactContext.getPackageName();
             ApplicationInfo ai = reactContext.getPackageManager().getApplicationInfo(packageName, PackageManager.GET_META_DATA);
@@ -111,6 +120,9 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
                 mStartPushData = pushData;
                 if (mPushCallbackRegistered) {
                     mEventDispatcher.dispatchEvent(PushManager.PUSH_RECEIVE_EVENT, ConversionUtil.toWritableMap(ConversionUtil.stringToMap(pushData)));
+                }
+                if (mInitialized && INSTANCE != null) {
+                    INSTANCE.sendEvent(PUSH_OPEN_JS_EVENT, ConversionUtil.stringToMap(pushData));
                 }
             }
         }
@@ -159,6 +171,14 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
             }
             return;
         }
+
+        synchronized (mStartPushLock) {
+            if (mStartPushData != null) {
+                sendEvent(PUSH_OPEN_JS_EVENT, ConversionUtil.stringToMap(mStartPushData));
+            }
+        }
+
+        mInitialized = true;
 
         if (success != null) {
             success.invoke();
@@ -257,6 +277,72 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
         getReactApplicationContext().startActivity(intent);
     }
 
+    @ReactMethod
+    public void startLocationTracking() {
+        mPushManager.startTrackingGeoPushes();
+    }
+
+    @ReactMethod
+    public void stopLocationTracking() {
+        mPushManager.stopTrackingGeoPushes();
+    }
+
+    @ReactMethod
+    public void setApplicationIconBadgeNumber(int badgeNumber) {
+        mPushManager.setBadgeNumber(badgeNumber);
+    }
+
+    @ReactMethod
+    public void getApplicationIconBadgeNumber(Callback callback) {
+        callback.invoke(mPushManager.getBadgeNumber());
+    }
+
+    @ReactMethod
+    public void addToApplicationIconBadgeNumber(int badgeNumber) {
+        mPushManager.addBadgeNumber(badgeNumber);
+    }
+
+    @ReactMethod
+    public void setMultiNotificationMode(boolean on) {
+        Context context = getReactApplicationContext();
+        if (on) {
+            PushManager.setMultiNotificationMode(context);
+        }
+        else {
+            PushManager.setSimpleNotificationMode(context);
+        }
+    }
+
+    @ReactMethod
+    public void setLightScreenOnNotification(boolean on) {
+        Context context = getReactApplicationContext();
+        PushManager.setLightScreenOnNotification(context, on);
+    }
+
+    @ReactMethod
+    public void setEnableLED(boolean on) {
+        Context context = getReactApplicationContext();
+        PushManager.setEnableLED(context, on);
+    }
+
+    @ReactMethod
+    public void setColorLED(int color) {
+        Context context = getReactApplicationContext();
+        PushManager.setColorLED(context, color);
+    }
+
+    @ReactMethod
+    public void setSoundType(int type) {
+        Context context = getReactApplicationContext();
+        PushManager.setSoundNotificationType(context, SoundType.fromInt(type));
+    }
+
+    @ReactMethod
+    public void setVibrateType(int type) {
+        Context context = getReactApplicationContext();
+        PushManager.setVibrateNotificationType(context, VibrateType.fromInt(type));
+    }
+
     ///
     /// LifecycleEventListener callbacks
     ///
@@ -278,6 +364,14 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
     @Override
     public void onHostDestroy() {
         PWLog.noise(TAG, "Host destroyed");
+
+        try {
+            Context context = getReactApplicationContext();
+            context.unregisterReceiver(mRegistationReceiver);
+        }
+        catch (Exception e) {
+
+        }
 
         mPushCallbackRegistered = false;
         mStartPushData = null;
@@ -314,5 +408,9 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
         catch (Exception e) {
 
         }
+    }
+
+    private void sendEvent(String event, Map<String, Object> params) {
+        mEventDispatcher.sendJSEvent(getReactApplicationContext(), event, params);
     }
 }

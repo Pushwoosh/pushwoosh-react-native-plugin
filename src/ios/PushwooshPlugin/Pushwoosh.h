@@ -7,8 +7,10 @@
 #import <Foundation/Foundation.h>
 
 #import "RCTBridgeModule.h"
+#import "RCTEventEmitter.h"
+
 #import "PushNotificationManager.h"
 
-@interface Pushwoosh: NSObject<RCTBridgeModule,PushNotificationDelegate>
+@interface Pushwoosh: RCTEventEmitter<RCTBridgeModule,PushNotificationDelegate>
 
 @end

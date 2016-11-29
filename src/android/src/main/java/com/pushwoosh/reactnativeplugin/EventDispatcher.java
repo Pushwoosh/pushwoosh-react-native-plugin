@@ -1,6 +1,8 @@
 package com.pushwoosh.reactnativeplugin;
 
 import com.facebook.react.bridge.Callback;
+import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,5 +42,10 @@ public class EventDispatcher {
             // A native module is supposed to invoke its callback only once!
             list.clear();
         }
+    }
+
+    public void sendJSEvent(ReactContext reactContext, String event, Map<String, Object> params) {
+        reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                .emit(event, ConversionUtil.toWritableMap(params));
     }
 }
