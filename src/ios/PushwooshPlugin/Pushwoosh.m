@@ -6,10 +6,10 @@
 
 #import "Pushwoosh.h"
 
-#import "RCTUtils.h"
-#import "RCTBridge.h"
+#import <React/RCTUtils.h>
+#import <React/RCTBridge.h>
 #import "PWEventDispatcher.h"
-#import "RCTEventDispatcher.h"
+#import <React/RCTEventDispatcher.h>
 
 static id objectOrNull(id object) {
 	if (!object) {
