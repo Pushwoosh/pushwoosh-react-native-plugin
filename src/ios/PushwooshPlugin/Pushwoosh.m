@@ -11,6 +11,8 @@
 #import "PWEventDispatcher.h"
 #import <React/RCTEventDispatcher.h>
 
+#import <UserNotifications/UserNotifications.h>
+
 static id objectOrNull(id object) {
 	if (!object) {
 		return [NSNull null];
@@ -45,6 +47,7 @@ RCT_EXPORT_METHOD(init:(NSDictionary*)config success:(RCTResponseSenderBlock)suc
 	[PushNotificationManager initializeWithAppCode:appCode appName:nil];
 	[[PushNotificationManager pushManager] sendAppOpen];
 	[PushNotificationManager pushManager].delegate = self;
+	[UNUserNotificationCenter currentNotificationCenter].delegate = [PushNotificationManager pushManager].notificationCenterDelegate;
 	
 	if (gStartPushData) {
 		[self sendJSEvent:kPushOpenJSEvent withArgs:gStartPushData];
