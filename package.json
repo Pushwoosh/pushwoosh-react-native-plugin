@@ -19,6 +19,12 @@
   "rnpm": {
     "android": {
       "sourceDir": "./src/android"
+    },
+    "ios": {
+      "sharedLibraries" : [ 
+        "libstdc++", 
+        "libz" 
+      ]
     }
   }
 }
