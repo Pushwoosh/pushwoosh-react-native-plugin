@@ -15,5 +15,10 @@
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/Pushwoosh/pushwoosh-react-native-plugin/issues"
+  },
+  "rnpm": {
+    "android": {
+      "sourceDir": "./src/android"
+    }
   }
 }
