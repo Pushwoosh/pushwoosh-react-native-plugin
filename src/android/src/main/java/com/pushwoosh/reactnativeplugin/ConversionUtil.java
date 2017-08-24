@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static android.R.attr.key;
+
 public final class ConversionUtil {
 
     public static Map<String, Object> toMap(ReadableMap readableMap) {
@@ -117,6 +119,9 @@ public final class ConversionUtil {
             }
             else if (value instanceof Integer) {
                 result.putInt(key, (Integer)value);
+            }
+            else if(value instanceof Long){
+                result.putString(key, String.valueOf(value));
             }
             else if (value instanceof String) {
                 result.putString(key, (String)value);
