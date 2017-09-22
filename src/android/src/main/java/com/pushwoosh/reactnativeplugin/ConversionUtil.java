@@ -1,5 +1,7 @@
 package com.pushwoosh.reactnativeplugin;
 
+import java.util.Iterator;
+
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableMapKeySetIterator;
@@ -8,165 +10,171 @@ import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeArray;
 import com.facebook.react.bridge.WritableNativeMap;
-import com.pushwoosh.internal.utils.JsonUtils;
 import com.pushwoosh.internal.utils.PWLog;
+import com.pushwoosh.tags.TagsBundle;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static android.R.attr.key;
-
 public final class ConversionUtil {
 
-    public static Map<String, Object> toMap(ReadableMap readableMap) {
-        ReadableMapKeySetIterator iterator = readableMap.keySetIterator();
-        Map<String, Object> result = new HashMap<>();
-        while (iterator.hasNextKey()) {
-            String key = iterator.nextKey();
-            ReadableType type = readableMap.getType(key);
-            switch (type) {
-                case Null:
-                    result.put(key, null);
-                    break;
-                case Boolean:
-                    result.put(key, readableMap.getBoolean(key));
-                    break;
-                case Number:
-                    result.put(key, readableMap.getDouble(key));
-                    break;
-                case String:
-                    result.put(key, readableMap.getString(key));
-                    break;
-                case Map:
-                    result.put(key, toMap(readableMap.getMap(key)));
-                    break;
-                case Array:
-                    result.put(key, toArray(readableMap.getArray(key)));
-                    break;
-                default:
-                    PWLog.error(PushwooshPlugin.TAG, "Could not convert object with key: " + key + ".");
-            }
+	public static TagsBundle convertToTagsBundle(ReadableMap readableMap) {
+		return new TagsBundle.Builder()
+				.putAll(toJsonObject(readableMap))
+				.build();
+	}
 
-        }
-        return result;
-    }
+	private static JSONObject toJsonObject(ReadableMap readableMap) {
+		ReadableMapKeySetIterator iterator = readableMap.keySetIterator();
+		JSONObject result = new JSONObject();
+		while (iterator.hasNextKey()) {
+			String key = iterator.nextKey();
+			ReadableType type = readableMap.getType(key);
+			try {
+				switch (type) {
+					case Null:
+						result.put(key, JSONObject.NULL);
+						break;
+					case Boolean:
+						result.put(key, readableMap.getBoolean(key));
+						break;
+					case Number:
+						result.put(key, readableMap.getDouble(key));
+						break;
+					case String:
+						result.put(key, readableMap.getString(key));
+						break;
+					case Map:
+						result.put(key, toJsonObject(readableMap.getMap(key)));
+						break;
+					case Array:
+						result.put(key, toArray(readableMap.getArray(key)));
+						break;
+					default:
+						PWLog.error(PushwooshPlugin.TAG, "Could not convert object with key: " + key + ".");
+				}
 
-    public static List<Object> toArray(ReadableArray readableArray) {
-        List<Object> result = new ArrayList<>(readableArray.size());
-        for (int i = 0; i < readableArray.size(); i++) {
-            ReadableType indexType = readableArray.getType(i);
-            switch(indexType) {
-                case Null:
-                    result.add(i, null);
-                    break;
-                case Boolean:
-                    result.add(i, readableArray.getBoolean(i));
-                    break;
-                case Number:
-                    result.add(i, readableArray.getDouble(i));
-                    break;
-                case String:
-                    result.add(i, readableArray.getString(i));
-                    break;
-                case Map:
-                    result.add(i, toMap(readableArray.getMap(i)));
-                    break;
-                case Array:
-                    result.add(i, toArray(readableArray.getArray(i)));
-                    break;
-                default:
-                    PWLog.error(PushwooshPlugin.TAG, "Could not convert object at index " + i + ".");
-            }
-        }
-        return result;
-    }
+			} catch (JSONException e) {
+				PWLog.error(PushwooshPlugin.TAG, "Could not convert object with key: " + key + ".", e);
+			}
 
-    public static Map<String, Object> stringToMap(String string) {
-        try {
-            JSONObject json = new JSONObject(string);
-            return JsonUtils.jsonToMap(json);
-        }
-        catch (JSONException e) {
-            PWLog.exception(e);
-        }
+		}
+		return result;
+	}
 
-        return Collections.<String, Object>emptyMap();
-    }
+	public static JSONArray toArray(ReadableArray readableArray) {
+		JSONArray result = new JSONArray();
+		for (int i = 0; i < readableArray.size(); i++) {
+			ReadableType indexType = readableArray.getType(i);
+			try {
+				switch (indexType) {
+					case Null:
+						result.put(i, JSONObject.NULL);
+						break;
+					case Boolean:
+						result.put(i, readableArray.getBoolean(i));
+						break;
+					case Number:
+						result.put(i, readableArray.getDouble(i));
+						break;
+					case String:
+						result.put(i, readableArray.getString(i));
+						break;
+					case Map:
+						result.put(i, toJsonObject(readableArray.getMap(i)));
+						break;
+					case Array:
+						result.put(i, toArray(readableArray.getArray(i)));
+						break;
+					default:
+						PWLog.error(PushwooshPlugin.TAG, "Could not convert object at index " + i + ".");
+				}
+			} catch (JSONException e) {
+				PWLog.error(PushwooshPlugin.TAG, "Could not convert object at index " + i + ".", e);
+			}
+		}
+		return result;
+	}
 
-    public static WritableMap toWritableMap(Map<String, Object> map) {
-        WritableNativeMap result = new WritableNativeMap();
+	public static JSONObject stringToJSONObject(String string) {
+		try {
+			JSONObject json = new JSONObject(string);
+			return json;
+		} catch (JSONException e) {
+			PWLog.exception(e);
+		}
 
-        for(Map.Entry<String, Object> entry : map.entrySet()) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
-            if (value == null) {
-                result.putNull(key);
-            }
-            else if (value instanceof Map) {
-                result.putMap(key, toWritableMap((Map)value));
-            }
-            else if (value instanceof List) {
-                result.putArray(key, toWritableArray((List) value));
-            }
-            else if (value instanceof Boolean) {
-                result.putBoolean(key, (Boolean)value);
-            }
-            else if (value instanceof Integer) {
-                result.putInt(key, (Integer)value);
-            }
-            else if(value instanceof Long){
-                result.putString(key, String.valueOf(value));
-            }
-            else if (value instanceof String) {
-                result.putString(key, (String)value);
-            }
-            else if (value instanceof Double) {
-                result.putDouble(key, (Double)value);
-            }
-            else {
-                PWLog.error(PushwooshPlugin.TAG, "Could not convert object " + value.toString());
-            }
-        }
+		return new JSONObject();
+	}
 
-        return result;
-    }
+	public static WritableMap toWritableMap(JSONObject jsonObject) {
+		WritableNativeMap result = new WritableNativeMap();
 
-    public static WritableArray toWritableArray(List<Object> array) {
-        WritableNativeArray result = new WritableNativeArray();
+		Iterator<String> keys = jsonObject.keys();
+		while (keys.hasNext()) {
+			String key = keys.next();
+			try {
+				Object value = jsonObject.get(key);
 
-        for (Object value : array) {
-            if (value == null) {
-                result.pushNull();
-            }
-            else if (value instanceof Map) {
-                result.pushMap(toWritableMap((Map) value));
-            }
-            else if (value instanceof List) {
-                result.pushArray(toWritableArray((List) value));
-            }
-            else if (value instanceof Boolean) {
-                result.pushBoolean((Boolean) value);
-            }
-            else if (value instanceof Integer) {
-                result.pushInt((Integer) value);
-            }
-            else if (value instanceof String) {
-                result.pushString((String) value);
-            }
-            else if (value instanceof Double) {
-                result.pushDouble((Double) value);
-            }
-            else {
-                PWLog.error(PushwooshPlugin.TAG, "Could not convert object " + value.toString());
-            }
-        }
+				if (value == null || JSONObject.NULL.equals(value)) {
+					result.putNull(key);
+				} else if (value instanceof JSONObject) {
+					result.putMap(key, toWritableMap((JSONObject) value));
+				} else if (value instanceof JSONArray) {
+					result.putArray(key, toWritableArray((JSONArray) value));
+				} else if (value instanceof Boolean) {
+					result.putBoolean(key, (Boolean) value);
+				} else if (value instanceof Integer) {
+					result.putInt(key, (Integer) value);
+				} else if (value instanceof Long) {
+					result.putString(key, String.valueOf(value));
+				} else if (value instanceof String) {
+					result.putString(key, (String) value);
+				} else if (value instanceof Double) {
+					result.putDouble(key, (Double) value);
+				} else {
+					PWLog.error(PushwooshPlugin.TAG, "Could not convert object " + value.toString());
+				}
 
-        return result;
-    }
+			} catch (JSONException e) {
+				PWLog.error(PushwooshPlugin.TAG, "Could not convert object with key " + key, e);
+			}
+		}
+
+		return result;
+	}
+
+	public static WritableArray toWritableArray(JSONArray array) {
+		WritableNativeArray result = new WritableNativeArray();
+
+		for (int i = 0; i < array.length(); i++) {
+			try {
+				Object value = array.get(i);
+				if (value == null) {
+					result.pushNull();
+				} else if (value instanceof JSONObject) {
+					result.pushMap(toWritableMap((JSONObject) value));
+				} else if (value instanceof JSONArray) {
+					result.pushArray(toWritableArray((JSONArray) value));
+				} else if (value instanceof Boolean) {
+					result.pushBoolean((Boolean) value);
+				} else if (value instanceof Integer) {
+					result.pushInt((Integer) value);
+				} else if (value instanceof String) {
+					result.pushString((String) value);
+				} else if (value instanceof Double) {
+					result.pushDouble((Double) value);
+				} else {
+					PWLog.error(PushwooshPlugin.TAG, "Could not convert object " + value.toString());
+				}
+
+			} catch (JSONException e) {
+				e.printStackTrace();
+				PWLog.error(PushwooshPlugin.TAG, "Could not convert object with index i " + i + " in array " + array.toString(), e);
+			}
+		}
+
+		return result;
+	}
 }

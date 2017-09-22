@@ -1,11 +1,30 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.3.3'
+    }
+}
+
+allprojects {
+    repositories {
+        jcenter()
+        maven {
+            url "https://maven.google.com"
+        }
+    }
+}
+
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.3"
-
+    compileSdkVersion 26
+    buildToolsVersion "26.0.1"
     defaultConfig {
         minSdkVersion 16
+        targetSdkVersion 26
     }
     buildTypes {
         release {
@@ -17,9 +36,11 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.facebook.react:react-native:0.14.+'
-    compile 'com.android.support:support-v4:23.1.0'
-    compile 'com.google.android.gms:play-services-gcm:8.4.0'
-    compile 'com.google.android.gms:play-services-location:8.4.0'
-    compile 'com.pushwoosh:pushwoosh:4.11.0'
+    compile 'com.facebook.react:react-native:0.14.0'
+    compile 'com.pushwoosh:pushwoosh:5.1.1'
+    compile 'com.pushwoosh:pushwoosh-amazon:5.1.1'
+    compile 'com.pushwoosh:pushwoosh-badge:5.1.1'
+    compile 'com.pushwoosh:pushwoosh-gcm:5.1.1'
+    compile "com.google.android.gms:play-services-gcm:11.2.2"
+    compile "com.google.android.gms:play-services-location:11.2.2"
 }

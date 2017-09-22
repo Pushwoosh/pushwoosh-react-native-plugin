@@ -1,13 +1,14 @@
 package com.pushwoosh.reactnativeplugin;
 
-import com.facebook.react.bridge.Callback;
-import com.facebook.react.bridge.ReactContext;
-import com.facebook.react.modules.core.DeviceEventManagerModule;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.facebook.react.bridge.Callback;
+import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 public class EventDispatcher {
 
@@ -44,8 +45,8 @@ public class EventDispatcher {
         }
     }
 
-    public void sendJSEvent(ReactContext reactContext, String event, Map<String, Object> params) {
+    public void sendJSEvent(ReactContext reactContext, String event, WritableMap params) {
         reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                .emit(event, ConversionUtil.toWritableMap(params));
+                .emit(event, params);
     }
 }
