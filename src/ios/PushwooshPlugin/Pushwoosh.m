@@ -135,7 +135,7 @@ RCT_EXPORT_METHOD(getTags:(RCTResponseSenderBlock)successCallback error:(RCTResp
 	}];
 }
 
-RCT_EXPORT_METHOD(setShowPushnotificationAlert:(BOOL *)showPushnotificationAlert) {
+RCT_EXPORT_METHOD(setShowPushnotificationAlert:(BOOL)showPushnotificationAlert) {
     [[PushNotificationManager pushManager] setShowPushnotificationAlert:showPushnotificationAlert];
 }
 
@@ -162,17 +162,23 @@ RCT_EXPORT_METHOD(stopLocationTracking) {
 }
 
 RCT_EXPORT_METHOD(setApplicationIconBadgeNumber:(nonnull NSNumber*)badgeNumber) {
-	[UIApplication sharedApplication].applicationIconBadgeNumber = [badgeNumber integerValue];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [UIApplication sharedApplication].applicationIconBadgeNumber = [badgeNumber integerValue];
+    });
 }
 
 RCT_EXPORT_METHOD(getApplicationIconBadgeNumber:(RCTResponseSenderBlock)callback) {
 	if(callback) {
-		callback(@[ @([UIApplication sharedApplication].applicationIconBadgeNumber) ]);
+        dispatch_async(dispatch_get_main_queue(), ^{
+           callback(@[ @([UIApplication sharedApplication].applicationIconBadgeNumber) ]);
+        });
 	}
 }
 
 RCT_EXPORT_METHOD(addToApplicationIconBadgeNumber:(nonnull NSNumber*)badgeNumber) {
-	[UIApplication sharedApplication].applicationIconBadgeNumber += [badgeNumber integerValue];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [UIApplication sharedApplication].applicationIconBadgeNumber += [badgeNumber integerValue];
+    });
 }
 
 #pragma mark - PushNotificationDelegate
