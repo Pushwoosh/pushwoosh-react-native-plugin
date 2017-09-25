@@ -14,18 +14,21 @@
 #import <UserNotifications/UserNotifications.h>
 
 static id objectOrNull(id object) {
-	if (!object) {
-		return [NSNull null];
-	}
-	return object;
+    if (object) {
+        return object;
+    } else {
+        return [NSNull null];
+    }
 }
 
 static NSDictionary * gStartPushData = nil;
 static NSString * const kRegistrationSuccesEvent = @"PWRegistrationSuccess";
 static NSString * const kRegistrationErrorEvent = @"PWRegistrationError";
+static NSString * const kPushReceivedEvent = @"PWPushReceived";
 static NSString * const kPushOpenEvent = @"PWPushOpen";
 
 static NSString * const kPushOpenJSEvent = @"pushOpened";
+static NSString * const kPushReceivedJSEvent = @"pushReceived";
 
 @implementation Pushwoosh
 
@@ -49,13 +52,17 @@ RCT_EXPORT_METHOD(init:(NSDictionary*)config success:(RCTResponseSenderBlock)suc
 	[PushNotificationManager pushManager].delegate = self;
 	[UNUserNotificationCenter currentNotificationCenter].delegate = [PushNotificationManager pushManager].notificationCenterDelegate;
 	
+    if (success) {
+        success(@[]);
+    }
+    
 	if (gStartPushData) {
+        [self sendJSEvent:kPushReceivedJSEvent withArgs:gStartPushData];
 		[self sendJSEvent:kPushOpenJSEvent withArgs:gStartPushData];
-	}
-	
-	if (success) {
-		success(@[]);
-	}
+    } else if([PushNotificationManager pushManager].launchNotification) {
+        [self sendJSEvent:kPushReceivedJSEvent withArgs:[PushNotificationManager pushManager].launchNotification];
+        [self sendJSEvent:kPushOpenJSEvent withArgs:[PushNotificationManager pushManager].launchNotification];
+    }
 }
 
 RCT_EXPORT_METHOD(register:(RCTResponseSenderBlock)success error:(RCTResponseSenderBlock)error) {
@@ -82,6 +89,15 @@ RCT_EXPORT_METHOD(onPushOpen:(RCTResponseSenderBlock)callback) {
 	}
 }
 
+RCT_EXPORT_METHOD(onPushReceived:(RCTResponseSenderBlock)callback) {
+    [[PWEventDispatcher sharedDispatcher] subscribe:callback toEvent:kPushReceivedEvent];
+    
+    if (gStartPushData) {
+        NSDictionary *pushData = gStartPushData;
+        gStartPushData = nil;
+        [[PWEventDispatcher sharedDispatcher] dispatchEvent:kPushReceivedEvent withArgs:@[ objectOrNull(pushData) ]];
+    }
+}
 
 RCT_EXPORT_METHOD(getHwid:(RCTResponseSenderBlock)callback) {
 	if (callback) {
@@ -159,6 +175,14 @@ RCT_EXPORT_METHOD(addToApplicationIconBadgeNumber:(nonnull NSNumber*)badgeNumber
 	[[PWEventDispatcher sharedDispatcher] dispatchEvent:kRegistrationErrorEvent withArgs:@[ objectOrNull([error localizedDescription]) ]];
 }
 
+- (void)onPushReceived:(PushNotificationManager *)pushManager withNotification:(NSDictionary *)pushNotification onStart:(BOOL)onStart {
+    [[PWEventDispatcher sharedDispatcher] dispatchEvent:kPushReceivedEvent withArgs:@[ objectOrNull(pushNotification) ]];
+    
+    if ([[UIApplication sharedApplication] applicationState] != UIApplicationStateBackground) {
+        [self sendJSEvent:kPushReceivedJSEvent withArgs:pushNotification];
+    }
+}
+
 - (void)onPushAccepted:(PushNotificationManager *)manager withNotification:(NSDictionary *)pushNotification onStart:(BOOL)onStart {
 	[[PWEventDispatcher sharedDispatcher] dispatchEvent:kPushOpenEvent withArgs:@[ objectOrNull(pushNotification) ]];
 	
@@ -187,6 +211,11 @@ RCT_EXPORT_METHOD(addToApplicationIconBadgeNumber:(nonnull NSNumber*)badgeNumber
 }
 
 // Just keep the launch notification until the module starts and callback functions initalizes
+- (void)onPushReceived:(PushNotificationManager *)manager withNotification:(NSDictionary *)pushNotification onStart:(BOOL)onStart {
+    if (onStart) {
+        gStartPushData = pushNotification;
+    }
+}
 - (void)onPushAccepted:(PushNotificationManager *)manager withNotification:(NSDictionary *)pushNotification onStart:(BOOL)onStart {
 	if (onStart) {
 		gStartPushData = pushNotification;
