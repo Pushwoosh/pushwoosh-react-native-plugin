@@ -135,6 +135,16 @@ RCT_EXPORT_METHOD(getTags:(RCTResponseSenderBlock)successCallback error:(RCTResp
 	}];
 }
 
+RCT_EXPORT_METHOD(setShowPushnotificationAlert:(BOOL *)showPushnotificationAlert) {
+    [[PushNotificationManager pushManager] setShowPushnotificationAlert:showPushnotificationAlert];
+}
+
+RCT_EXPORT_METHOD(getShowPushnotificationAlert:(RCTResponseSenderBlock)callback) {
+    if(callback) {
+        callback(@[ @([PushNotificationManager pushManager].showPushnotificationAlert) ]);
+    }
+}
+
 RCT_EXPORT_METHOD(setUserId:(NSString*)userId) {
 	[[PushNotificationManager pushManager] setUserId:userId];
 }
