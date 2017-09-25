@@ -10,6 +10,7 @@
 #import <React/RCTEventEmitter.h>
 
 #import "PushNotificationManager.h"
+#import "PWInAppManager.h"
 
 @interface Pushwoosh: RCTEventEmitter<RCTBridgeModule,PushNotificationDelegate>
 

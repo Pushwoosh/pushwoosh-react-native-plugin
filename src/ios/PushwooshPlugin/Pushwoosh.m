@@ -146,11 +146,11 @@ RCT_EXPORT_METHOD(getShowPushnotificationAlert:(RCTResponseSenderBlock)callback)
 }
 
 RCT_EXPORT_METHOD(setUserId:(NSString*)userId) {
-	[[PushNotificationManager pushManager] setUserId:userId];
+	[[PWInAppManager sharedManager] setUserId:userId];
 }
 
 RCT_EXPORT_METHOD(postEvent:(NSString*)event withAttributes:(NSDictionary*)attributes) {
-	[[PushNotificationManager pushManager] postEvent:event withAttributes:attributes];
+	[[PWInAppManager sharedManager] postEvent:event withAttributes:attributes];
 }
 
 RCT_EXPORT_METHOD(startLocationTracking) {

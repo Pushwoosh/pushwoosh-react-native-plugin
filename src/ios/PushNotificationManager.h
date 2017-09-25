@@ -5,15 +5,21 @@
 //
 
 #import <Foundation/Foundation.h>
+
+#if TARGET_OS_IPHONE
 #import <UIKit/UIKit.h>
 #import <StoreKit/StoreKit.h>
 #import <UserNotifications/UserNotifications.h>
+#endif
 
-#define PUSHWOOSH_VERSION @"5.0.1"
+#define PUSHWOOSH_VERSION @"5.3.7"
 
 
 @class PushNotificationManager;
+
+#if TARGET_OS_IPHONE
 @class CLLocation;
+#endif
 
 typedef void (^PushwooshGetTagsHandler)(NSDictionary *tags);
 typedef void (^PushwooshErrorHandler)(NSError *error);
@@ -43,12 +49,10 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
 /**
  Tells the delegate that the push manager has received a remote notification.
  
- If this method is implemented `onPushAccepted:withNotification:` will not be called, internal message boxes will not be displayed.
- 
  @param pushManager The push manager that received the remote notification.
  @param pushNotification A dictionary that contains information referring to the remote notification, potentially including a badge number for the application icon, an alert sound, an alert message to display to the user, a notification identifier, and custom data.
  The provider originates it as a JSON-defined dictionary that iOS converts to an NSDictionary object; the dictionary may contain only property-list objects plus NSNull.
- @param onStart If the application was not active when the push notification was received, the application will be launched with this parameter equal to `YES`, otherwise the parameter will be `NO`.
+@param onStart If the application was not foreground when the push notification was received, the application will be opened with this parameter equal to `YES`, otherwise the parameter will be `NO`.
  */
 - (void)onPushReceived:(PushNotificationManager *)pushManager withNotification:(NSDictionary *)pushNotification onStart:(BOOL)onStart;
 
@@ -70,10 +74,10 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  }
  
  */
-- (void)onPushAccepted:(PushNotificationManager *)pushManager withNotification:(NSDictionary *)pushNotification;
+- (void)onPushAccepted:(PushNotificationManager *)pushManager withNotification:(NSDictionary *)pushNotification DEPRECATED_ATTRIBUTE;
 
 /**
- Tells the delegate that the user has pressed OK on the push notification.
+ Tells the delegate that the user has pressed on the push notification banner.
  
  @param pushManager The push manager that received the remote notification.
  @param pushNotification A dictionary that contains information about the remote notification, potentially including a badge number for the application icon, an alert sound, an alert message to display to the user, a notification identifier, and custom data.
@@ -88,7 +92,7 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  p = 1pb;
  }
  
- @param onStart If the application was not active when the push notification was received, the application will be launched with this parameter equal to `YES`, otherwise the parameter will be `NO`.
+ @param onStart If the application was not foreground when the push notification was received, the application will be opened with this parameter equal to `YES`, otherwise the parameter will be `NO`.
  */
 - (void)onPushAccepted:(PushNotificationManager *)pushManager withNotification:(NSDictionary *)pushNotification onStart:(BOOL)onStart;
 
@@ -177,20 +181,32 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  */
 @property (nonatomic, weak) NSObject<PushNotificationDelegate> *delegate;
 
+#if TARGET_OS_IPHONE
+
 /**
  Show push notifications alert when push notification is received while the app is running, default is `YES`
  */
 @property (nonatomic, assign) BOOL showPushnotificationAlert;
+
+#endif
 
 /**
  Returns push notification payload if the app was started in response to push notification or null otherwise
  */
 @property (nonatomic, copy, readonly) NSDictionary *launchNotification;
 
+#if TARGET_OS_IPHONE
+
 /**
  Returns UNUserNotificationCenterDelegate that handles foreground push notifications on iOS10
  */
 @property (nonatomic, strong, readonly) id<UNUserNotificationCenterDelegate> notificationCenterDelegate;
+
+#else
+
+@property (nonatomic, strong, readonly) id<NSUserNotificationCenterDelegate> notificationCenterDelegate;
+
+#endif
 
 /**
  Initializes PushNotificationManager. Usually called by Pushwoosh Runtime internally.
@@ -218,6 +234,12 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
 - (void)unregisterForPushNotifications;
 
 - (instancetype)initWithApplicationCode:(NSString *)appCode appName:(NSString *)appName;
+
+#if TARGET_OS_IPHONE
+
+/**
+ Deprecated. Use initWithApplicationCode:appName: method instead
+ */
 - (id)initWithApplicationCode:(NSString *)appCode navController:(UIViewController *)navController appName:(NSString *)appName __attribute__((deprecated));
 
 /**
@@ -236,6 +258,8 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  Stops location tracking
  */
 - (void)stopLocationTracking;
+
+#endif
 
 /**
  Send tags to server. Tag names have to be created in the Pushwoosh Control Panel. Possible tag types: Integer, String, Incremental (integer only), List tags (array of values).
@@ -293,6 +317,7 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  */
 - (void)sendBadges:(NSInteger)badge;
 
+#if TARGET_OS_IPHONE
 /**
  Sends in-app purchases to Pushwoosh. Use in paymentQueue:updatedTransactions: payment queue method (see example).
  
@@ -305,6 +330,7 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  @param transactions Array of SKPaymentTransaction items as received in the payment queue.
  */
 - (void)sendSKPaymentTransactions:(NSArray *)transactions;
+#endif
 
 /**
  Tracks individual in-app purchase. See recommended `sendSKPaymentTransactions:` method.
@@ -424,8 +450,10 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
 /**
  Set User indentifier. This could be Facebook ID, username or email, or any other user ID.
  This allows data and events to be matched across multiple user devices.
+ 
+ Deprecated. Use PWInAppManager setUserId method instead
  */
-- (void)setUserId:(NSString *)userId;
+- (void)setUserId:(NSString *)userId __attribute__ ((deprecated));;
 
 /**
  Move all events from oldUserId to newUserId if doMerge is true. If doMerge is false all events for oldUserId are removed.
@@ -434,8 +462,10 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  @param newUserId destination user
  @param doMerge if false all events for oldUserId are removed, if true all events for oldUserId are moved to newUserId
  @param completion callback
+ 
+ Deprecated. Use PWInAppManager mergeUserId method instead
  */
-- (void)mergeUserId:(NSString *)oldUserId to:(NSString *)newUserId doMerge:(BOOL)doMerge completion:(void (^)(NSError *error))completion;
+- (void)mergeUserId:(NSString *)oldUserId to:(NSString *)newUserId doMerge:(BOOL)doMerge completion:(void (^)(NSError *error))completion __attribute__ ((deprecated));
 
 /**
  Post events for In-App Messages. This can trigger In-App message display as specified in Pushwoosh Control Panel.
@@ -448,12 +478,16 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  @param event name of the event
  @param attributes NSDictionary of event attributes
  @param completion function to call after posting event
+ 
+ Deprecated. Use PWInAppManager postEvent method instead
  */
-- (void)postEvent:(NSString *)event withAttributes:(NSDictionary *)attributes completion:(void (^)(NSError *error))completion;
+- (void)postEvent:(NSString *)event withAttributes:(NSDictionary *)attributes completion:(void (^)(NSError *error))completion __attribute__ ((deprecated));
 
 /**
  See `postEvent:withAttributes:completion:`
+ 
+ Deprecated. Use PWInAppManager postEvent method instead
  */
-- (void)postEvent:(NSString *)event withAttributes:(NSDictionary *)attributes;
+- (void)postEvent:(NSString *)event withAttributes:(NSDictionary *)attributes __attribute__ ((deprecated));
 
 @end
