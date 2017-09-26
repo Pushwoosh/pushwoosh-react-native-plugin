@@ -142,6 +142,30 @@ class PushNotification {
 		PushwooshModule.getTags(success, fail);
 	}
 
+    //Function: setShowPushnotificationAlert
+    //Set push notifications alert when push notification is received while the app is running, default is `true`
+    //
+    //Example:
+    //(start code)
+    //    Pushwoosh.setShowPushnotificationAlert(false);
+    //(end)
+    setShowPushnotificationAlert(showPushnotificationAlert: boolean) {
+        PushwooshModule.setShowPushnotificationAlert(showPushnotificationAlert);
+    }
+    
+    //Function: getShowPushnotificationAlert
+    //Show push notifications alert when push notification is received while the app is running, default is `true`
+    //
+    //Example:
+    //(start code)
+    //    Pushwoosh.getShowPushnotificationAlert((showPushnotificationAlert) => {
+    //                                           console.warn("showPushnotificationAlert = " + showPushnotificationAlert);
+    //                                           });
+    //(end)
+    getShowPushnotificationAlert(callback: Function) {
+        PushwooshModule.getShowPushnotificationAlert(callback);
+    }
+    
 	//Function: getPushToken
 	//Call this to get push token if it is available. Note the token also comes in registerDevice function callback.
 	//
