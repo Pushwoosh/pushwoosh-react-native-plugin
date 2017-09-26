@@ -161,6 +161,8 @@ public final class ConversionUtil {
 					result.pushBoolean((Boolean) value);
 				} else if (value instanceof Integer) {
 					result.pushInt((Integer) value);
+				} else if (value instanceof Long) {
+					result.pushString(String.valueOf(value));
 				} else if (value instanceof String) {
 					result.pushString((String) value);
 				} else if (value instanceof Double) {
@@ -168,7 +170,6 @@ public final class ConversionUtil {
 				} else {
 					PWLog.error(PushwooshPlugin.TAG, "Could not convert object " + value.toString());
 				}
-
 			} catch (JSONException e) {
 				e.printStackTrace();
 				PWLog.error(PushwooshPlugin.TAG, "Could not convert object with index i " + i + " in array " + array.toString(), e);
