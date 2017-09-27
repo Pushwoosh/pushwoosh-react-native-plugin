@@ -7,7 +7,7 @@ React Native Pushwoosh Push Notifications module
 
 ![platforms](https://img.shields.io/badge/platforms-Android%20%7C%20iOS-yellowgreen.svg)
 
-| [Guide](http://docs.pushwoosh.com/docs/react-native-plugin) | [Documentation](docs/README.md) | [Sample](https://github.com/Pushwoosh/pushwoosh-react-native-sample) |
+| [Guide](http://docs.pushwoosh.com/docs/react-native-plugin) | [Documentation](http://docs.pushwoosh.com/docs/react-native-plugin) | [Sample](https://github.com/Pushwoosh/pushwoosh-react-native-sample) |
 | ----------------------------------------------------------- | ------------------------------- | -------------------------------------------------------------------- |
 
 
