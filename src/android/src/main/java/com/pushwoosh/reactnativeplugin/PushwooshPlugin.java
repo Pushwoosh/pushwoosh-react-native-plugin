@@ -80,12 +80,12 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 		Pushwoosh.getInstance().setSenderId(projectId);
 
 		synchronized (sStartPushLock) {
-			if (sStartPushData != null) {
-				sendEvent(PUSH_OPEN_JS_EVENT, ConversionUtil.stringToJSONObject(sStartPushData));
-			}
-
 			if (sReceivedPushData != null) {
 				sendEvent(PUSH_RECEIVED_JS_EVENT, ConversionUtil.stringToJSONObject(sReceivedPushData));
+			}
+			
+			if (sStartPushData != null) {
+				sendEvent(PUSH_OPEN_JS_EVENT, ConversionUtil.stringToJSONObject(sStartPushData));
 			}
 		}
 
