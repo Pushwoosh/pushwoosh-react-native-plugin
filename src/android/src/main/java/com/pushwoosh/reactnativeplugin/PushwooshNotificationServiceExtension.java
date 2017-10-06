@@ -9,7 +9,7 @@ import com.pushwoosh.notification.PushMessage;
 
 public class PushwooshNotificationServiceExtension extends NotificationServiceExtension {
 
-	private boolean mBroadcastPush;
+	private boolean showForegroundPush;
 
 	public PushwooshNotificationServiceExtension() {
 		try {
@@ -17,19 +17,19 @@ public class PushwooshNotificationServiceExtension extends NotificationServiceEx
 			ApplicationInfo ai = getApplicationContext().getPackageManager().getApplicationInfo(packageName, PackageManager.GET_META_DATA);
 
 			if (ai.metaData != null) {
-				mBroadcastPush = ai.metaData.getBoolean("PW_BROADCAST_PUSH", false) || ai.metaData.getBoolean("com.pushwoosh.handlePushInForeground", true);
+				showForegroundPush = ai.metaData.getBoolean("PW_BROADCAST_PUSH", false) || ai.metaData.getBoolean("com.pushwoosh.foreground_push", true);
 			}
 		} catch (Exception e) {
 			PWLog.exception(e);
 		}
 
-		PWLog.debug(PushwooshPlugin.TAG, "broadcastPush = " + mBroadcastPush);
+		PWLog.debug(PushwooshPlugin.TAG, "showForegroundPush = " + showForegroundPush);
 	}
 
 	@Override
 	protected boolean onMessageReceived(final PushMessage pushMessage) {
 		PushwooshPlugin.messageReceived(pushMessage.toJson().toString());
-		return mBroadcastPush && super.onMessageReceived(pushMessage) && isAppOnForeground();
+		return !showForegroundPush && isAppOnForeground() || super.onMessageReceived(pushMessage) ;
 	}
 
 	@Override
