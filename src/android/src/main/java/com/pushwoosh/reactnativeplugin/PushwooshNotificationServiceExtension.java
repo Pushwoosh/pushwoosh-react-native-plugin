@@ -17,7 +17,7 @@ public class PushwooshNotificationServiceExtension extends NotificationServiceEx
 			ApplicationInfo ai = getApplicationContext().getPackageManager().getApplicationInfo(packageName, PackageManager.GET_META_DATA);
 
 			if (ai.metaData != null) {
-				mBroadcastPush = ai.metaData.getBoolean("PW_BROADCAST_PUSH", true);
+				mBroadcastPush = ai.metaData.getBoolean("PW_BROADCAST_PUSH", false) || ai.metaData.getBoolean("com.pushwoosh.handlePushInForeground", true);
 			}
 		} catch (Exception e) {
 			PWLog.exception(e);
@@ -29,7 +29,7 @@ public class PushwooshNotificationServiceExtension extends NotificationServiceEx
 	@Override
 	protected boolean onMessageReceived(final PushMessage pushMessage) {
 		PushwooshPlugin.messageReceived(pushMessage.toJson().toString());
-		return mBroadcastPush && super.onMessageReceived(pushMessage);
+		return mBroadcastPush && super.onMessageReceived(pushMessage) && isAppOnForeground();
 	}
 
 	@Override
