@@ -21,7 +21,7 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "26.0.1"
+    buildToolsVersion "26.0.2"
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 26
@@ -36,11 +36,11 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.facebook.react:react-native:0.14.0'
-    compile 'com.pushwoosh:pushwoosh:5.1.1'
-    compile 'com.pushwoosh:pushwoosh-amazon:5.1.1'
-    compile 'com.pushwoosh:pushwoosh-badge:5.1.1'
-    compile 'com.pushwoosh:pushwoosh-gcm:5.1.1'
-    compile "com.google.android.gms:play-services-gcm:11.2.2"
-    compile "com.google.android.gms:play-services-location:11.2.2"
+    compile 'com.facebook.react:react-native:0.20.1'
+    compile 'com.pushwoosh:pushwoosh:5.4.1'
+    compile 'com.pushwoosh:pushwoosh-amazon:5.4.1'
+    compile 'com.pushwoosh:pushwoosh-badge:5.4.1'
+    compile 'com.pushwoosh:pushwoosh-gcm:5.4.1'
+    compile "com.google.android.gms:play-services-gcm:11.4.0"
+    compile "com.google.android.gms:play-services-location:11.4.0"
 }

@@ -63,13 +63,6 @@
       <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/rs" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/main/shaders" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/test/res" type="java-test-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/src/test/resources" type="java-test-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/src/test/assets" type="java-test-resource" />
-      <sourceFolder url="file://$MODULE_DIR$/src/test/aidl" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/src/test/rs" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/src/test/shaders" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/androidTest/res" type="java-test-resource" />
       <sourceFolder url="file://$MODULE_DIR$/src/androidTest/resources" type="java-test-resource" />
       <sourceFolder url="file://$MODULE_DIR$/src/androidTest/assets" type="java-test-resource" />
@@ -77,6 +70,13 @@
       <sourceFolder url="file://$MODULE_DIR$/src/androidTest/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/androidTest/rs" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/androidTest/shaders" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/src/test/res" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/src/test/resources" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/src/test/assets" type="java-test-resource" />
+      <sourceFolder url="file://$MODULE_DIR$/src/test/aidl" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/src/test/rs" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/src/test/shaders" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/build/android-profile" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/annotations" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/blame" />
@@ -93,46 +93,49 @@
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/shaders" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/symbols" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/transforms" />
+      <excludeFolder url="file://$MODULE_DIR$/build/intermediates/typedefs.txt" />
       <excludeFolder url="file://$MODULE_DIR$/build/outputs" />
       <excludeFolder url="file://$MODULE_DIR$/build/tmp" />
     </content>
     <orderEntry type="jdk" jdkName="Android API 26 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" exported="" name="okhttp-ws-2.4.0" level="project" />
-    <orderEntry type="library" exported="" name="okhttp-2.4.0" level="project" />
-    <orderEntry type="library" exported="" name="pushwoosh-gcm-5.1.1" level="project" />
+    <orderEntry type="library" exported="" name="okhttp-ws-2.5.0" level="project" />
+    <orderEntry type="library" exported="" name="okio-1.6.0" level="project" />
+    <orderEntry type="library" exported="" name="pushwoosh-gcm-5.4.1" level="project" />
+    <orderEntry type="library" exported="" name="okhttp-2.5.0" level="project" />
     <orderEntry type="library" exported="" name="jsr305-3.0.0" level="project" />
-    <orderEntry type="library" exported="" name="fbcore-0.6.1" level="project" />
-    <orderEntry type="library" exported="" name="react-native-0.14.0" level="project" />
+    <orderEntry type="library" exported="" name="stetho-1.2.0" level="project" />
+    <orderEntry type="library" exported="" name="fbcore-0.8.1" level="project" />
+    <orderEntry type="library" exported="" name="commons-cli-1.2" level="project" />
     <orderEntry type="library" exported="" name="recyclerview-v7-23.0.1" level="project" />
-    <orderEntry type="library" exported="" name="imagepipeline-okhttp-0.6.1" level="project" />
+    <orderEntry type="library" exported="" name="imagepipeline-0.8.1" level="project" />
     <orderEntry type="library" exported="" name="android-jsc-r174650" level="project" />
-    <orderEntry type="library" exported="" name="imagepipeline-0.6.1" level="project" />
+    <orderEntry type="library" exported="" name="fresco-0.8.1" level="project" />
+    <orderEntry type="library" exported="" name="imagepipeline-okhttp-0.8.1" level="project" />
     <orderEntry type="library" exported="" name="support-core-ui-25.2.0" level="project" />
-    <orderEntry type="library" exported="" name="fresco-0.6.1" level="project" />
     <orderEntry type="library" exported="" name="bolts-android-1.1.4" level="project" />
-    <orderEntry type="library" exported="" name="play-services-basement-11.2.2" level="project" />
-    <orderEntry type="library" exported="" name="okio-1.5.0" level="project" />
-    <orderEntry type="library" exported="" name="drawee-0.6.1" level="project" />
+    <orderEntry type="library" exported="" name="play-services-basement-11.4.0" level="project" />
+    <orderEntry type="library" exported="" name="drawee-0.8.1" level="project" />
     <orderEntry type="library" exported="" name="appcompat-v7-23.0.1" level="project" />
-    <orderEntry type="library" exported="" name="play-services-base-11.2.2" level="project" />
+    <orderEntry type="library" exported="" name="play-services-base-11.4.0" level="project" />
     <orderEntry type="library" exported="" name="support-core-utils-25.2.0" level="project" />
     <orderEntry type="library" exported="" name="support-fragment-25.2.0" level="project" />
-    <orderEntry type="library" exported="" name="play-services-location-11.2.2" level="project" />
+    <orderEntry type="library" exported="" name="play-services-location-11.4.0" level="project" />
     <orderEntry type="library" exported="" name="library-2.4.0" level="project" />
-    <orderEntry type="library" exported="" name="pushwoosh-badge-5.1.1" level="project" />
-    <orderEntry type="library" exported="" name="pushwoosh-beacon_v5.1.1" level="project" />
+    <orderEntry type="library" exported="" name="stetho-okhttp-1.2.0" level="project" />
+    <orderEntry type="library" exported="" name="pushwoosh-beacon_v5.4.1" level="project" />
+    <orderEntry type="library" exported="" name="pushwoosh-amazon-5.4.1" level="project" />
+    <orderEntry type="library" exported="" name="pushwoosh-badge-5.4.1" level="project" />
     <orderEntry type="library" exported="" name="jackson-core-2.2.3" level="project" />
-    <orderEntry type="library" exported="" name="play-services-gcm-11.2.2" level="project" />
-    <orderEntry type="library" exported="" name="pushwoosh-location_v5.1.1" level="project" />
-    <orderEntry type="library" exported="" name="pushwoosh-5.1.1" level="project" />
-    <orderEntry type="library" exported="" name="pushnotifications" level="project" />
+    <orderEntry type="library" exported="" name="pushwoosh-5.4.1" level="project" />
+    <orderEntry type="library" exported="" name="play-services-gcm-11.4.0" level="project" />
+    <orderEntry type="library" exported="" name="pushwoosh-location_v5.4.1" level="project" />
     <orderEntry type="library" exported="" name="support-v4-25.2.0" level="project" />
     <orderEntry type="library" exported="" name="support-compat-25.2.0" level="project" />
-    <orderEntry type="library" exported="" name="pushwoosh-amazon-5.1.1" level="project" />
     <orderEntry type="library" exported="" name="support-media-compat-25.2.0" level="project" />
-    <orderEntry type="library" exported="" name="play-services-tasks-11.2.2" level="project" />
+    <orderEntry type="library" exported="" name="react-native-0.20.1" level="project" />
+    <orderEntry type="library" exported="" name="play-services-tasks-11.4.0" level="project" />
     <orderEntry type="library" exported="" name="support-annotations-25.2.0" level="project" />
-    <orderEntry type="library" exported="" name="play-services-iid-11.2.2" level="project" />
+    <orderEntry type="library" exported="" name="play-services-iid-11.4.0" level="project" />
   </component>
 </module>
