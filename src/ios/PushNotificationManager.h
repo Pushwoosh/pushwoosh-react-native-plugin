@@ -12,7 +12,7 @@
 #import <UserNotifications/UserNotifications.h>
 #endif
 
-#define PUSHWOOSH_VERSION @"5.4.0"
+#define PUSHWOOSH_VERSION @"5.5.3"
 
 
 @class PushNotificationManager;
@@ -320,6 +320,8 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  */
 - (void)sendBadges:(NSInteger)badge;
 
++ (NSString *)pushwooshVersion;
+
 #if TARGET_OS_IPHONE
 /**
  Sends in-app purchases to Pushwoosh. Use in paymentQueue:updatedTransactions: payment queue method (see example).
@@ -363,10 +365,9 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
 - (void)handlePushRegistration:(NSData *)devToken;
 - (void)handlePushRegistrationString:(NSString *)deviceID;
 
-//internal
 - (void)handlePushRegistrationFailure:(NSError *)error;
 
-//if the push is received while the app is running. internal
+//if the push is received while the app is running.
 - (BOOL)handlePushReceived:(NSDictionary *)userInfo;
 
 /**
