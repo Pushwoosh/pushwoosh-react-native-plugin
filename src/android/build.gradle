@@ -45,8 +45,6 @@ dependencies {
     compile "com.pushwoosh.java7:pushwoosh-amazon:${pushwoosh}"
     compile "com.pushwoosh.java7:pushwoosh-badge:${pushwoosh}"
     compile "com.pushwoosh.java7:pushwoosh-gcm:${pushwoosh}"
-    compile "com.pushwoosh.java7:pushwoosh-location:${pushwoosh}"
-    compile "com.pushwoosh.java7:pushwoosh-beacon:${pushwoosh}"
     compile "com.google.android.gms:play-services-gcm:11.4.0"
     compile "com.google.android.gms:play-services-location:11.4.0"
 }
