@@ -72,11 +72,16 @@ RCT_EXPORT_METHOD(register:(RCTResponseSenderBlock)success error:(RCTResponseSen
 	[[PushNotificationManager pushManager] registerForPushNotifications];
 }
 
-RCT_EXPORT_METHOD(unregister:(RCTResponseSenderBlock)success error:(RCTResponseSenderBlock)error) {
-	[[PushNotificationManager pushManager] unregisterForPushNotifications];
-	if (success) {
-		success(@[]);
-	}
+RCT_EXPORT_METHOD(unregister:(RCTResponseSenderBlock)successCallback error:(RCTResponseSenderBlock)errorCallback) {
+    [[PushNotificationManager pushManager] unregisterForPushNotificationsWithCompletion:^(NSError *error) {
+        if (!error && successCallback) {
+            successCallback(@[]);
+        }
+        
+        if (error && errorCallback) {
+            errorCallback(@[ objectOrNull([error localizedDescription]) ]);
+        }
+    }];
 }
 
 RCT_EXPORT_METHOD(onPushOpen:(RCTResponseSenderBlock)callback) {
