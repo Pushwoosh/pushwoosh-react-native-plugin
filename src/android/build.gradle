@@ -41,10 +41,10 @@ ext {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.facebook.react:react-native:0.20.1'
-    compile "com.pushwoosh.java7:pushwoosh:${pushwoosh}"
-    compile "com.pushwoosh.java7:pushwoosh-amazon:${pushwoosh}"
-    compile "com.pushwoosh.java7:pushwoosh-badge:${pushwoosh}"
-    compile "com.pushwoosh.java7:pushwoosh-gcm:${pushwoosh}"
+    compile "com.pushwoosh:pushwoosh:${pushwoosh}"
+    compile "com.pushwoosh:pushwoosh-amazon:${pushwoosh}"
+    compile "com.pushwoosh:pushwoosh-badge:${pushwoosh}"
+    compile "com.pushwoosh:pushwoosh-gcm:${pushwoosh}"
     compile "com.google.android.gms:play-services-gcm:11.4.0"
     compile "com.google.android.gms:play-services-location:11.4.0"
 }
