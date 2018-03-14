@@ -1,5 +1,6 @@
 package com.pushwoosh.reactnativeplugin;
 
+import android.content.Intent;
 import android.support.annotation.NonNull;
 
 import com.facebook.react.bridge.Callback;
@@ -16,6 +17,7 @@ import com.pushwoosh.exception.RegisterForPushNotificationsException;
 import com.pushwoosh.exception.UnregisterForPushNotificationException;
 import com.pushwoosh.function.Result;
 import com.pushwoosh.inapp.PushwooshInApp;
+import com.pushwoosh.inbox.ui.presentation.view.activity.InboxActivity;
 import com.pushwoosh.internal.utils.PWLog;
 import com.pushwoosh.location.PushwooshLocation;
 import com.pushwoosh.notification.PushwooshNotificationSettings;
@@ -266,6 +268,11 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	public void setVibrateType(int type) {
 		PushwooshNotificationSettings.setVibrateNotificationType(VibrateType.fromInt(type));
 	}
+    
+    @ReactMethod
+    public void presentInboxUI() {
+		getCurrentActivity().startActivity(new Intent(getCurrentActivity(), InboxActivity.class));
+    }
 
 	///
 	/// LifecycleEventListener callbacks

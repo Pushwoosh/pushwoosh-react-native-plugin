@@ -6,6 +6,8 @@
 
 #import "Pushwoosh.h"
 
+#import "PushwooshInboxUI.h"
+
 #import <React/RCTUtils.h>
 #import <React/RCTBridge.h>
 #import "PWEventDispatcher.h"
@@ -185,7 +187,29 @@ RCT_EXPORT_METHOD(addToApplicationIconBadgeNumber:(nonnull NSNumber*)badgeNumber
         [UIApplication sharedApplication].applicationIconBadgeNumber += [badgeNumber integerValue];
     });
 }
+    
+RCT_EXPORT_METHOD(presentInboxUI) {
+    UIViewController *inboxViewController = [PWIInboxUI createInboxControllerWithStyle:[PWIInboxStyle defaultStyle]];
+    inboxViewController.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Close", @"Close") style:UIBarButtonItemStylePlain target:self action:@selector(closeInbox)];
+    [[Pushwoosh findRootViewController] presentViewController:[[UINavigationController alloc] initWithRootViewController:inboxViewController] animated:YES completion:nil];
+}
+    
+- (void)closeInbox {
+    UIViewController *topViewController = [Pushwoosh findRootViewController];
+    if ([topViewController isKindOfClass:[UINavigationController class]] && [((UINavigationController*)topViewController).viewControllers.firstObject isKindOfClass:[topViewController dismissViewControllerAnimated:YES completion:nil];
+    }
+}
 
++ (UIViewController*)findRootViewController {
+    UIApplication *sharedApplication = [UIApplication valueForKey:@"sharedApplication"];
+    UIViewController *controller = sharedApplication.keyWindow.rootViewController;
+    
+    while (controller.presentedViewController) {
+        controller = controller.presentedViewController;
+    }
+    return controller;
+}
+    
 #pragma mark - PushNotificationDelegate
 
 - (void)onDidRegisterForRemoteNotificationsWithDeviceToken:(NSString *)token {

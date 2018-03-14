@@ -24,7 +24,8 @@
       "sharedLibraries" : [ 
         "libstdc++", 
         "libz" 
-      ]
+      ],
+      "assets" : [ "./src/ios/PushwooshInboxBundle.bundle" ]
     }
   }
 }
