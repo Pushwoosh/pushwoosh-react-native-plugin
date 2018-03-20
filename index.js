@@ -343,6 +343,12 @@ class PushNotification {
 	setVibrateType(type: number) {
 		PushwooshModule.setVibrateType(type);
 	}
+
+	//Function: presentInboxUI
+	//[android, ios] Opens Inbox screen.
+	presentInboxUI() {
+		PushwooshModule.presentInboxUI();
+	}
 }
 
 module.exports = new PushNotification();

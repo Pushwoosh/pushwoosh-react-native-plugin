@@ -189,14 +189,22 @@ RCT_EXPORT_METHOD(addToApplicationIconBadgeNumber:(nonnull NSNumber*)badgeNumber
 }
     
 RCT_EXPORT_METHOD(presentInboxUI) {
-    UIViewController *inboxViewController = [PWIInboxUI createInboxControllerWithStyle:[PWIInboxStyle defaultStyle]];
-    inboxViewController.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Close", @"Close") style:UIBarButtonItemStylePlain target:self action:@selector(closeInbox)];
-    [[Pushwoosh findRootViewController] presentViewController:[[UINavigationController alloc] initWithRootViewController:inboxViewController] animated:YES completion:nil];
+    NSString *resourceBundlePath = [[NSBundle mainBundle] pathForResource:@"PushwooshInboxBundle" ofType:@"bundle"];
+    if (![NSBundle bundleWithPath:resourceBundlePath]) {
+        NSLog(@"[Pushwoosh][presentInboxUI] Error: PushwooshInboxBundle.bundle not found. Please launch \"node node_modules/pushwoosh-react-native-plugin/scripts/add_inbox_ios_resources.js\" from project root directory or manually add node_modules/pushwoosh-react-native-plugin/src/ios/PushwooshInboxBundle.bundle to your project.");
+    } else {
+        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+            UIViewController *inboxViewController = [PWIInboxUI createInboxControllerWithStyle:[PWIInboxStyle defaultStyle]];
+            inboxViewController.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Close", @"Close") style:UIBarButtonItemStylePlain target:self action:@selector(closeInbox)];
+            [[Pushwoosh findRootViewController] presentViewController:[[UINavigationController alloc] initWithRootViewController:inboxViewController] animated:YES completion:nil];
+        }];
+    }
 }
     
 - (void)closeInbox {
     UIViewController *topViewController = [Pushwoosh findRootViewController];
-    if ([topViewController isKindOfClass:[UINavigationController class]] && [((UINavigationController*)topViewController).viewControllers.firstObject isKindOfClass:[topViewController dismissViewControllerAnimated:YES completion:nil];
+    if ([topViewController isKindOfClass:[UINavigationController class]] && [((UINavigationController*)topViewController).viewControllers.firstObject isKindOfClass:[PWIInboxViewController class]]) {
+        [topViewController dismissViewControllerAnimated:YES completion:nil];
     }
 }
 

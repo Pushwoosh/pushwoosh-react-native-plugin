@@ -294,3 +294,28 @@ Example:
 ```js
 Pushwoosh.postEvent("buttonPressed", { "buttonNumber" : "4", "buttonLabel" : "Banner" })
 ```
+
+### postEvent
+
+```js
+presentInboxUI()
+```
+
+Opens [Inbox](https://www.pushwoosh.com/docs/message-inbox) screen.
+
+Before using Message Inbox, please add node_modules/pushwoosh-react-native-plugin/src/ios/PushwooshInboxBundle.bundle to your project. Or, launch a script 'node node_modules/pushwoosh-react-native-plugin/scripts/add_inbox_ios_resources.js' to do it.
+
+<table width=100% style='background-color:#0EA7ED;'>
+<colgroup>
+<col width="10%" />
+<col width="20%" />
+<col width="70%" />
+</colgroup>
+<tbody>
+<tr>
+<th align="left" colspan="3"><strong>Parameters</strong></th>
+</tr>
+<tr class="even"><td>string</td><td><b>event</b></td><td>Event name.</td></tr>
+<tr class="even"><td>object</td><td><b>attributes</b></td><td>Additional event data.</td></tr>
+</tbody>
+</table>
