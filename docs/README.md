@@ -42,7 +42,7 @@ td {
 <tr class="even"><td><a href="#gethwid">getHwid(success)</a></td></tr>
 <tr class="even"><td><a href="#setuserid">setUserId(userId)</a></td></tr>
 <tr class="even"><td><a href="#postevent">postEvent(event, attributes)</a></td></tr>
-<tr class="even"><td><a href="#presentInboxUI">presentInboxUI()</a></td></tr>
+<tr class="even"><td><a href="#presentinboxui">presentInboxUI()</a></td></tr>
 </tbody>
 </table>
 <hr />
