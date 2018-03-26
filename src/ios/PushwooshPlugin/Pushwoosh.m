@@ -231,17 +231,13 @@ RCT_EXPORT_METHOD(presentInboxUI) {
 - (void)onPushReceived:(PushNotificationManager *)pushManager withNotification:(NSDictionary *)pushNotification onStart:(BOOL)onStart {
     [[PWEventDispatcher sharedDispatcher] dispatchEvent:kPushReceivedEvent withArgs:@[ objectOrNull(pushNotification) ]];
     
-    if ([[UIApplication sharedApplication] applicationState] != UIApplicationStateBackground) {
-        [self sendJSEvent:kPushReceivedJSEvent withArgs:pushNotification];
-    }
+    [self sendJSEvent:kPushReceivedJSEvent withArgs:pushNotification];
 }
 
 - (void)onPushAccepted:(PushNotificationManager *)manager withNotification:(NSDictionary *)pushNotification onStart:(BOOL)onStart {
 	[[PWEventDispatcher sharedDispatcher] dispatchEvent:kPushOpenEvent withArgs:@[ objectOrNull(pushNotification) ]];
 	
-	if ([[UIApplication sharedApplication] applicationState] != UIApplicationStateBackground) {
-		[self sendJSEvent:kPushOpenJSEvent withArgs:pushNotification];
-	}
+    [self sendJSEvent:kPushOpenJSEvent withArgs:pushNotification];
 }
 
 #pragma mark - RCTEventEmitter
