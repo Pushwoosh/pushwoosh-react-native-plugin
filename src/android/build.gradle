@@ -54,6 +54,8 @@ dependencies {
     compile "com.android.support.constraint:constraint-layout:1.0.2"
     compile "com.github.bumptech.glide:glide:4.3.1"
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:1.1.60"
-    compile "com.google.android.gms:play-services-gcm:11.4.0"
-    compile "com.google.android.gms:play-services-location:11.4.0"
+    compile "com.google.android.gms:play-services-gcm:+"
+    compile "com.google.android.gms:play-services-location:+"
+    compile "com.google.firebase:firebase-core:+"
+    compile "com.google.firebase:firebase-messaging:+"
 }
