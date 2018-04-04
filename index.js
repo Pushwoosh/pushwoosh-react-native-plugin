@@ -346,8 +346,65 @@ class PushNotification {
 
 	//Function: presentInboxUI
 	//[android, ios] Opens Inbox screen.
-	presentInboxUI() {
-		PushwooshModule.presentInboxUI();
+	//
+	// Supported style keys:
+	//
+	// Customizes the date formatting
+	// "dateFormat"
+	//
+	// The default icon in the cell next to the message; if not specified, the app icon is used
+	// "defaultImageIcon"
+	//
+	// The image which is displayed if an error occurs and the list of inbox messages is empty
+	// "listErrorImage"
+	//
+	// The error text which is displayed when an error occurs; cannot be localized
+	// "listErrorMessage"
+	//
+	// The text which is displayed if the list of inbox messages is empty; cannot be localized
+	// "listEmptyMessage"
+	//
+	// The accent color
+	// "accentColor"
+	//
+	// The default background color
+	// "backgroundColor"
+	//
+	// The default selection color
+	// "highlightColor"
+	//
+	// The color of message titles
+	// "titleColor"
+	//
+	// The color of messages descriptions
+	// "descriptionColor"
+	//
+	// The color of message dates
+	// "dateColor"
+	//
+	// The color of the separator
+	// "dividerColor"
+	//
+	//Example:
+	//(start code)
+	//	Pushwoosh.presentInboxUI({ 
+	//   "dateFormat" : "dd.MMMM.YYYY",
+	//   "defaultImageIcon" : Image.resolveAssetSource(require('./icon.png')),
+	//   "listErrorImage" : Image.resolveAssetSource(require('./error.png')),
+	//   "listErrorMessage" : "Error message1",
+	//   "listEmptyMessage" : "Error message2",
+	//   "accentColor" : processColor('#ff00ff'),
+	//   "highlightColor" : processColor('yellow'),
+	//   "dateColor" : processColor('blue'),
+	//   "titleColor" : processColor('#ff00ff'),
+	//   "dividerColor" : processColor('#ff00ff'),
+	//   "descriptionColor" : processColor('green'),
+	//   "backgroundColor" : processColor('rgba(255, 100, 30, 1.0)')
+	// });
+	//(end)
+
+	presentInboxUI(style: ?Object) {
+		PushwooshModule.presentInboxUI(style);
 	}
 }
 

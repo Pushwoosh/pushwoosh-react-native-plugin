@@ -12,6 +12,7 @@
 #import <React/RCTBridge.h>
 #import "PWEventDispatcher.h"
 #import <React/RCTEventDispatcher.h>
+#import <React/RCTConvert.h>
 
 #import <UserNotifications/UserNotifications.h>
 
@@ -188,19 +189,105 @@ RCT_EXPORT_METHOD(addToApplicationIconBadgeNumber:(nonnull NSNumber*)badgeNumber
     });
 }
     
-RCT_EXPORT_METHOD(presentInboxUI) {
+RCT_EXPORT_METHOD(presentInboxUI:(NSDictionary *)styleDictionary) {
     NSString *resourceBundlePath = [[NSBundle mainBundle] pathForResource:@"PushwooshInboxBundle" ofType:@"bundle"];
     if (![NSBundle bundleWithPath:resourceBundlePath]) {
         NSLog(@"[Pushwoosh][presentInboxUI] Error: PushwooshInboxBundle.bundle not found. Please launch \"node node_modules/pushwoosh-react-native-plugin/scripts/add_inbox_ios_resources.js\" from project root directory or manually add node_modules/pushwoosh-react-native-plugin/src/ios/PushwooshInboxBundle.bundle to your project.");
     } else {
         [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-            UIViewController *inboxViewController = [PWIInboxUI createInboxControllerWithStyle:[PWIInboxStyle defaultStyle]];
+            UIViewController *inboxViewController = [PWIInboxUI createInboxControllerWithStyle:[self inboxStyleForDictionary:styleDictionary]];
             inboxViewController.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Close", @"Close") style:UIBarButtonItemStylePlain target:self action:@selector(closeInbox)];
             [[Pushwoosh findRootViewController] presentViewController:[[UINavigationController alloc] initWithRootViewController:inboxViewController] animated:YES completion:nil];
         }];
     }
 }
+
+- (PWIInboxStyle *)inboxStyleForDictionary:(NSDictionary *)styleDictionary {
+    PWIInboxStyle *style = [PWIInboxStyle defaultStyle];
     
+    NSDictionary *defaultImageDict = styleDictionary[@"defaultImageIcon"];
+    
+    if (defaultImageDict) {
+        style.defaultImageIcon = [RCTConvert UIImage:defaultImageDict];
+    }
+    
+    NSString *dateFormat = styleDictionary[@"dateFormat"];
+    
+    if (dateFormat) {
+        style.dateFormatterBlock = ^NSString *(NSDate *date, NSObject *owner) {
+            NSDateFormatter *formatter = [NSDateFormatter new];
+            formatter.dateFormat = dateFormat;
+            return [formatter stringFromDate:date];
+        };
+    }
+    
+    NSDictionary *listErrorImageDict = styleDictionary[@"listErrorImage"];
+    
+    if (listErrorImageDict) {
+        style.listErrorImage = [RCTConvert UIImage:listErrorImageDict];
+    }
+    
+    NSString *listErrorMessage = styleDictionary[@"listErrorMessage"];
+    
+    if (listErrorMessage) {
+        style.listErrorMessage = listErrorMessage;
+    }
+    
+    NSString *listEmptyMessage = styleDictionary[@"listEmptyMessage"];
+    
+    if (listEmptyMessage) {
+        style.listEmptyMessage = listEmptyMessage;
+    }
+    
+    NSNumber *accentColorValue = styleDictionary[@"accentColor"];
+    
+    if (accentColorValue) {
+        style.accentColor = [RCTConvert UIColor:accentColorValue];
+    }
+    
+    NSNumber *backgroundColorValue = styleDictionary[@"backgroundColor"];
+    
+    if (backgroundColorValue) {
+        style.backgroundColor = [RCTConvert UIColor:backgroundColorValue];
+    }
+    
+    if (accentColorValue) {
+        style.accentColor = [RCTConvert UIColor:accentColorValue];
+    }
+    
+    NSNumber *highlightColorValue = styleDictionary[@"highlightColor"];
+    
+    if (highlightColorValue) {
+        style.selectionColor = [RCTConvert UIColor:highlightColorValue];
+    }
+    
+    NSNumber *titleColorValue = styleDictionary[@"titleColor"];
+    
+    if (titleColorValue) {
+        style.titleColor = [RCTConvert UIColor:titleColorValue];
+    }
+    
+    NSNumber *descriptionColorValue = styleDictionary[@"descriptionColor"];
+    
+    if (descriptionColorValue) {
+        style.descriptionColor = [RCTConvert UIColor:descriptionColorValue];
+    }
+    
+    NSNumber *dateColorValue = styleDictionary[@"dateColor"];
+    
+    if (dateColorValue) {
+        style.dateColor = [RCTConvert UIColor:dateColorValue];
+    }
+    
+    NSNumber *dividerColorValue = styleDictionary[@"dividerColor"];
+    
+    if (dividerColorValue) {
+        style.separatorColor = [RCTConvert UIColor:dividerColorValue];
+    }
+    
+    return style;
+}
+
 - (void)closeInbox {
     UIViewController *topViewController = [Pushwoosh findRootViewController];
     if ([topViewController isKindOfClass:[UINavigationController class]] && [((UINavigationController*)topViewController).viewControllers.firstObject isKindOfClass:[PWIInboxViewController class]]) {
