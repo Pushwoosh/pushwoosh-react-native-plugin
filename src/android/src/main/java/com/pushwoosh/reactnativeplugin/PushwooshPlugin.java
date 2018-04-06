@@ -1,6 +1,12 @@
 package com.pushwoosh.reactnativeplugin;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 
 import com.facebook.react.bridge.Callback;
@@ -17,7 +23,10 @@ import com.pushwoosh.exception.RegisterForPushNotificationsException;
 import com.pushwoosh.exception.UnregisterForPushNotificationException;
 import com.pushwoosh.function.Result;
 import com.pushwoosh.inapp.PushwooshInApp;
+import com.pushwoosh.inbox.ui.PushwooshInboxStyle;
+import com.pushwoosh.inbox.ui.model.customizing.formatter.InboxDateFormatter;
 import com.pushwoosh.inbox.ui.presentation.view.activity.InboxActivity;
+import com.pushwoosh.internal.platform.AndroidPlatformModule;
 import com.pushwoosh.internal.utils.PWLog;
 import com.pushwoosh.location.PushwooshLocation;
 import com.pushwoosh.notification.PushwooshNotificationSettings;
@@ -26,6 +35,12 @@ import com.pushwoosh.notification.VibrateType;
 import com.pushwoosh.tags.TagsBundle;
 
 import org.json.JSONObject;
+
+import java.io.IOException;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class PushwooshPlugin extends ReactContextBaseJavaModule implements LifecycleEventListener {
 
@@ -49,12 +64,17 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 
 	private static PushwooshPlugin INSTANCE = null;
 
+	private InboxUiStyleManager inboxUiInboxUiStyleManager;
+
 	public PushwooshPlugin(ReactApplicationContext reactContext) {
 		super(reactContext);
 
 		INSTANCE = this;
 
 		reactContext.addLifecycleEventListener(this);
+
+		Context applicationContext = AndroidPlatformModule.getApplicationContext();
+		inboxUiInboxUiStyleManager = new InboxUiStyleManager(applicationContext);
 	}
 
 	///
@@ -85,7 +105,7 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 			if (sReceivedPushData != null) {
 				sendEvent(PUSH_RECEIVED_JS_EVENT, ConversionUtil.stringToJSONObject(sReceivedPushData));
 			}
-			
+
 			if (sStartPushData != null) {
 				sendEvent(PUSH_OPEN_JS_EVENT, ConversionUtil.stringToJSONObject(sStartPushData));
 			}
@@ -181,12 +201,12 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 		Pushwoosh.getInstance().getTags(new com.pushwoosh.function.Callback<TagsBundle, GetTagsException>() {
 			@Override
 			public void process(@NonNull Result<TagsBundle, GetTagsException> result) {
-				if(result.isSuccess()){
-					if (success != null && result.getData()!=null) {
+				if (result.isSuccess()) {
+					if (success != null && result.getData() != null) {
 						success.invoke(ConversionUtil.toWritableMap(result.getData().toJson()));
 					}
 				} else {
-					if (error != null && result.getException()!=null) {
+					if (error != null && result.getException() != null) {
 						error.invoke(result.getException().getMessage());
 					}
 				}
@@ -256,7 +276,7 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 
 	@ReactMethod
 	public void setColorLED(int color) {
-		PushwooshNotificationSettings.setColorLED( color);
+		PushwooshNotificationSettings.setColorLED(color);
 	}
 
 	@ReactMethod
@@ -268,11 +288,24 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	public void setVibrateType(int type) {
 		PushwooshNotificationSettings.setVibrateNotificationType(VibrateType.fromInt(type));
 	}
-    
-    @ReactMethod
-    public void presentInboxUI() {
-		getCurrentActivity().startActivity(new Intent(getCurrentActivity(), InboxActivity.class));
-    }
+
+
+	@ReactMethod
+	public void presentInboxUI(final ReadableMap mapStyle) {
+		if (mapStyle != null) {
+			inboxUiInboxUiStyleManager.setStyle(mapStyle);
+		}
+
+		Activity currentActivity = getCurrentActivity();
+		Intent intent = new Intent(currentActivity, InboxActivity.class);
+		if (currentActivity != null) {
+			currentActivity.startActivity(intent);
+		}else {
+			PWLog.error(TAG, "current activity is null");
+		}
+	}
+
+
 
 	///
 	/// LifecycleEventListener callbacks
