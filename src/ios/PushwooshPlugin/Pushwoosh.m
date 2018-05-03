@@ -39,6 +39,10 @@ static NSString * const kPushReceivedJSEvent = @"pushReceived";
 
 RCT_EXPORT_MODULE();
 
+- (dispatch_queue_t)methodQueue {
+    return dispatch_get_main_queue();
+}
+
 RCT_EXPORT_METHOD(init:(NSDictionary*)config success:(RCTResponseSenderBlock)success error:(RCTResponseSenderBlock)error) {
 	NSString *appCode = config[@"pw_appid"];
 	
@@ -303,6 +307,54 @@ RCT_EXPORT_METHOD(presentInboxUI:(NSDictionary *)styleDictionary) {
         controller = controller.presentedViewController;
     }
     return controller;
+}
+
+RCT_EXPORT_METHOD(showGDPRConsentUI) {
+    [[PWGDPRManager sharedManager] showGDPRConsentUI];
+}
+
+RCT_EXPORT_METHOD(showGDPRDeletionUI) {
+    [[PWGDPRManager sharedManager] showGDPRDeletionUI];
+}
+
+RCT_EXPORT_METHOD(isDeviceDataRemoved:(RCTResponseSenderBlock)callback) {
+    callback(@[@([PWGDPRManager sharedManager].isDeviceDataRemoved)]);
+}
+
+RCT_EXPORT_METHOD(isCommunicationEnabled:(RCTResponseSenderBlock)callback) {
+    callback(@[@([PWGDPRManager sharedManager].isCommunicationEnabled)]);
+}
+
+RCT_EXPORT_METHOD(isAvailableGDPR:(RCTResponseSenderBlock)callback) {
+    callback(@[@([PWGDPRManager sharedManager].isAvailable)]);
+}
+
+RCT_EXPORT_METHOD(setCommunicationEnabled:(BOOL)enabled success:(RCTResponseSenderBlock)successCallback error:(RCTResponseSenderBlock)errorCallback) {
+    [[PWGDPRManager sharedManager] setCommunicationEnabled:enabled completion:^(NSError *error) {
+        if (error) {
+            if (errorCallback) {
+                errorCallback(@[error.localizedDescription]);
+            }
+        } else {
+            if (successCallback) {
+                successCallback(@[]);
+            }
+        }
+    }];
+}
+
+RCT_EXPORT_METHOD(removeAllDeviceData:(RCTResponseSenderBlock)successCallback error:(RCTResponseSenderBlock)errorCallback) {
+    [[PWGDPRManager sharedManager] removeAllDeviceDataWithCompletion:^(NSError *error) {
+        if (error) {
+            if (errorCallback) {
+                errorCallback(@[error.localizedDescription]);
+            }
+        } else {
+            if (successCallback) {
+                successCallback(@[]);
+            }
+        }
+    }];
 }
     
 #pragma mark - PushNotificationDelegate
