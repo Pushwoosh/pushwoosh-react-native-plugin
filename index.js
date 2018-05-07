@@ -376,11 +376,20 @@ class PushNotification {
 	// The color of message titles
 	// "titleColor"
 	//
+	// The color of message titles if message was readed (Android only)
+	// "readTitleColor"
+	//
 	// The color of messages descriptions
 	// "descriptionColor"
 	//
+	// The color of messages descriptions if message was readed (Android only)
+	// "readDescriptionColor"
+	//
 	// The color of message dates
 	// "dateColor"
+	//
+	// The color of message dates if message was readed (Android only)
+	// "readDateColor"
 	//
 	// The color of the separator
 	// "dividerColor"
