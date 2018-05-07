@@ -358,6 +358,9 @@ class PushNotification {
 	// The image which is displayed if an error occurs and the list of inbox messages is empty
 	// "listErrorImage"
 	//
+	// The image which is displayed if the list of inbox messages is empty
+	// "listEmptyImage"
+	//
 	// The error text which is displayed when an error occurs; cannot be localized
 	// "listErrorMessage"
 	//
@@ -391,6 +394,7 @@ class PushNotification {
 	//   "dateFormat" : "dd.MMMM.YYYY",
 	//   "defaultImageIcon" : Image.resolveAssetSource(require('./icon.png')),
 	//   "listErrorImage" : Image.resolveAssetSource(require('./error.png')),
+	//	 "listEmptyImage" : Image.resolveAssetSource(require('./empty.png')),
 	//   "listErrorMessage" : "Error message1",
 	//   "listEmptyMessage" : "Error message2",
 	//   "accentColor" : processColor('#ff00ff'),

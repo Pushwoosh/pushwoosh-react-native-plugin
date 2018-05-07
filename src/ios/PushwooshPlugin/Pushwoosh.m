@@ -231,6 +231,12 @@ RCT_EXPORT_METHOD(presentInboxUI:(NSDictionary *)styleDictionary) {
         style.listErrorImage = [RCTConvert UIImage:listErrorImageDict];
     }
     
+    NSDictionary *listEmptyImageDict = styleDictionary[@"listEmptyImage"];
+    
+    if (listEmptyImageDict) {
+        style.listEmptyImage = [RCTConvert UIImage:listEmptyImageDict];
+    }
+    
     NSString *listErrorMessage = styleDictionary[@"listErrorMessage"];
     
     if (listErrorMessage) {
