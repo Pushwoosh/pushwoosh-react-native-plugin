@@ -355,6 +355,9 @@ class PushNotification {
 	// The default icon in the cell next to the message; if not specified, the app icon is used
 	// "defaultImageIcon"
 	//
+	// The appearance of the unread messages mark. iOS only
+	// "unreadImage"
+	//
 	// The image which is displayed if an error occurs and the list of inbox messages is empty
 	// "listErrorImage"
 	//
@@ -366,6 +369,9 @@ class PushNotification {
 	//
 	// The text which is displayed if the list of inbox messages is empty; cannot be localized
 	// "listEmptyMessage"
+	//
+	// The default text color. iOS only
+	// "defaultTextColor"
 	//
 	// The accent color
 	// "accentColor"

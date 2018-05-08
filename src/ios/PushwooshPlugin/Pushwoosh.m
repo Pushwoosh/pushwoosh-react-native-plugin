@@ -237,6 +237,12 @@ RCT_EXPORT_METHOD(presentInboxUI:(NSDictionary *)styleDictionary) {
         style.listEmptyImage = [RCTConvert UIImage:listEmptyImageDict];
     }
     
+    NSDictionary *unreadImageDict = styleDictionary[@"unreadImage"];
+    
+    if (unreadImageDict) {
+        style.unreadImage = [RCTConvert UIImage:unreadImageDict];
+    }
+    
     NSString *listErrorMessage = styleDictionary[@"listErrorMessage"];
     
     if (listErrorMessage) {
@@ -253,6 +259,12 @@ RCT_EXPORT_METHOD(presentInboxUI:(NSDictionary *)styleDictionary) {
     
     if (accentColorValue) {
         style.accentColor = [RCTConvert UIColor:accentColorValue];
+    }
+    
+    NSNumber *defaultTextColorValue = styleDictionary[@"defaultTextColor"];
+    
+    if (defaultTextColorValue) {
+        style.defaultTextColor = [RCTConvert UIColor:defaultTextColorValue];
     }
     
     NSNumber *backgroundColorValue = styleDictionary[@"backgroundColor"];
