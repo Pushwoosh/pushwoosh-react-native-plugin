@@ -1,3 +1,4 @@
+package com.pushwoosh.reactnativeplugin;
 
 import android.content.Context;
 import android.graphics.Bitmap;
