@@ -15,6 +15,7 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
+import com.pushwoosh.GDPRManager;
 import com.pushwoosh.Pushwoosh;
 import com.pushwoosh.badge.PushwooshBadge;
 import com.pushwoosh.exception.GetTagsException;
@@ -306,65 +307,65 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	}
 
 	@ReactMethod
-    public void showGDPRConsentUI(){
-        GDPRManager.getInstance().showGDPRConsentUI();
-    }
+	public void showGDPRConsentUI(){
+		GDPRManager.getInstance().showGDPRConsentUI();
+	}
 
-    @ReactMethod
-    public void showGDPRDeletionUI(){
-        GDPRManager.getInstance().showGDPRDeletionUI();
-    }
+	@ReactMethod
+	public void showGDPRDeletionUI(){
+		GDPRManager.getInstance().showGDPRDeletionUI();
+	}
 
-    @ReactMethod
-    public void isDeviceDataRemoved(final Callback success){
-        success.invoke(GDPRManager.getInstance().isDeviceDataRemoved());
-    }
+	@ReactMethod
+	public void isDeviceDataRemoved(final Callback success){
+		success.invoke(GDPRManager.getInstance().isDeviceDataRemoved());
+	}
 
-    @ReactMethod
-    public void isCommunicationEnabled(final Callback success){
-       success.invoke(GDPRManager.getInstance().isCommunicationEnabled());
-    }
+	@ReactMethod
+	public void isCommunicationEnabled(final Callback success){
+		success.invoke(GDPRManager.getInstance().isCommunicationEnabled());
+	}
 
-    @ReactMethod
-    public void isAvailableGDPR(final Callback success){
-        success.invoke(GDPRManager.getInstance().isAvailable());
-    }
+	@ReactMethod
+	public void isAvailableGDPR(final Callback success){
+		success.invoke(GDPRManager.getInstance().isAvailable());
+	}
 
-    @ReactMethod
-    public void setCommunicationEnabled(boolean enable, final Callback success, final Callback error) {
-        GDPRManager.getInstance().setCommunicationEnabled(enable, new com.pushwoosh.function.Callback<Void, PushwooshException>() {
-            @Override
-            public void process(@NonNull Result<Void, PushwooshException> result) {
-                if (result.isSuccess()) {
-                    if (success != null) {
-                        success.invoke(result.getData());
-                    }
-                } else if (result.getException() != null) {
-                    if (error != null) {
-                        error.invoke(result.getException().getLocalizedMessage());
-                    }
-                }
-            }
-        });
-    }
+	@ReactMethod
+	public void setCommunicationEnabled(boolean enable, final Callback success, final Callback error) {
+		GDPRManager.getInstance().setCommunicationEnabled(enable, new com.pushwoosh.function.Callback<Void, PushwooshException>() {
+			@Override
+			public void process(@NonNull Result<Void, PushwooshException> result) {
+				if (result.isSuccess()) {
+					if (success != null) {
+						success.invoke(result.getData());
+					}
+				} else if (result.getException() != null) {
+					if (error != null) {
+						error.invoke(result.getException().getLocalizedMessage());
+					}
+				}
+			}
+		});
+	}
 
-    @ReactMethod
-    public void removeAllDeviceData(final Callback success, final Callback error) {
-        GDPRManager.getInstance().removeAllDeviceData(new com.pushwoosh.function.Callback<Void, PushwooshException>() {
-            @Override
-            public void process(@NonNull Result<Void, PushwooshException> result) {
-                if (result.isSuccess()) {
-                    if (success != null) {
-                        success.invoke(result.getData());
-                    }
-                } else if (result.getException() != null) {
-                    if (error != null) {
-                        error.invoke(result.getException().getLocalizedMessage());
-                    }
-                }
-            }
-        });
-    }
+	@ReactMethod
+	public void removeAllDeviceData(final Callback success, final Callback error) {
+		GDPRManager.getInstance().removeAllDeviceData(new com.pushwoosh.function.Callback<Void, PushwooshException>() {
+			@Override
+			public void process(@NonNull Result<Void, PushwooshException> result) {
+				if (result.isSuccess()) {
+					if (success != null) {
+						success.invoke(result.getData());
+					}
+				} else if (result.getException() != null) {
+					if (error != null) {
+						error.invoke(result.getException().getLocalizedMessage());
+					}
+				}
+			}
+		});
+	}
 
 	///
 	/// LifecycleEventListener callbacks
