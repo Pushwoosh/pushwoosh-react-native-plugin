@@ -7,6 +7,7 @@
 #import "Pushwoosh.h"
 
 #import "PushwooshInboxUI.h"
+#import "PWGDPRManager.h"
 
 #import <React/RCTUtils.h>
 #import <React/RCTBridge.h>
