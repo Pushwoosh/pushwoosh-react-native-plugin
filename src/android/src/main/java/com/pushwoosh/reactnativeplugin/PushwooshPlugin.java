@@ -1,6 +1,7 @@
 package com.pushwoosh.reactnativeplugin;
 
 import android.app.Activity;
+import android.os.Bundle;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -34,8 +35,12 @@ import com.pushwoosh.notification.PushwooshNotificationSettings;
 import com.pushwoosh.notification.SoundType;
 import com.pushwoosh.notification.VibrateType;
 import com.pushwoosh.tags.TagsBundle;
+import com.pushwoosh.notification.LocalNotification;
+import com.pushwoosh.notification.LocalNotificationReceiver;
 
 import org.json.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONException;
 
 import java.io.IOException;
 import java.net.URL;
@@ -86,6 +91,7 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	public String getName() {
 		return "Pushwoosh";
 	}
+
 
 	@ReactMethod
 	public void init(ReadableMap config, Callback success, Callback error) {
@@ -245,6 +251,46 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 		PushwooshLocation.stopLocationTracking();
 	}
 
+    @ReactMethod
+	public void createLocalNotification(ReadableMap data, final Callback success){
+
+		JSONObject params  = ConversionUtil.toJsonObject(data);
+
+		try{
+			String message = params.getString("msg");
+			int seconds = params.getInt("seconds");
+			if (message == null){
+				return;
+			}
+
+			Bundle extras = new Bundle();
+			String userData = params.getString("userData");
+			if (userData!=null){
+				extras.putString("u", userData);
+			}
+
+			LocalNotification notification = new LocalNotification.Builder()
+			.setMessage(message)
+			.setDelay(seconds)
+			.setExtras(extras)
+			.build();
+			Pushwoosh.getInstance().scheduleLocalNotification(notification);
+		} catch(JSONException e){
+			PWLog.error(TAG, "Incorrect parameters passed or parameters missing", e);
+		}
+		if (success != null){
+			success.invoke();
+		}
+	}
+
+	@ReactMethod
+	public void clearLocalNotification(final Callback success){
+		LocalNotificationReceiver.cancelAll();
+		if (success != null){
+			success.invoke();
+		}
+	}
+
 	@ReactMethod
 	public void setApplicationIconBadgeNumber(int badgeNumber) {
 		PushwooshBadge.setBadgeNumber(badgeNumber);
@@ -366,6 +412,7 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 			}
 		});
 	}
+
 
 	///
 	/// LifecycleEventListener callbacks

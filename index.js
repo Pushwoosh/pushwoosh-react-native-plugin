@@ -47,6 +47,20 @@ class PushNotification {
 		PushwooshModule.init(config, success, fail);
 	}
 
+	createLocalNotification(data: Array, success: ?Function){
+		if (!success){
+			success = function(){};
+		}
+		PushwooshModule.createLocalNotification(data, success);
+	}
+
+	clearLocalNotification(success: ?Function){
+		if (!success){
+			success = function(){};
+		}
+		PushwooshModule.clearLocalNotification(success);
+	}
+
 	//Function: register
 	//Call this to register for push notifications and retreive a push Token
 	//

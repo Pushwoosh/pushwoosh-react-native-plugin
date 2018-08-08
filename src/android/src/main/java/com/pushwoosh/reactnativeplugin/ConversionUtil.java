@@ -25,7 +25,7 @@ public final class ConversionUtil {
 				.build();
 	}
 
-	private static JSONObject toJsonObject(ReadableMap readableMap) {
+	public static JSONObject toJsonObject(ReadableMap readableMap) {
 		ReadableMapKeySetIterator iterator = readableMap.keySetIterator();
 		JSONObject result = new JSONObject();
 		while (iterator.hasNextKey()) {
