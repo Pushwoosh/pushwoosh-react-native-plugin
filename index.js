@@ -50,9 +50,7 @@ class PushNotification {
 	createLocalNotification(data: Object){
 		PushwooshModule.createLocalNotification(data);
 	}
-	createLocalNotificationiOS(data: Object){
-		PushwooshModule.createLocalNotificationiOS(data);
-	}
+
 	clearLocalNotification(){
 		PushwooshModule.clearLocalNotification();
 	}
