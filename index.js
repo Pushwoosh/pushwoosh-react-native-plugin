@@ -47,18 +47,14 @@ class PushNotification {
 		PushwooshModule.init(config, success, fail);
 	}
 
-	createLocalNotification(data: Array, success: ?Function){
-		if (!success){
-			success = function(){};
-		}
-		PushwooshModule.createLocalNotification(data, success);
+	createLocalNotification(data: Object){
+		PushwooshModule.createLocalNotification(data);
 	}
-
-	clearLocalNotification(success: ?Function){
-		if (!success){
-			success = function(){};
-		}
-		PushwooshModule.clearLocalNotification(success);
+	createLocalNotificationiOS(data: Object){
+		PushwooshModule.createLocalNotificationiOS(data);
+	}
+	clearLocalNotification(){
+		PushwooshModule.clearLocalNotification();
 	}
 
 	//Function: register

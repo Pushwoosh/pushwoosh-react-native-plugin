@@ -252,19 +252,17 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	}
 
     @ReactMethod
-	public void createLocalNotification(ReadableMap data, final Callback success){
+	public void createLocalNotification(ReadableMap data){
 
 		JSONObject params  = ConversionUtil.toJsonObject(data);
 
-		try{
-			String message = params.getString("msg");
-			int seconds = params.getInt("seconds");
+			String message = params.optString("msg");
 			if (message == null){
 				return;
 			}
-
+			int seconds = params.optInt("seconds");
 			Bundle extras = new Bundle();
-			String userData = params.getString("userData");
+			String userData = params.optString("userData");
 			if (userData!=null){
 				extras.putString("u", userData);
 			}
@@ -275,20 +273,11 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 			.setExtras(extras)
 			.build();
 			Pushwoosh.getInstance().scheduleLocalNotification(notification);
-		} catch(JSONException e){
-			PWLog.error(TAG, "Incorrect parameters passed or parameters missing", e);
-		}
-		if (success != null){
-			success.invoke();
-		}
 	}
 
 	@ReactMethod
-	public void clearLocalNotification(final Callback success){
+	public void clearLocalNotification(){
 		LocalNotificationReceiver.cancelAll();
-		if (success != null){
-			success.invoke();
-		}
 	}
 
 	@ReactMethod

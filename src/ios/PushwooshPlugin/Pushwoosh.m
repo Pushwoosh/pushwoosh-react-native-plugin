@@ -375,6 +375,52 @@ RCT_EXPORT_METHOD(removeAllDeviceData:(RCTResponseSenderBlock)successCallback er
         }
     }];
 }
+
+RCT_EXPORT_METHOD(createLocalNotification:(NSDictionary *)params){
+    NSString *body = params[@"msg"];
+    NSUInteger delay = [params[@"seconds"] unsignedIntegerValue];
+    NSDictionary *userData = params[@"userData"];
+
+    [self sendLocalNotificationWithBody:body delay:delay userData:userData];
+}
+
+- (void)sendLocalNotificationWithBody:(NSString *)body delay:(NSUInteger)delay userData:(NSDictionary *)userData {
+    if (@available(iOS 10, *)) {
+        UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+        UNMutableNotificationContent *content = [UNMutableNotificationContent new];
+        content.body = body;
+        content.sound = [UNNotificationSound defaultSound];
+        content.userInfo = userData;
+        UNTimeIntervalNotificationTrigger *trigger = delay > 0 ? [UNTimeIntervalNotificationTrigger triggerWithTimeInterval:delay repeats:NO] : nil;
+        NSString *identifier = @"LocalNotification";
+        UNNotificationRequest *request = [UNNotificationRequest requestWithIdentifier:identifier
+                                                                              content:content
+                                                                              trigger:trigger];
+        
+        [center addNotificationRequest:request withCompletionHandler:^(NSError *_Nullable error) {
+            if (error != nil) {
+                NSLog(@"Something went wrong: %@", error);
+            }
+        }];
+    } else {
+        UILocalNotification *localNotification = [[UILocalNotification alloc] init];
+        localNotification.fireDate = [NSDate dateWithTimeIntervalSinceNow:delay];
+        localNotification.alertBody = body;
+        localNotification.timeZone = [NSTimeZone defaultTimeZone];
+        localNotification.userInfo = userData;
+        [[UIApplication sharedApplication] scheduleLocalNotification:localNotification];
+    }
+}
+
+RCT_EXPORT_METHOD(clearLocalNotification){
+    if (@available(iOS 10, *)) {
+        UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+        [center removeAllDeliveredNotifications];
+        [center removeAllPendingNotificationRequests];
+    } else{
+        [[UIApplication sharedApplication] cancelAllLocalNotifications];
+    }
+}
     
 #pragma mark - PushNotificationDelegate
 
