@@ -267,11 +267,6 @@ typedef void (^PushwooshErrorHandler)(NSError *error);
  */
 - (void)stopLocationTracking;
 
-/**
-Creates local notification
- */
-- (void)createLocalNotification:(NSDictionary *)params;
-
 #endif
 
 /**

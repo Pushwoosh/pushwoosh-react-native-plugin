@@ -47,9 +47,26 @@ class PushNotification {
 		PushwooshModule.init(config, success, fail);
 	}
 
+    //Function: createLocalNotification
+	//Creates a local notification with a specified message, delay and custom data
+	//
+	//Example:
+	//(start code)
+	//	//creates a local notification with "message" content, 5 seconds delay and passes {"somedata":"optional"} object in payload
+	//	Pushwoosh.createLocalNotification({msg:"message", seconds:5, userData:{"somedata":"optional"}});
+	//(end)
+
 	createLocalNotification(data: Object){
 		PushwooshModule.createLocalNotification(data);
 	}
+
+    //Function: clearLocalNotification
+	//Clears all existing and cancels all pending local notifications
+	//
+	//Example:
+	//(start code)
+	//	Pushwoosh.clearLocalNotification();
+	//(end)
 
 	clearLocalNotification(){
 		PushwooshModule.clearLocalNotification();
