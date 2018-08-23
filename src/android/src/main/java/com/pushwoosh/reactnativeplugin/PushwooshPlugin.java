@@ -251,7 +251,7 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 		PushwooshLocation.stopLocationTracking();
 	}
 
-    @ReactMethod
+	@ReactMethod
 	public void createLocalNotification(ReadableMap data){
 
 		JSONObject params  = ConversionUtil.toJsonObject(data);
