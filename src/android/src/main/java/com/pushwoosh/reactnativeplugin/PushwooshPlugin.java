@@ -256,23 +256,26 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 
 		JSONObject params  = ConversionUtil.toJsonObject(data);
 
-			String message = params.optString("msg");
-			if (message == null){
-				return;
-			}
-			int seconds = params.optInt("seconds");
-			Bundle extras = new Bundle();
-			String userData = params.optString("userData");
-			if (userData!=null){
-				extras.putString("u", userData);
-			}
+		String message = params.optString("msg");
+		if (message == null){
+			return;
+		}
+		int seconds = params.optInt("seconds");
+		Bundle extras = new Bundle();
+		String userData = params.optString("userData");
+		if (userData!=null){
+		    extras.putString("u", userData);
+		}
 
-			LocalNotification notification = new LocalNotification.Builder()
-			.setMessage(message)
-			.setDelay(seconds)
-			.setExtras(extras)
-			.build();
-			Pushwoosh.getInstance().scheduleLocalNotification(notification);
+		LocalNotification notification = new LocalNotification.Builder()
+		.setMessage(message)
+		.setDelay(seconds);
+		if (extras){
+			notification.setExtras(extras);
+		}
+		notification.build();
+
+		Pushwoosh.getInstance().scheduleLocalNotification(notification);
 	}
 
 	@ReactMethod
