@@ -274,7 +274,6 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 		LocalNotification notification = builder
 		.setMessage(message)
 		.setDelay(seconds)
-		.setExtras(extras)
 		.build();
 
 		Pushwoosh.getInstance().scheduleLocalNotification(notification);
