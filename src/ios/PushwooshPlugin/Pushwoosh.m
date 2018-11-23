@@ -65,6 +65,15 @@ RCT_EXPORT_METHOD(init:(NSDictionary*)config success:(RCTResponseSenderBlock)suc
     }
     
 	if (gStartPushData) {
+        NSString *link = gStartPushData[@"l"];
+        
+        //get deeplink from the payload and write it to the launchOptions for proper RCTLinking behavior
+        if (link) {
+            NSMutableDictionary *launchOptions = self.bridge.launchOptions.mutableCopy;
+            launchOptions[UIApplicationLaunchOptionsURLKey] = [NSURL URLWithString:link];
+            [self.bridge setValue:launchOptions forKey:@"launchOptions"];
+        }
+        
         [self sendJSEvent:kPushReceivedJSEvent withArgs:gStartPushData];
 		[self sendJSEvent:kPushOpenJSEvent withArgs:gStartPushData];
     } else if([PushNotificationManager pushManager].launchNotification) {
