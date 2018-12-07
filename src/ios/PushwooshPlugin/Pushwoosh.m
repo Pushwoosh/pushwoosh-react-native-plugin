@@ -8,6 +8,7 @@
 
 #import "PushwooshInboxUI.h"
 #import "PWGDPRManager.h"
+#import "PWGeozonesManager.h"
 
 #import <React/RCTUtils.h>
 #import <React/RCTBridge.h>
@@ -65,6 +66,15 @@ RCT_EXPORT_METHOD(init:(NSDictionary*)config success:(RCTResponseSenderBlock)suc
     }
     
 	if (gStartPushData) {
+        NSString *link = gStartPushData[@"l"];
+        
+        //get deeplink from the payload and write it to the launchOptions for proper RCTLinking behavior
+        if (link) {
+            NSMutableDictionary *launchOptions = self.bridge.launchOptions.mutableCopy;
+            launchOptions[UIApplicationLaunchOptionsURLKey] = [NSURL URLWithString:link];
+            [self.bridge setValue:launchOptions forKey:@"launchOptions"];
+        }
+        
         [self sendJSEvent:kPushReceivedJSEvent withArgs:gStartPushData];
 		[self sendJSEvent:kPushOpenJSEvent withArgs:gStartPushData];
     } else if([PushNotificationManager pushManager].launchNotification) {
@@ -167,11 +177,11 @@ RCT_EXPORT_METHOD(postEvent:(NSString*)event withAttributes:(NSDictionary*)attri
 }
 
 RCT_EXPORT_METHOD(startLocationTracking) {
-	[[PushNotificationManager pushManager] startLocationTracking];
+	[[PWGeozonesManager sharedManager] startLocationTracking];
 }
 
 RCT_EXPORT_METHOD(stopLocationTracking) {
-	[[PushNotificationManager pushManager] stopLocationTracking];
+	[[PWGeozonesManager sharedManager] stopLocationTracking];
 }
 
 RCT_EXPORT_METHOD(setApplicationIconBadgeNumber:(nonnull NSNumber*)badgeNumber) {
