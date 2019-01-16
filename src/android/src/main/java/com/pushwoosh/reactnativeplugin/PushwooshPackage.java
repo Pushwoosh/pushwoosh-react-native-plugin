@@ -13,11 +13,6 @@ import java.util.List;
 
 public class PushwooshPackage implements ReactPackage {
     @Override
-    public List<Class<? extends JavaScriptModule>> createJSModules() {
-        return Collections.emptyList();
-    }
-
-    @Override
     public List<com.facebook.react.uimanager.ViewManager> createViewManagers(ReactApplicationContext reactContext) {
         return Collections.emptyList();
     }
