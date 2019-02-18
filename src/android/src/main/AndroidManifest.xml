@@ -14,8 +14,7 @@
 	<!--<uses-permission-sdk-23 android:name="android.permission.RECEIVE_BOOT_COMPLETED" />-->
 	
 	
-	<application
-		android:allowBackup="true">
+	<application>
 		
 		<meta-data
 			android:name="com.pushwoosh.notification_service_extension"

@@ -39,24 +39,24 @@ ext {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.facebook.react:react-native:+'
-    compile "com.pushwoosh:pushwoosh:${pushwoosh}"
-    compile "com.pushwoosh:pushwoosh-amazon:${pushwoosh}"
-    compile "com.pushwoosh:pushwoosh-badge:${pushwoosh}"
-    compile "com.pushwoosh:pushwoosh-gcm:${pushwoosh}"
-    compile "com.pushwoosh:pushwoosh-inbox:${pushwoosh}"
-    compile "com.pushwoosh:pushwoosh-inbox-ui:${pushwoosh}"
-    compile "com.android.support:appcompat-v7:27.+"
-    compile "com.android.support:recyclerview-v7:27.+"
-    compile "com.android.support:recyclerview-v7:27.+"
-    compile "com.android.support:design:27.+"
-    compile "com.android.support.constraint:constraint-layout:1.0.2"
-    compile "com.github.bumptech.glide:glide:4.3.1"
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:1.1.60"
-    compile "com.google.android.gms:play-services-gcm:+"
-    compile "com.google.android.gms:play-services-location:+"
-    compile "com.google.firebase:firebase-core:+"
-    compile "com.google.firebase:firebase-messaging:+"
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.facebook.react:react-native:+'
+    implementation "com.pushwoosh:pushwoosh:${pushwoosh}"
+    implementation "com.pushwoosh:pushwoosh-amazon:${pushwoosh}"
+    implementation "com.pushwoosh:pushwoosh-badge:${pushwoosh}"
+    implementation "com.pushwoosh:pushwoosh-gcm:${pushwoosh}"
+    implementation "com.pushwoosh:pushwoosh-inbox:${pushwoosh}"
+    implementation "com.pushwoosh:pushwoosh-inbox-ui:${pushwoosh}"
+    implementation "com.android.support:appcompat-v7:27.+"
+    implementation "com.android.support:recyclerview-v7:27.+"
+    implementation "com.android.support:recyclerview-v7:27.+"
+    implementation "com.android.support:design:27.+"
+    implementation "com.android.support.constraint:constraint-layout:1.0.2"
+    implementation "com.github.bumptech.glide:glide:4.3.1"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:1.1.60"
+    implementation "com.google.android.gms:play-services-gcm:+"
+    implementation "com.google.android.gms:play-services-location:+"
+    implementation "com.google.firebase:firebase-core:+"
+    implementation "com.google.firebase:firebase-messaging:+"
 }
 
