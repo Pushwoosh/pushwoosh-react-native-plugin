@@ -4,10 +4,6 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 
 import com.facebook.react.bridge.Callback;
@@ -25,12 +21,9 @@ import com.pushwoosh.exception.RegisterForPushNotificationsException;
 import com.pushwoosh.exception.UnregisterForPushNotificationException;
 import com.pushwoosh.function.Result;
 import com.pushwoosh.inapp.PushwooshInApp;
-import com.pushwoosh.inbox.ui.PushwooshInboxStyle;
-import com.pushwoosh.inbox.ui.model.customizing.formatter.InboxDateFormatter;
 import com.pushwoosh.inbox.ui.presentation.view.activity.InboxActivity;
 import com.pushwoosh.internal.platform.AndroidPlatformModule;
 import com.pushwoosh.internal.utils.PWLog;
-import com.pushwoosh.location.PushwooshLocation;
 import com.pushwoosh.notification.PushwooshNotificationSettings;
 import com.pushwoosh.notification.SoundType;
 import com.pushwoosh.notification.VibrateType;
@@ -39,14 +32,6 @@ import com.pushwoosh.notification.LocalNotification;
 import com.pushwoosh.notification.LocalNotificationReceiver;
 
 import org.json.JSONObject;
-import org.json.JSONArray;
-import org.json.JSONException;
-
-import java.io.IOException;
-import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 public class PushwooshPlugin extends ReactContextBaseJavaModule implements LifecycleEventListener {
 
@@ -239,16 +224,6 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	@ReactMethod
 	public void postEvent(String event, ReadableMap attributes) {
 		PushwooshInApp.getInstance().postEvent(event, ConversionUtil.convertToTagsBundle(attributes));
-	}
-
-	@ReactMethod
-	public void startLocationTracking() {
-		PushwooshLocation.startLocationTracking();
-	}
-
-	@ReactMethod
-	public void stopLocationTracking() {
-		PushwooshLocation.stopLocationTracking();
 	}
 
 	@ReactMethod

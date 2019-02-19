@@ -35,11 +35,10 @@ android {
 }
 
 ext {
-    pushwoosh = "5.12.0"
+    pushwoosh = "5.12.1"
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.facebook.react:react-native:+'
     implementation "com.pushwoosh:pushwoosh:${pushwoosh}"
     implementation "com.pushwoosh:pushwoosh-amazon:${pushwoosh}"
@@ -55,7 +54,6 @@ dependencies {
     implementation "com.github.bumptech.glide:glide:4.3.1"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:1.1.60"
     implementation "com.google.android.gms:play-services-gcm:+"
-    implementation "com.google.android.gms:play-services-location:+"
     implementation "com.google.firebase:firebase-core:+"
     implementation "com.google.firebase:firebase-messaging:+"
 }

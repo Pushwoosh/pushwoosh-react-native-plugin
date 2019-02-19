@@ -1,19 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.pushwoosh.reactnativeplugin">
-	
-	<!--BEACON-->
-	<!--<uses-permission android:name="android.permission.BLUETOOTH" />-->
-	<!--<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />-->
-	
-	<!--LOCATION-->
-	
-	<!--<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />-->
-	<!--<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />-->
-	<!---->
-	<!--<uses-permission-sdk-23 android:name="android.permission.RECEIVE_BOOT_COMPLETED" />-->
-	
-	
+
 	<application>
 		
 		<meta-data
@@ -23,40 +11,6 @@
 		<meta-data
 			android:name="com.pushwoosh.internal.plugin_provider"
 			android:value="com.pushwoosh.reactnativeplugin.internal.ReactNativePluginProvider" />
-		
-		<!--BEACON-->
-		<service
-			android:name="com.pushwoosh.thirdparty.radiusnetworks.ibeacon.service.IBeaconService"
-			android:enabled="true"
-			android:exported="true"
-			android:isolatedProcess="false"
-			android:label="iBeacon" />
-		<service
-			android:name="com.pushwoosh.thirdparty.radiusnetworks.ibeacon.IBeaconIntentProcessor"
-			android:enabled="true" />
-		<service android:name="com.pushwoosh.beacon.PushBeaconService" />
-		
-		<!--LOCATION-->
-		<meta-data
-			android:name="com.pushwoosh.plugin.location"
-			android:value="com.pushwoosh.location.LocationPlugin" />
-		
-		<service android:name="com.pushwoosh.location.network.GeoLocationServiceApi16" />
-		
-		<activity
-			android:name="com.pushwoosh.location.internal.utils.ResolutionActivity"
-			android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-		
-		<service
-			android:name="com.pushwoosh.location.network.GeoLocationServiceApi21"
-			android:exported="true"
-			android:permission="android.permission.BIND_JOB_SERVICE" />
-		
-		<receiver android:name="com.pushwoosh.location.geofencer.GeofenceReceiver">
-			<intent-filter>
-				<action android:name="${applicationId}.action.GEOFENCE" />
-			</intent-filter>
-		</receiver>
 	
 	</application>
 
