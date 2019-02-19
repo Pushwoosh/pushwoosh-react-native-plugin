@@ -2,9 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.pushwoosh.reactnativeplugin">
 
-	
-	<application
-		>
+	<application>
 		
 		<meta-data
 			android:name="com.pushwoosh.notification_service_extension"
