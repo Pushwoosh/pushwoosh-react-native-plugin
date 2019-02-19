@@ -252,28 +252,6 @@ class PushNotification {
 		PushwooshModule.postEvent(event, attributes);
 	}
 
-	//Function: startLocationTracking
-	//[android, ios, wp8, windows] Starts geolocation based push notifications. You need to configure Geozones in Pushwoosh Control panel.
-	//
-	//Parameters:
-	// "success" - success callback
-	// "fail" - error callback
-	//
-	startLocationTracking() {
-		PushwooshModule.startLocationTracking();
-	}
-
-	//Function: stopLocationTracking
-	//[android, ios, wp8, windows] Stops geolocation based push notifications
-	//
-	//Parameters:
-	// "success" - success callback
-	// "fail" - error callback
-	//
-	stopLocationTracking() {
-		PushwooshModule.stopLocationTracking();
-	}
-
 	//Function: setApplicationIconBadgeNumber
 	//[android, ios, wp8, windows] Set the application icon badge number
 	//

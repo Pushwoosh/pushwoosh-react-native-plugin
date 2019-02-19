@@ -8,7 +8,6 @@
 
 #import "PushwooshInboxUI.h"
 #import "PWGDPRManager.h"
-#import "PWGeozonesManager.h"
 
 #import <React/RCTUtils.h>
 #import <React/RCTBridge.h>
@@ -174,14 +173,6 @@ RCT_EXPORT_METHOD(setUserId:(NSString*)userId) {
 
 RCT_EXPORT_METHOD(postEvent:(NSString*)event withAttributes:(NSDictionary*)attributes) {
 	[[PWInAppManager sharedManager] postEvent:event withAttributes:attributes];
-}
-
-RCT_EXPORT_METHOD(startLocationTracking) {
-	[[PWGeozonesManager sharedManager] startLocationTracking];
-}
-
-RCT_EXPORT_METHOD(stopLocationTracking) {
-	[[PWGeozonesManager sharedManager] stopLocationTracking];
 }
 
 RCT_EXPORT_METHOD(setApplicationIconBadgeNumber:(nonnull NSNumber*)badgeNumber) {
