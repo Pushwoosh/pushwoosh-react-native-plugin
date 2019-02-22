@@ -43,7 +43,6 @@ dependencies {
     implementation "com.pushwoosh:pushwoosh:${pushwoosh}"
     implementation "com.pushwoosh:pushwoosh-amazon:${pushwoosh}"
     implementation "com.pushwoosh:pushwoosh-badge:${pushwoosh}"
-    implementation "com.pushwoosh:pushwoosh-gcm:${pushwoosh}"
     implementation "com.pushwoosh:pushwoosh-inbox:${pushwoosh}"
     implementation "com.pushwoosh:pushwoosh-inbox-ui:${pushwoosh}"
     implementation "com.android.support:appcompat-v7:27.+"
