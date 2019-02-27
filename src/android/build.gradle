@@ -1,10 +1,14 @@
 buildscript {
     repositories {
         jcenter()
+        maven {
+            url "https://maven.google.com"
+        }
     }
 
     dependencies {
         classpath 'com.android.tools.build:gradle:2.3.3'
+        classpath 'com.google.gms:google-services:4.2.0'
     }
 }
 
@@ -38,6 +42,18 @@ ext {
     pushwoosh = "5.12.1"
 }
 
+evaluationDependsOn(':app')
+
+rootProject.subprojects {
+    if (name == "app") {
+        if (!plugins.hasPlugin('com.google.gms.google-services')) {
+            apply {
+                plugin com.google.gms.googleservices.GoogleServicesPlugin
+            }
+        }
+    }
+}
+
 dependencies {
     implementation 'com.facebook.react:react-native:+'
     implementation "com.pushwoosh:pushwoosh:${pushwoosh}"
@@ -47,12 +63,10 @@ dependencies {
     implementation "com.pushwoosh:pushwoosh-inbox-ui:${pushwoosh}"
     implementation "com.android.support:appcompat-v7:27.+"
     implementation "com.android.support:recyclerview-v7:27.+"
-    implementation "com.android.support:recyclerview-v7:27.+"
-    implementation "com.android.support:design:27.+"
+    api "com.android.support:design:27.+"
     implementation "com.android.support.constraint:constraint-layout:1.0.2"
     implementation "com.github.bumptech.glide:glide:4.3.1"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:1.1.60"
-    implementation "com.google.android.gms:play-services-gcm:+"
     implementation "com.google.firebase:firebase-core:+"
     implementation "com.google.firebase:firebase-messaging:+"
 }
