@@ -421,7 +421,10 @@ class PushNotification {
 	//   "titleColor" : processColor('#ff00ff'),
 	//   "dividerColor" : processColor('#ff00ff'),
 	//   "descriptionColor" : processColor('green'),
-	//   "backgroundColor" : processColor('rgba(255, 100, 30, 1.0)')
+	//   "backgroundColor" : processColor('rgba(255, 100, 30, 1.0)'),
+	//   "barBackgroundColor" : processColor('#ffffff'),
+	//   "barAccentColor" : processColor('#ffd700'),
+	//   "barTextColor" : processColor('#282828')
 	// });
 	//(end)
 
