@@ -309,6 +309,24 @@ RCT_EXPORT_METHOD(presentInboxUI:(NSDictionary *)styleDictionary) {
         style.separatorColor = [RCTConvert UIColor:dividerColorValue];
     }
     
+    NSNumber *barBackgroundColor = styleDictionary[@"barBackgroundColor"];
+    
+    if (barBackgroundColor) {
+        style.barBackgroundColor = [RCTConvert UIColor:barBackgroundColor];
+    }
+    
+    NSNumber *barAccentColor = styleDictionary[@"barAccentColor"];
+    
+    if (barAccentColor) {
+        style.barAccentColor = [RCTConvert UIColor:barAccentColor];
+    }
+    
+    NSNumber *barTextColor = styleDictionary[@"barTextColor"];
+    
+    if (barTextColor) {
+        style.barTextColor = [RCTConvert UIColor:barTextColor];
+    }
+    
     return style;
 }
 
