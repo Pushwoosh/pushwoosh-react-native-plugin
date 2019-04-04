@@ -1,4 +1,6 @@
-const config = require('react-native/local-cli/core/config');
+require('react-native/setupBabel')();
+
+const core = require('react-native/local-cli/core');
 const PbxFile = require('xcode/lib/pbxFile');
 const path = require('path');
 const xcode = require('xcode');
@@ -6,7 +8,8 @@ const fs = require('fs');
 const createGroupWithMessage = require('react-native/local-cli/link/ios/createGroupWithMessage');
 
 function pwAddInboxiOSResources() {
-    const iOSconfig = config.getProjectConfig().ios;
+    core.configPromise.then(function(config) {
+        const iOSconfig = config.getProjectConfig().ios;
     const pw_iOSconfig = config.getDependencyConfig('pushwoosh-react-native-plugin').ios;
 
     const project = xcode.project(iOSconfig.pbxprojPath).parseSync();
@@ -31,6 +34,9 @@ function pwAddInboxiOSResources() {
         iOSconfig.pbxprojPath,
         project.writeSync()
       );
+    });
+
+    
 };
 
 pwAddInboxiOSResources();

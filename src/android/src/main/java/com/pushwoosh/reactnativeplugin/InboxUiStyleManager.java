@@ -35,6 +35,9 @@ class InboxUiStyleManager {
     private static final String READ_TITLE_COLOR_KEY = "readTitleColor";
     private static final String DESCRIPTION_COLOR_KEY = "descriptionColor";
     private static final String READ_DESCRIPTION_COLOR_KEY = "readDescriptionColor";
+    private static final String BAR_BACKGROUND_COLOR = "barBackgroundColor";
+    private static final String BAR_ACCENT_COLOR = "barAccentColor";
+    private static final String BAR_TEXT_COLOR = "barTextColor";
 
     public static final String URI_KEY = "uri";
 
@@ -136,6 +139,13 @@ class InboxUiStyleManager {
             PWInboxStyle.setDescriptionColor(mapStyle.getInt(DESCRIPTION_COLOR_KEY));
         if (mapStyle.hasKey(READ_DESCRIPTION_COLOR_KEY))
             PWInboxStyle.setReadDescriptionColor(mapStyle.getInt(READ_DESCRIPTION_COLOR_KEY));
+
+        if (mapStyle.hasKey(BAR_BACKGROUND_COLOR))
+            PWInboxStyle.setBarBackgroundColor(mapStyle.getInt(BAR_BACKGROUND_COLOR));
+        if (mapStyle.hasKey(BAR_ACCENT_COLOR))
+            PWInboxStyle.setBarAccentColor(mapStyle.getInt(BAR_ACCENT_COLOR));
+        if (mapStyle.hasKey(BAR_TEXT_COLOR))
+            PWInboxStyle.setBarTextColor(mapStyle.getInt(BAR_TEXT_COLOR));
     }
 
     private class ReactInboxDateFormatter implements InboxDateFormatter {
