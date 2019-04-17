@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = "pushwoosh-react-native-plugin"
-  s.version          = "5.13.1"
+  s.version          = "5.14.0"
   s.summary          = "React Native Pushwoosh Push Notifications module"
   s.requires_arc = true
   s.author       = 'Pushwoosh'
