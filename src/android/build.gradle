@@ -39,7 +39,7 @@ android {
 }
 
 ext {
-    pushwoosh = "5.15.0"
+    pushwoosh = "5.15.1"
 }
 
 evaluationDependsOn(':app')
