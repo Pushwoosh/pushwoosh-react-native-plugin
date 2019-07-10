@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.NonNull;
 
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.LifecycleEventListener;
@@ -114,7 +113,7 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	public void register(final Callback success, final Callback error) {
 		Pushwoosh.getInstance().registerForPushNotifications(new com.pushwoosh.function.Callback<String, RegisterForPushNotificationsException>() {
 			@Override
-			public void process(@NonNull Result<String, RegisterForPushNotificationsException> result) {
+			public void process(Result<String, RegisterForPushNotificationsException> result) {
 				if (result.isSuccess()) {
 					success.invoke(result.getData());
 				} else if (result.getException() != null) {
@@ -128,7 +127,7 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	public void unregister(final Callback success, final Callback error) {
 		Pushwoosh.getInstance().unregisterForPushNotifications(new com.pushwoosh.function.Callback<String, UnregisterForPushNotificationException>() {
 			@Override
-			public void process(@NonNull Result<String, UnregisterForPushNotificationException> result) {
+			public void process(Result<String, UnregisterForPushNotificationException> result) {
 				if (result.isSuccess()) {
 					if (success != null) {
 						success.invoke(result.getData());
@@ -174,7 +173,7 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	public void setTags(ReadableMap tags, final Callback success, final Callback error) {
 		Pushwoosh.getInstance().sendTags(ConversionUtil.convertToTagsBundle(tags), new com.pushwoosh.function.Callback<Void, PushwooshException>() {
 			@Override
-			public void process(@NonNull Result<Void, PushwooshException> result) {
+			public void process(Result<Void, PushwooshException> result) {
 				if (result.isSuccess()) {
 					if (success != null) {
 						success.invoke();
@@ -192,7 +191,7 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	public void getTags(final Callback success, final Callback error) {
 		Pushwoosh.getInstance().getTags(new com.pushwoosh.function.Callback<TagsBundle, GetTagsException>() {
 			@Override
-			public void process(@NonNull Result<TagsBundle, GetTagsException> result) {
+			public void process(Result<TagsBundle, GetTagsException> result) {
 				if (result.isSuccess()) {
 					if (success != null && result.getData() != null) {
 						success.invoke(ConversionUtil.toWritableMap(result.getData().toJson()));
@@ -349,7 +348,7 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	public void setCommunicationEnabled(boolean enable, final Callback success, final Callback error) {
 		GDPRManager.getInstance().setCommunicationEnabled(enable, new com.pushwoosh.function.Callback<Void, PushwooshException>() {
 			@Override
-			public void process(@NonNull Result<Void, PushwooshException> result) {
+			public void process(Result<Void, PushwooshException> result) {
 				if (result.isSuccess()) {
 					if (success != null) {
 						success.invoke(result.getData());
@@ -367,7 +366,7 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	public void removeAllDeviceData(final Callback success, final Callback error) {
 		GDPRManager.getInstance().removeAllDeviceData(new com.pushwoosh.function.Callback<Void, PushwooshException>() {
 			@Override
-			public void process(@NonNull Result<Void, PushwooshException> result) {
+			public void process(Result<Void, PushwooshException> result) {
 				if (result.isSuccess()) {
 					if (success != null) {
 						success.invoke(result.getData());
