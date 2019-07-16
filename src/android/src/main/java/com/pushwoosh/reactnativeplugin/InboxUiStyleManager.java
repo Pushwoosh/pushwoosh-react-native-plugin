@@ -5,8 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import com.facebook.react.bridge.ReadableMap;
 import com.pushwoosh.inbox.ui.PushwooshInboxStyle;
@@ -43,11 +41,11 @@ class InboxUiStyleManager {
 
     private Context context;
 
-    public InboxUiStyleManager(@NonNull Context context){
+    public InboxUiStyleManager(Context context){
         this.context = context;
     }
 
-    public void setStyle(@NonNull ReadableMap mapStyle) {
+    public void setStyle(ReadableMap mapStyle) {
         setDateFormat(mapStyle);
         setImages(mapStyle);
         setTexts(mapStyle);
@@ -102,7 +100,6 @@ class InboxUiStyleManager {
         return null;
     }
 
-    @Nullable
     private Drawable getDrawable(String uri) throws IOException {
         URL url = new URL(uri);
         Bitmap bitmap = BitmapFactory.decodeStream(url.openConnection().getInputStream());
@@ -152,7 +149,7 @@ class InboxUiStyleManager {
 
         private SimpleDateFormat simpleDateFormat;
 
-        public ReactInboxDateFormatter(@NonNull String dateFormat) {
+        public ReactInboxDateFormatter(String dateFormat) {
             Locale aDefault = Locale.getDefault();
             simpleDateFormat = new SimpleDateFormat(dateFormat, aDefault);
         }
