@@ -477,6 +477,11 @@ class PushNotification {
 		}
 		PushwooshModule.removeAllDeviceData(success, fail);
 	}
+
+	// Set notification icon background color
+	setNotificationIconBackgroundColor(color: string) {
+		PushwooshModule.setNotificationIconBackgroundColor(color);
+	}
 }
 
 module.exports = new PushNotification();
