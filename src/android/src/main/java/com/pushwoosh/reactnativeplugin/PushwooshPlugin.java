@@ -386,10 +386,10 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 		int intColor;
 		try {
             intColor = Color.parseColor(color);
+			PushwooshNotificationSettings.setNotificationIconBackgroundColor(intColor);
         } catch (IllegalArgumentException e) {
-            intColor = Color.BLACK;
+            PWLog.exception(e);
         }
-    	PushwooshNotificationSettings.setNotificationIconBackgroundColor(intColor);
  	}
 
 	///
