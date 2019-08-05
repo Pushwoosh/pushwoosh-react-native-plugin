@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.LifecycleEventListener;
@@ -380,6 +381,16 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 		});
 	}
 
+	@ReactMethod
+	public void setNotificationIconBackgroundColor(String color) {
+		int intColor;
+		try {
+            intColor = Color.parseColor(color);
+			PushwooshNotificationSettings.setNotificationIconBackgroundColor(intColor);
+        } catch (IllegalArgumentException e) {
+            PWLog.exception(e);
+        }
+ 	}
 
 	///
 	/// LifecycleEventListener callbacks
