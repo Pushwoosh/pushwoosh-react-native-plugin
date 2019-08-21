@@ -112,16 +112,7 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 
 	@ReactMethod
 	public void register(final Callback success, final Callback error) {
-		Pushwoosh.getInstance().registerForPushNotifications(new com.pushwoosh.function.Callback<String, RegisterForPushNotificationsException>() {
-			@Override
-			public void process(Result<String, RegisterForPushNotificationsException> result) {
-				if (result.isSuccess()) {
-					success.invoke(result.getData());
-				} else if (result.getException() != null) {
-					error.invoke(result.getException().getLocalizedMessage());
-				}
-			}
-		});
+		Pushwoosh.getInstance().registerForPushNotifications(new RegisterForPushNotificationCallback(success, error));
 	}
 
 	@ReactMethod
@@ -460,6 +451,31 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 		} catch (Exception e) {
 			// React Native is highly unstable
 			PWLog.exception(e);
+		}
+	}
+
+	private class RegisterForPushNotificationCallback implements com.pushwoosh.function.Callback<String, RegisterForPushNotificationsException> {
+		private Callback success;
+		private Callback error;
+
+		public RegisterForPushNotificationCallback(Callback success, Callback error) {
+			this.success = success;
+			this.error = error;
+		}
+
+		@Override
+		public void process(Result<String, RegisterForPushNotificationsException> result) {
+			if (result.isSuccess()) {
+				if (success != null) {
+					success.invoke(result.getData());
+					success = null;
+				}
+			} else if (result.getException() != null) {
+				if (error != null) {
+					error.invoke(result.getException().getLocalizedMessage());
+					error = null;
+				}
+			}
 		}
 	}
 }
