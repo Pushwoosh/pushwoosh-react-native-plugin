@@ -131,7 +131,7 @@ class PushNotification {
 	//		}
 	//	);
 	//
-	//	//setings list tags "MyTag" with values (array) "hello", "world"
+	//	//settings list tags "MyTag" with values (array) "hello", "world"
 	//	pushNotification.setTags({"MyTag":["hello", "world"]});
 	//(end)
 	setTags(tags: Object, success: ?Function, fail: ?Function) {
