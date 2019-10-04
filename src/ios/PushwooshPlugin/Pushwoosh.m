@@ -43,7 +43,8 @@ RCT_EXPORT_MODULE();
 
 RCT_EXPORT_METHOD(init:(NSDictionary*)config success:(RCTResponseSenderBlock)success error:(RCTResponseSenderBlock)error) {
 	NSString *appCode = config[@"pw_appid"];
-	
+    NSString *notificationHandling = config[@"pw_notification_handling"];
+    
 	if (!appCode || ![appCode isKindOfClass:[NSString class]]) {
 		if (error) {
 			error(@[ @"pw_appid is missing" ]);
@@ -51,12 +52,15 @@ RCT_EXPORT_METHOD(init:(NSDictionary*)config success:(RCTResponseSenderBlock)suc
 		
 		return;
 	}
-	
 	[PushNotificationManager initializeWithAppCode:appCode appName:nil];
 	[[PushNotificationManager pushManager] sendAppOpen];
 	[PushNotificationManager pushManager].delegate = self;
-	[UNUserNotificationCenter currentNotificationCenter].delegate = [PushNotificationManager pushManager].notificationCenterDelegate;
-	
+
+    // We set Pushwoosh UNUserNotificationCenter delegate unless CUSTOM is specified in the config
+    if(![notificationHandling isEqualToString:@"CUSTOM"]) {
+        [UNUserNotificationCenter currentNotificationCenter].delegate = [PushNotificationManager pushManager].notificationCenterDelegate;
+    }
+
     if (success) {
         success(@[]);
     }
