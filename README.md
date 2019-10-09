@@ -13,10 +13,21 @@ React Native Pushwoosh Push Notifications module
 
 ### Installation
 
-```
-npm install pushwoosh-react-native-plugin --save
-react-native link pushwoosh-react-native-plugin
-```
+`npm install pushwoosh-react-native-plugin --save`
+
+or
+
+`yarn add pushwoosh-react-native-plugin`
+
+## Linking 
+
+### >= 0.60
+
+Autolinking will just do the job.
+
+### < 0.60
+
+`react-native link pushwoosh-react-native-plugin`
 
 ### Usage
 
