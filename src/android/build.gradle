@@ -39,7 +39,7 @@ android {
 }
 
 ext {
-    pushwoosh = "5.18.1"
+    pushwoosh = "5.19.3"
 }
 
 evaluationDependsOn(':app')
@@ -56,7 +56,7 @@ rootProject.subprojects {
 
 dependencies {
     implementation 'com.facebook.react:react-native:+'
-    implementation "com.pushwoosh:pushwoosh:${pushwoosh}"
+    api "com.pushwoosh:pushwoosh:${pushwoosh}"
     implementation "com.pushwoosh:pushwoosh-amazon:${pushwoosh}"
     implementation "com.pushwoosh:pushwoosh-badge:${pushwoosh}"
     implementation "com.pushwoosh:pushwoosh-inbox:${pushwoosh}"
