@@ -12,6 +12,7 @@ Pod::Spec.new do |s|
   s.xcconfig = {
     "HEADER_SEARCH_PATHS" => "${PODS_ROOT}/Headers/Public/React"
   }
+  s.static_framework = true
 
   s.dependency 'React'
   s.dependency 'Pushwoosh'
