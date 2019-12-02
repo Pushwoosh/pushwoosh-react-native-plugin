@@ -11,6 +11,7 @@
 #import "PWEventDispatcher.h"
 #import <React/RCTEventDispatcher.h>
 #import <React/RCTConvert.h>
+#import <Pushwoosh/PWInbox.h>
 
 #import <UserNotifications/UserNotifications.h>
 
@@ -198,9 +199,16 @@ RCT_EXPORT_METHOD(presentInboxUI:(NSDictionary *)styleDictionary) {
         NSLog(@"[Pushwoosh][presentInboxUI] Error: PushwooshInboxBundle.bundle not found. Please launch \"node node_modules/pushwoosh-react-native-plugin/scripts/add_inbox_ios_resources.js\" from project root directory or manually add node_modules/pushwoosh-react-native-plugin/src/ios/PushwooshInboxBundle.bundle to your project.");
     } else {
         [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-            UIViewController *inboxViewController = [PWIInboxUI createInboxControllerWithStyle:[self inboxStyleForDictionary:styleDictionary]];
+            PWIInboxViewController *inboxViewController = [PWIInboxUI createInboxControllerWithStyle:[self inboxStyleForDictionary:styleDictionary]];
             inboxViewController.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Close", @"Close") style:UIBarButtonItemStylePlain target:self action:@selector(closeInbox)];
             [[Pushwoosh findRootViewController] presentViewController:[[UINavigationController alloc] initWithRootViewController:inboxViewController] animated:YES completion:nil];
+            
+            __weak typeof (self) wself = self;
+            inboxViewController.onMessageClickBlock = ^(NSObject<PWInboxMessageProtocol> *message) {
+                if (message.type == PWInboxMessageTypeDeeplink) {
+                    [wself closeInbox];
+                }
+            };
         }];
     }
 }
