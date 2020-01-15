@@ -35,13 +35,13 @@ RCT_EXPORT_VIEW_PROPERTY(onSizeChanged, RCTBubblingEventBlock)
 
 - (void)inlineInAppDidLoadInView:(PWReactInlineInAppView *)inAppView {
     if (inAppView.onLoaded) {
-        inAppView.onLoaded(nil);
+        inAppView.onLoaded(@{@"identifier": inAppView.identifier});
     }
 }
 
 - (void)didCloseInlineInAppView:(PWReactInlineInAppView *)inAppView {
     if (inAppView.onClosed) {
-        inAppView.onClosed(nil);
+        inAppView.onClosed(@{@"identifier": inAppView.identifier});
     }
 }
 
