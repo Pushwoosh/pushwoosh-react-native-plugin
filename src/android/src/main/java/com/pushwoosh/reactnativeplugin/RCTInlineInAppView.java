@@ -6,11 +6,17 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 
+import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.pushwoosh.inapp.view.inline.InlineInAppView;
+import com.pushwoosh.inapp.view.inline.InlineInAppViewListener;
 
-public class RCTInlineInAppView extends InlineInAppView {
+public class RCTInlineInAppView extends InlineInAppView implements InlineInAppViewListener {
     public RCTInlineInAppView(@NonNull Context context) {
         super(context);
+        this.addInlineInAppViewListener(this);
         setupLayoutHack();
     }
 
@@ -23,6 +29,7 @@ public class RCTInlineInAppView extends InlineInAppView {
                 Choreographer.getInstance().postFrameCallback(this);
             }
         });
+
     }
 
     void manuallyLayoutChildren() {
@@ -32,5 +39,39 @@ public class RCTInlineInAppView extends InlineInAppView {
                     MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY));
             child.layout(0, 0, child.getMeasuredWidth(), child.getMeasuredHeight());
         }
+    }
+
+    @Override
+    public void onInlineInAppLoaded() {
+        WritableMap event = Arguments.createMap();
+        event.putString("identifier", this.getIdentifier());
+        ReactContext reactContext = (ReactContext)getContext();
+        reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
+                getId(),
+                "onLoaded",
+                event);
+    }
+
+    @Override
+    public void onInlineInAppViewClosed() {
+        WritableMap event = Arguments.createMap();
+        event.putString("identifier", this.getIdentifier());
+        ReactContext reactContext = (ReactContext)getContext();
+        reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
+                getId(),
+                "onClosed",
+                event);
+    }
+
+    @Override
+    public void onInlineInAppViewChangedSize(int var1, int var2) {
+        WritableMap event = Arguments.createMap();
+        event.putString("width", String.valueOf(var1));
+        event.putString("height", String.valueOf(var2));
+        ReactContext reactContext = (ReactContext)getContext();
+        reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
+                getId(),
+                "onSizeChanged",
+                event);
     }
 }

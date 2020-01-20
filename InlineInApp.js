@@ -11,6 +11,7 @@ class InlineInAppView extends React.Component {
 		// process raw event...
 		this.props.onLoaded(event.nativeEvent);
 	}
+
 	_onClosed = (event) => {
 		if (!this.props.onClosed) {
 			return;
@@ -19,6 +20,7 @@ class InlineInAppView extends React.Component {
 		// process raw event...
 		this.props.onClosed(event.nativeEvent);
 	}
+
 	_onSizeChanged = (event) => {
 		if (!this.props.onSizeChanged) {
 			return;
@@ -27,29 +29,43 @@ class InlineInAppView extends React.Component {
 		// process raw event...
 		this.props.onSizeChanged(event.nativeEvent);
 	}
+
 	render() {
-		return <InlineInAppView {...this.props} />;
+		return (
+			<PWInlineInAppView 
+				{...this.props} 
+				onLoaded = {this._onLoaded}
+				onClosed = {this._onClosed}
+				onSizeChanged = {this._onSizeChanged}
+			/>
+		);
 	}
 }
 
 InlineInAppView.propTypes = {
 	/**
-	 * A Boolean value that determines whether the user may use pinch
-	 * gestures to zoom in and out of the map.
+	 * Value of the identifier property must be equal to the 
+	 * identifier attribute value of the in-app message you've 
+	 * created in Pushwoosh Control Panel
 	 */
 	identifier: PropTypes.string,
 	/**
-	 * Callback that is called continuously when the user is dragging the map.
-	 */
+     * This event is called to notify you that an inline in-app
+     * was loaded and has been added to the view
+     */
 	onLoaded: PropTypes.func,
-	/**
-	 * Callback that is called continuously when the user is dragging the map.
-	 */
+	 /**
+     * This event is called to notify you that an inline in-app
+     * view has been closed by the user
+     */
 	onClosed: PropTypes.func,
 	/**
-	 * Callback that is called continuously when the user is dragging the map.
-	 */
+     * This event is called to notify you that an inline in-app
+     * view size has been changed
+     */
 	onSizeChanged: PropTypes.func,
 };
 
-module.exports = requireNativeComponent('PWInlineInAppView', InlineInAppView);
+var PWInlineInAppView = requireNativeComponent('PWInlineInAppView', InlineInAppView)
+
+export default InlineInAppView
