@@ -179,6 +179,10 @@ RCT_EXPORT_METHOD(setApplicationIconBadgeNumber:(nonnull NSNumber*)badgeNumber) 
     });
 }
 
+RCT_EXPORT_METHOD(setLanguage:(NSString *)language) {
+    [PushNotificationManager pushManager].language = language;
+}
+
 RCT_EXPORT_METHOD(getApplicationIconBadgeNumber:(RCTResponseSenderBlock)callback) {
 	if(callback) {
         dispatch_async(dispatch_get_main_queue(), ^{

@@ -482,6 +482,13 @@ class PushNotification {
 	setNotificationIconBackgroundColor(color: string) {
 		PushwooshModule.setNotificationIconBackgroundColor(color);
 	}
+
+	// Set custom application language. Must be a lowercase two-letter code according to ISO-639-1 standard ("en", "de", "fr", etc.).
+	// Device language used by default.
+	// Set to null if you want to use device language again.
+	setLanguage(language: string) {
+		PushwooshModule.setLanguage(language);
+	}
 }
 
 module.exports = new PushNotification();
