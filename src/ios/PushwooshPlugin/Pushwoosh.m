@@ -11,7 +11,6 @@
 #import "PWEventDispatcher.h"
 #import <React/RCTEventDispatcher.h>
 #import <React/RCTConvert.h>
-#import <Pushwoosh/PWInbox.h>
 
 #import <UserNotifications/UserNotifications.h>
 
