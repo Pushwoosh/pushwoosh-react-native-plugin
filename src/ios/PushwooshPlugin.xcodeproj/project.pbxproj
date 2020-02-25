@@ -39,9 +39,9 @@
 		46D37B351D12BB4900D5EC47 /* Pushwoosh.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Pushwoosh.h; sourceTree = "<group>"; };
 		46D37B371D12BB4900D5EC47 /* Pushwoosh.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Pushwoosh.m; sourceTree = "<group>"; };
 		5DCC5C4C20A57D96008B0595 /* PWGDPRManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PWGDPRManager.h; sourceTree = SOURCE_ROOT; };
+		5DE2C7712404F92200DB2992 /* PushwooshInboxUI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PushwooshInboxUI.h; sourceTree = SOURCE_ROOT; };
+		5DE2C7722404F92200DB2992 /* PWIInboxUI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PWIInboxUI.h; sourceTree = SOURCE_ROOT; };
 		5DFB752223ED54DB001D0AFD /* PWInbox.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PWInbox.h; sourceTree = SOURCE_ROOT; };
-		5DFB752623ED5819001D0AFD /* PWInlineInAppView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = PWInlineInAppView.h; path = "../../../../../../../../github/Pushwoosh/react-native/src/ios/PWInlineInAppView.h"; sourceTree = "<group>"; };
-		5DFB752723ED5882001D0AFD /* PWIInboxUI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = PWIInboxUI.h; path = "../../../../../../../../github/Pushwoosh/react-native/src/ios/PWIInboxUI.h"; sourceTree = "<group>"; };
 		A4CDCC841F78F55E00741E9F /* PWInAppManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PWInAppManager.h; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -79,9 +79,9 @@
 		46D37B341D12BB4900D5EC47 /* PushwooshPlugin */ = {
 			isa = PBXGroup;
 			children = (
-				5DFB752623ED5819001D0AFD /* PWInlineInAppView.h */,
+				5DE2C7712404F92200DB2992 /* PushwooshInboxUI.h */,
+				5DE2C7722404F92200DB2992 /* PWIInboxUI.h */,
 				5DFB752223ED54DB001D0AFD /* PWInbox.h */,
-				5DFB752723ED5882001D0AFD /* PWIInboxUI.h */,
 				5DCC5C4C20A57D96008B0595 /* PWGDPRManager.h */,
 				2A841C6B20590CCA007AAF5C /* PushwooshInboxUI.h */,
 				2A841C6C20590CCA007AAF5C /* PWIInboxStyle.h */,
