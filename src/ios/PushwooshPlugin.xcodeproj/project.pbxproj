@@ -38,6 +38,7 @@
 		46D37B321D12BB4900D5EC47 /* libPushwooshPlugin.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPushwooshPlugin.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		46D37B351D12BB4900D5EC47 /* Pushwoosh.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Pushwoosh.h; sourceTree = "<group>"; };
 		46D37B371D12BB4900D5EC47 /* Pushwoosh.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Pushwoosh.m; sourceTree = "<group>"; };
+		5D980721240E293E000B0CDC /* PWInlineInAppView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PWInlineInAppView.h; sourceTree = SOURCE_ROOT; };
 		5DCC5C4C20A57D96008B0595 /* PWGDPRManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PWGDPRManager.h; sourceTree = SOURCE_ROOT; };
 		5DE2C7712404F92200DB2992 /* PushwooshInboxUI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PushwooshInboxUI.h; sourceTree = SOURCE_ROOT; };
 		5DE2C7722404F92200DB2992 /* PWIInboxUI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PWIInboxUI.h; sourceTree = SOURCE_ROOT; };
@@ -79,6 +80,7 @@
 		46D37B341D12BB4900D5EC47 /* PushwooshPlugin */ = {
 			isa = PBXGroup;
 			children = (
+				5D980721240E293E000B0CDC /* PWInlineInAppView.h */,
 				5DE2C7712404F92200DB2992 /* PushwooshInboxUI.h */,
 				5DE2C7722404F92200DB2992 /* PWIInboxUI.h */,
 				5DFB752223ED54DB001D0AFD /* PWInbox.h */,
