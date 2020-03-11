@@ -4,8 +4,6 @@ import android.content.Context;
 import android.view.Choreographer;
 import android.view.View;
 
-import androidx.annotation.NonNull;
-
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableMap;
@@ -14,7 +12,7 @@ import com.pushwoosh.inapp.view.inline.InlineInAppView;
 import com.pushwoosh.inapp.view.inline.InlineInAppViewListener;
 
 public class RCTInlineInAppView extends InlineInAppView implements InlineInAppViewListener {
-    public RCTInlineInAppView(@NonNull Context context) {
+    public RCTInlineInAppView(Context context) {
         super(context);
         this.addInlineInAppViewListener(this);
         setupLayoutHack();
