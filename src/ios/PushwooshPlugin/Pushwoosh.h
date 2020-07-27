@@ -25,6 +25,6 @@
 #import "PWInbox.h"
 #endif
 
-@interface Pushwoosh: RCTEventEmitter<RCTBridgeModule,PushNotificationDelegate>
+@interface PushwooshPlugin: RCTEventEmitter<RCTBridgeModule,PushNotificationDelegate>
 
 @end
