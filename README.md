@@ -29,3 +29,16 @@ Pushwoosh.init({
 });
 Pushwoosh.register();
 ```
+
+In order to use custom notification handling on iOS specify the parameter "pw_notification_handling" to "CUSTOM" when initializing the plugin(If no value specified Pushwoosh notification handler is used):
+
+```js
+import Pushwoosh from 'pushwoosh-react-native-plugin';
+
+Pushwoosh.init({ 
+    "pw_appid" : "YOUR_PUSHWOOSH_PROJECT_ID" , 
+    "project_number" : "YOUR_GCM_PROJECT_NUMBER",
+    "pw_notification_handling" : "CUSTOM"
+});
+Pushwoosh.register();
+```
