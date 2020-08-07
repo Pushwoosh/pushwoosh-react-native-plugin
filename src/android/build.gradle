@@ -7,8 +7,8 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.3'
-        classpath 'com.google.gms:google-services:4.2.0'
+        classpath 'com.android.tools.build:gradle:3.6.3'
+        classpath 'com.google.gms:google-services:4.3.3'
     }
 }
 
@@ -24,11 +24,10 @@ allprojects {
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion "27.0.2"
+    compileSdkVersion 30
     defaultConfig {
-        minSdkVersion 16
-        targetSdkVersion 27
+        minSdkVersion 17
+        targetSdkVersion 30
     }
     buildTypes {
         release {
@@ -39,7 +38,7 @@ android {
 }
 
 ext {
-    pushwoosh = "5.18.1"
+    pushwoosh = "6.0.3"
 }
 
 evaluationDependsOn(':app')
@@ -57,17 +56,12 @@ rootProject.subprojects {
 dependencies {
     implementation 'com.facebook.react:react-native:+'
     implementation "com.pushwoosh:pushwoosh:${pushwoosh}"
+    implementation "com.pushwoosh:pushwoosh-firebase:${pushwoosh}"
     implementation "com.pushwoosh:pushwoosh-amazon:${pushwoosh}"
     implementation "com.pushwoosh:pushwoosh-badge:${pushwoosh}"
     implementation "com.pushwoosh:pushwoosh-inbox:${pushwoosh}"
     implementation "com.pushwoosh:pushwoosh-inbox-ui:${pushwoosh}"
-    implementation "com.android.support:appcompat-v7:27.+"
-    implementation "com.android.support:recyclerview-v7:27.+"
-    api "com.android.support:design:27.+"
-    implementation "com.android.support.constraint:constraint-layout:1.0.2"
-    implementation "com.github.bumptech.glide:glide:4.7.1"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:1.1.60"
-    implementation "com.google.firebase:firebase-core:(+,17.0.0)"
-    implementation "com.google.firebase:firebase-messaging:(+,19.0.0)"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.71"
+    implementation "com.google.firebase:firebase-messaging:(+,20.2.2)"
 }
 

@@ -30,7 +30,6 @@
 /* Begin PBXFileReference section */
 		2A1A931A20D3BBF80073E61E /* libPushwooshInboxUI.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libPushwooshInboxUI.a; sourceTree = "<group>"; };
 		2A1A931B20D3BBF80073E61E /* libPushwoosh.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libPushwoosh.a; sourceTree = "<group>"; };
-		2A841C6A20590CCA007AAF5C /* PWIInboxUI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PWIInboxUI.h; sourceTree = SOURCE_ROOT; };
 		2A841C6B20590CCA007AAF5C /* PushwooshInboxUI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PushwooshInboxUI.h; sourceTree = SOURCE_ROOT; };
 		2A841C6C20590CCA007AAF5C /* PWIInboxStyle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PWIInboxStyle.h; sourceTree = SOURCE_ROOT; };
 		46ACA26D1D13D58900717D7F /* PushNotificationManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PushNotificationManager.h; sourceTree = SOURCE_ROOT; };
@@ -39,7 +38,11 @@
 		46D37B321D12BB4900D5EC47 /* libPushwooshPlugin.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPushwooshPlugin.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		46D37B351D12BB4900D5EC47 /* Pushwoosh.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Pushwoosh.h; sourceTree = "<group>"; };
 		46D37B371D12BB4900D5EC47 /* Pushwoosh.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Pushwoosh.m; sourceTree = "<group>"; };
+		5D980721240E293E000B0CDC /* PWInlineInAppView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PWInlineInAppView.h; sourceTree = SOURCE_ROOT; };
 		5DCC5C4C20A57D96008B0595 /* PWGDPRManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PWGDPRManager.h; sourceTree = SOURCE_ROOT; };
+		5DE2C7712404F92200DB2992 /* PushwooshInboxUI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PushwooshInboxUI.h; sourceTree = SOURCE_ROOT; };
+		5DE2C7722404F92200DB2992 /* PWIInboxUI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PWIInboxUI.h; sourceTree = SOURCE_ROOT; };
+		5DFB752223ED54DB001D0AFD /* PWInbox.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PWInbox.h; sourceTree = SOURCE_ROOT; };
 		A4CDCC841F78F55E00741E9F /* PWInAppManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PWInAppManager.h; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -77,10 +80,13 @@
 		46D37B341D12BB4900D5EC47 /* PushwooshPlugin */ = {
 			isa = PBXGroup;
 			children = (
+				5D980721240E293E000B0CDC /* PWInlineInAppView.h */,
+				5DE2C7712404F92200DB2992 /* PushwooshInboxUI.h */,
+				5DE2C7722404F92200DB2992 /* PWIInboxUI.h */,
+				5DFB752223ED54DB001D0AFD /* PWInbox.h */,
 				5DCC5C4C20A57D96008B0595 /* PWGDPRManager.h */,
 				2A841C6B20590CCA007AAF5C /* PushwooshInboxUI.h */,
 				2A841C6C20590CCA007AAF5C /* PWIInboxStyle.h */,
-				2A841C6A20590CCA007AAF5C /* PWIInboxUI.h */,
 				A4CDCC841F78F55E00741E9F /* PWInAppManager.h */,
 				46ACA26D1D13D58900717D7F /* PushNotificationManager.h */,
 				46D37B351D12BB4900D5EC47 /* Pushwoosh.h */,
@@ -130,6 +136,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = 46D37B291D12BB4900D5EC47;
@@ -191,7 +198,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -228,7 +235,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;

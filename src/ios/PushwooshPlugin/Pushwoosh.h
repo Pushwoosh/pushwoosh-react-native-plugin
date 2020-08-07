@@ -14,13 +14,17 @@
 #import <Pushwoosh/PWInAppManager.h>
 #import <PushwooshInboxUI/PushwooshInboxUI.h>
 #import <Pushwoosh/PWGDPRManager.h>
+#import <Pushwoosh/PWInlineInAppView.h>
+#import <Pushwoosh/PWInbox.h>
 #else
 #import "PushNotificationManager.h"
 #import "PWInAppManager.h"
 #import "PushwooshInboxUI.h"
 #import "PWGDPRManager.h"
+#import "PWInlineInAppView.h"
+#import "PWInbox.h"
 #endif
 
-@interface Pushwoosh: RCTEventEmitter<RCTBridgeModule,PushNotificationDelegate>
+@interface PushwooshPlugin: RCTEventEmitter<RCTBridgeModule,PushNotificationDelegate>
 
 @end

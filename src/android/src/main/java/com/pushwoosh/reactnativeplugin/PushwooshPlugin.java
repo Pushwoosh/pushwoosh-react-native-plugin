@@ -373,6 +373,11 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	}
 
 	@ReactMethod
+	public void setLanguage(String language){
+		Pushwoosh.getInstance().setLanguage(language);
+	}
+
+	@ReactMethod
 	public void setNotificationIconBackgroundColor(String color) {
 		int intColor;
 		try {

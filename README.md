@@ -7,6 +7,7 @@ React Native Pushwoosh Push Notifications module
 
 ![platforms](https://img.shields.io/badge/platforms-Android%20%7C%20iOS-yellowgreen.svg)
 
+
 | [Guide](https://www.pushwoosh.com/platform-docs/pushwoosh-sdk/cross-platform-frameworks/react-native/integrating-react-native-plugin) | [Documentation](docs/README.md) | [Sample](https://github.com/Pushwoosh/pushwoosh-react-native-sample) |
 | ----------------------------------------------------------- | ------------------------------- | -------------------------------------------------------------------- |
 
@@ -26,6 +27,19 @@ import Pushwoosh from 'pushwoosh-react-native-plugin';
 Pushwoosh.init({ 
     "pw_appid" : "YOUR_PUSHWOOSH_PROJECT_ID" , 
     "project_number" : "YOUR_GCM_PROJECT_NUMBER" 
+});
+Pushwoosh.register();
+```
+
+In order to use custom notification handling on iOS specify the parameter "pw_notification_handling" to "CUSTOM" when initializing the plugin(If no value specified Pushwoosh notification handler is used):
+
+```js
+import Pushwoosh from 'pushwoosh-react-native-plugin';
+
+Pushwoosh.init({ 
+    "pw_appid" : "YOUR_PUSHWOOSH_PROJECT_ID" , 
+    "project_number" : "YOUR_GCM_PROJECT_NUMBER",
+    "pw_notification_handling" : "CUSTOM"
 });
 Pushwoosh.register();
 ```

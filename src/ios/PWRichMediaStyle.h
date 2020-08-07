@@ -5,6 +5,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 FOUNDATION_EXPORT NSTimeInterval const PWRichMediaStyleDefaultAnimationDuration;
 
@@ -29,9 +30,9 @@ FOUNDATION_EXPORT NSTimeInterval const PWRichMediaStyleDefaultAnimationDuration;
  Built-in Rich Media presenting animations.
  
  Example:
- 
+ @code
  style.animationDelegate = [PWRichMediaStyleSlideLeftAnimation new];
- 
+ @endcode
  */
 @interface PWRichMediaStyleSlideLeftAnimation : NSObject <PWRichMediaStyleAnimationDelegate>
 @end
@@ -81,11 +82,11 @@ typedef PWLoadingView *(^PWRichMediaLoadingViewBlock)(void);
  Block to customize Rich Media loading view.
  
  Example:
- 
+ @code
  style.loadingViewBlock = ^PWLoadingView *{
     return [[[NSBundle mainBundle] loadNibNamed:@"LoadingView" owner:self options:nil] lastObject];
  };
- 
+ @endcode
  */
 @property (nonatomic) PWRichMediaLoadingViewBlock loadingViewBlock;
 

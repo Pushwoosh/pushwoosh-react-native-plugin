@@ -6,7 +6,7 @@
 
 #import <Foundation/Foundation.h>
 
-#if TARGET_OS_IPHONE
+#if TARGET_OS_IOS
 
 #import "PWRichMediaStyle.h"
 
@@ -39,6 +39,11 @@ typedef NS_ENUM(NSUInteger, PWRichMediaSource) {
  Content of the Rich Media. For PWRichMediaSourceInApp it's equal to In-App code, for PWRichMediaSourcePush it's equal to Rich Media code.
  */
 @property (nonatomic, readonly) NSString *content;
+
+/**
+ Payload of the associated push notification if source is equal to PWRichMediaSourcePush.
+*/
+@property (nonatomic, readonly) NSDictionary *pushPayload;
 
 /**
  Checks if PWRichMediaSourceInApp is a required In-App. Always returns YES for PWRichMediaSourcePush.

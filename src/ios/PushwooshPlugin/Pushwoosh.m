@@ -31,11 +31,11 @@ static NSString * const kPushOpenEvent = @"PWPushOpen";
 static NSString * const kPushOpenJSEvent = @"pushOpened";
 static NSString * const kPushReceivedJSEvent = @"pushReceived";
 
-@implementation Pushwoosh
+@implementation PushwooshPlugin
 
 #pragma mark - Pushwoosh RCTBridgeModule
 
-RCT_EXPORT_MODULE();
+RCT_EXPORT_MODULE(Pushwoosh);
 
 - (dispatch_queue_t)methodQueue {
     return dispatch_get_main_queue();
@@ -43,7 +43,8 @@ RCT_EXPORT_MODULE();
 
 RCT_EXPORT_METHOD(init:(NSDictionary*)config success:(RCTResponseSenderBlock)success error:(RCTResponseSenderBlock)error) {
 	NSString *appCode = config[@"pw_appid"];
-	
+    NSString *notificationHandling = config[@"pw_notification_handling"];
+    
 	if (!appCode || ![appCode isKindOfClass:[NSString class]]) {
 		if (error) {
 			error(@[ @"pw_appid is missing" ]);
@@ -51,12 +52,15 @@ RCT_EXPORT_METHOD(init:(NSDictionary*)config success:(RCTResponseSenderBlock)suc
 		
 		return;
 	}
-	
 	[PushNotificationManager initializeWithAppCode:appCode appName:nil];
 	[[PushNotificationManager pushManager] sendAppOpen];
 	[PushNotificationManager pushManager].delegate = self;
-	[UNUserNotificationCenter currentNotificationCenter].delegate = [PushNotificationManager pushManager].notificationCenterDelegate;
-	
+
+    // We set Pushwoosh UNUserNotificationCenter delegate unless CUSTOM is specified in the config
+    if(![notificationHandling isEqualToString:@"CUSTOM"]) {
+        [UNUserNotificationCenter currentNotificationCenter].delegate = [PushNotificationManager pushManager].notificationCenterDelegate;
+    }
+
     if (success) {
         success(@[]);
     }
@@ -178,6 +182,10 @@ RCT_EXPORT_METHOD(setApplicationIconBadgeNumber:(nonnull NSNumber*)badgeNumber) 
     });
 }
 
+RCT_EXPORT_METHOD(setLanguage:(NSString *)language) {
+    [PushNotificationManager pushManager].language = language;
+}
+
 RCT_EXPORT_METHOD(getApplicationIconBadgeNumber:(RCTResponseSenderBlock)callback) {
 	if(callback) {
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -198,9 +206,16 @@ RCT_EXPORT_METHOD(presentInboxUI:(NSDictionary *)styleDictionary) {
         NSLog(@"[Pushwoosh][presentInboxUI] Error: PushwooshInboxBundle.bundle not found. Please launch \"node node_modules/pushwoosh-react-native-plugin/scripts/add_inbox_ios_resources.js\" from project root directory or manually add node_modules/pushwoosh-react-native-plugin/src/ios/PushwooshInboxBundle.bundle to your project.");
     } else {
         [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-            UIViewController *inboxViewController = [PWIInboxUI createInboxControllerWithStyle:[self inboxStyleForDictionary:styleDictionary]];
+            PWIInboxViewController *inboxViewController = [PWIInboxUI createInboxControllerWithStyle:[self inboxStyleForDictionary:styleDictionary]];
             inboxViewController.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Close", @"Close") style:UIBarButtonItemStylePlain target:self action:@selector(closeInbox)];
-            [[Pushwoosh findRootViewController] presentViewController:[[UINavigationController alloc] initWithRootViewController:inboxViewController] animated:YES completion:nil];
+            [[PushwooshPlugin findRootViewController] presentViewController:[[UINavigationController alloc] initWithRootViewController:inboxViewController] animated:YES completion:nil];
+            
+            __weak typeof (self) wself = self;
+            inboxViewController.onMessageClickBlock = ^(NSObject<PWInboxMessageProtocol> *message) {
+                if (message.type == PWInboxMessageTypeDeeplink) {
+                    [wself closeInbox];
+                }
+            };
         }];
     }
 }
@@ -328,7 +343,7 @@ RCT_EXPORT_METHOD(presentInboxUI:(NSDictionary *)styleDictionary) {
 }
 
 - (void)closeInbox {
-    UIViewController *topViewController = [Pushwoosh findRootViewController];
+    UIViewController *topViewController = [PushwooshPlugin findRootViewController];
     if ([topViewController isKindOfClass:[UINavigationController class]] && [((UINavigationController*)topViewController).viewControllers.firstObject isKindOfClass:[PWIInboxViewController class]]) {
         [topViewController dismissViewControllerAnimated:YES completion:nil];
     }
