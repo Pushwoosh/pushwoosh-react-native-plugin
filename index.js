@@ -16,7 +16,7 @@ const PushwooshModule = NativeModules.Pushwoosh;
 //
 //const Pushwoosh = require('pushwoosh-react-native-plugin');
 //
-//Pushwoosh.init({ "pw_appid" : "XXXX-XXXX", "project_number" : "XXXXXXXXXXXXX", reverse_proxy_url : "your_url_proxy"});
+//Pushwoosh.init({ "pw_appid" : "XXXX-XXXX", "project_number" : "XXXXXXXXXXXXX", reverse_proxy_url : "your_url_proxy" });
 //
 //Pushwoosh.register(
 //  (token) => {
