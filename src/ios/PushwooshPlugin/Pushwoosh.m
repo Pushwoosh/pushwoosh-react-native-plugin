@@ -54,7 +54,7 @@ RCT_EXPORT_METHOD(init:(NSDictionary*)config success:(RCTResponseSenderBlock)suc
 	}
     
     NSString *proxyUrl = config[@"reverse_proxy_url"];
-    if (proxyUrl) {
+    if (proxyUrl && ![proxyUrl isEqualToString:@""]) {
         [[Pushwoosh sharedInstance] setReverseProxy:proxyUrl];
     }
     
