@@ -82,12 +82,17 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	public void init(ReadableMap config, Callback success, Callback error) {
 		String appId = config.getString("pw_appid");
 		String projectId = config.getString("project_number");
+		String proxyUrl = config.getString("reverse_proxy_url");
 
 		if (appId == null || projectId == null) {
 			if (error != null) {
 				error.invoke("Pushwoosh Application id and GCM project number not specified");
 			}
 			return;
+		}
+
+		if (proxyUrl != null) {
+			NetworkModule.getRequestManager().setReverseProxyUrl(proxyUrl);
 		}
 
 		Pushwoosh.getInstance().setAppId(appId);
