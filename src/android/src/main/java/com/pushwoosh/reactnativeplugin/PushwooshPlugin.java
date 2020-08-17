@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.text.TextUtils;
 
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.LifecycleEventListener;
@@ -22,6 +23,7 @@ import com.pushwoosh.exception.UnregisterForPushNotificationException;
 import com.pushwoosh.function.Result;
 import com.pushwoosh.inapp.PushwooshInApp;
 import com.pushwoosh.inbox.ui.presentation.view.activity.InboxActivity;
+import com.pushwoosh.internal.network.NetworkModule;
 import com.pushwoosh.internal.platform.AndroidPlatformModule;
 import com.pushwoosh.internal.utils.PWLog;
 import com.pushwoosh.notification.PushwooshNotificationSettings;
@@ -82,12 +84,17 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	public void init(ReadableMap config, Callback success, Callback error) {
 		String appId = config.getString("pw_appid");
 		String projectId = config.getString("project_number");
+		String proxyUrl = config.getString("reverse_proxy_url");
 
 		if (appId == null || projectId == null) {
 			if (error != null) {
 				error.invoke("Pushwoosh Application id and GCM project number not specified");
 			}
 			return;
+		}
+
+		if (!TextUtils.isEmpty(proxyUrl) && NetworkModule.getRequestManager() != null) {
+			NetworkModule.getRequestManager().setReverseProxyUrl(proxyUrl);
 		}
 
 		Pushwoosh.getInstance().setAppId(appId);

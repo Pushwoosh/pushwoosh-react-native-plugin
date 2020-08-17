@@ -52,6 +52,12 @@ RCT_EXPORT_METHOD(init:(NSDictionary*)config success:(RCTResponseSenderBlock)suc
 		
 		return;
 	}
+    
+    NSString *proxyUrl = config[@"reverse_proxy_url"];
+    if (proxyUrl && ![proxyUrl isEqualToString:@""]) {
+        [[Pushwoosh sharedInstance] setReverseProxy:proxyUrl];
+    }
+    
 	[PushNotificationManager initializeWithAppCode:appCode appName:nil];
 	[[PushNotificationManager pushManager] sendAppOpen];
 	[PushNotificationManager pushManager].delegate = self;

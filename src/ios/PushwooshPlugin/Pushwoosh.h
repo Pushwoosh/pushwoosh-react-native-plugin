@@ -8,6 +8,7 @@
 
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventEmitter.h>
+#import <Pushwoosh/Pushwoosh.h>
 
 #if __has_include(<Pushwoosh/PushNotificationManager.h>)
 #import <Pushwoosh/PushNotificationManager.h>
