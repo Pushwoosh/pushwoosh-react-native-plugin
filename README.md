@@ -42,3 +42,16 @@ Pushwoosh.init({
 });
 Pushwoosh.register();
 ```
+
+In order to use reverse proxy to connect to pushwoosh servers specify the parameter "reverse_proxy_url" with the url to your reverse proxy when initializing the plugin:
+
+```js
+import Pushwoosh from 'pushwoosh-react-native-plugin';
+
+Pushwoosh.init({ 
+    "pw_appid" : "YOUR_PUSHWOOSH_PROJECT_ID" , 
+    "project_number" : "YOUR_GCM_PROJECT_NUMBER",
+    "reverse_proxy_url" : "URL_TO_YOUR_REVERSE_PROXY"
+});
+Pushwoosh.register();
+```
