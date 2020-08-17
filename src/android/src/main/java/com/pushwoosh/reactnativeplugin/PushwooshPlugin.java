@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.text.TextUtils;
 
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.LifecycleEventListener;
@@ -22,6 +23,7 @@ import com.pushwoosh.exception.UnregisterForPushNotificationException;
 import com.pushwoosh.function.Result;
 import com.pushwoosh.inapp.PushwooshInApp;
 import com.pushwoosh.inbox.ui.presentation.view.activity.InboxActivity;
+import com.pushwoosh.internal.network.NetworkModule;
 import com.pushwoosh.internal.platform.AndroidPlatformModule;
 import com.pushwoosh.internal.utils.PWLog;
 import com.pushwoosh.notification.PushwooshNotificationSettings;
@@ -91,7 +93,7 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 			return;
 		}
 
-		if (proxyUrl != null) {
+		if (!TextUtils.isEmpty(proxyUrl) && NetworkModule.getRequestManager() != null) {
 			NetworkModule.getRequestManager().setReverseProxyUrl(proxyUrl);
 		}
 
