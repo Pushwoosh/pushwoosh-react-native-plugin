@@ -84,7 +84,6 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	public void init(ReadableMap config, Callback success, Callback error) {
 		String appId = config.getString("pw_appid");
 		String projectId = config.getString("project_number");
-		String proxyUrl = config.getString("reverse_proxy_url");
 
 		if (appId == null || projectId == null) {
 			if (error != null) {
@@ -93,8 +92,13 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 			return;
 		}
 
-		if (!TextUtils.isEmpty(proxyUrl) && NetworkModule.getRequestManager() != null) {
-			NetworkModule.getRequestManager().setReverseProxyUrl(proxyUrl);
+		try {
+			String proxyUrl = config.getString("reverse_proxy_url");
+			if (!TextUtils.isEmpty(proxyUrl) && NetworkModule.getRequestManager() != null) {
+				NetworkModule.getRequestManager().setReverseProxyUrl(proxyUrl);
+			}
+		} catch(Exception e) {
+			
 		}
 
 		Pushwoosh.getInstance().setAppId(appId);
