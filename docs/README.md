@@ -92,6 +92,8 @@ Initializes Pushwoosh module with application id and google project number.
 <tr class="even"><td>object</td><td><b>config</b></td><td>Pushwoosh initialization config.</td></tr>
 <tr class="even"><td>string</td><td><b>config.pw_appid</b></td><td>Pushwoosh application id.</td></tr>
 <tr class="even"><td>string</td><td><b>config.project_number</b></td><td>GCM project number (for Android push notifications).</td></tr>
+<tr class="even"><td>string</td><td><b>config.reverse_proxy_url</b></td><td>Url to your reverse proxy (Optional).</td></tr>
+<tr class="even"><td>string</td><td><b>config.pw_notification_handling</b></td><td>To use custom notification handling on iOS specify the parameter "pw_notification_handling" to "CUSTOM" (Optional).</td></tr>
 <tr class="even"><td>function</td><td><b>success</b></td><td>(optional) initialization success callback.</td></tr>
 <tr class="even"><td>function</td><td><b>fail</b></td><td>(optional) initialization failure callback.</td></tr>
 </tbody>
