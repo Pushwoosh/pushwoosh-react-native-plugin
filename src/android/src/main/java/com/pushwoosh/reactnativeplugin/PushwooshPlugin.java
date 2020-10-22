@@ -222,6 +222,24 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	}
 
 	@ReactMethod
+	public void setUserId(String userId, final Callback success, final Callback error) {
+		Pushwoosh.getInstance().setUserId(userId, new com.pushwoosh.function.Callback<Void, PushwooshException>() {
+			@Override
+			public void process(Result<Void, PushwooshException> result) {
+				if (result.isSuccess()) {
+					if (success != null) {
+						success.invoke();
+					}
+				} else {
+					if (error != null) {
+						error.invoke(result.getException().getMessage());
+					}
+				}
+			}
+		});
+	}
+
+	@ReactMethod
 	public void postEvent(String event, ReadableMap attributes) {
 		PushwooshInApp.getInstance().postEvent(event, ConversionUtil.convertToTagsBundle(attributes));
 	}
