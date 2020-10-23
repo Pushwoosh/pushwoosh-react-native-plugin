@@ -45,7 +45,7 @@ DeviceEventEmitter.addListener('pushOpened', (e: Event) => {
 <tr class="even"><td><a href="#gettags">getTags(success, fail)</a></td></tr>
 <tr class="even"><td><a href="#getpushtoken">getPushToken(success)</a></td></tr>
 <tr class="even"><td><a href="#gethwid">getHwid(success)</a></td></tr>
-<tr class="even"><td><a href="#setuserid">setUserId(userId)</a></td></tr>
+<tr class="even"><td><a href="#setuserid">setUserId(userId, success, fail)</a></td></tr>
 <tr class="even"><td><a href="#postevent">postEvent(event, attributes)</a></td></tr>
 <tr class="even"><td><a href="#setapplicationiconbadgenumber">setApplicationIconBadgeNumber(badgeNumber)</a></td></tr>
 <tr class="even"><td><a href="#getapplicationiconbadgenumber">getApplicationIconBadgeNumber(callback)</a></td></tr>
@@ -270,7 +270,7 @@ Returns Pushwoosh HWID used for communications with Pushwoosh API.
 ### setUserId
 
 ```js
-setUserId(userId)
+setUserId(userId, success, fail)
 ```
 
 Set User indentifier. This could be Facebook ID, username or email, or any other user ID.
