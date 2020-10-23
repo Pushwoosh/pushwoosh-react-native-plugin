@@ -178,6 +178,19 @@ RCT_EXPORT_METHOD(setUserId:(NSString*)userId) {
 	[[PWInAppManager sharedManager] setUserId:userId];
 }
 
+RCT_EXPORT_METHOD(setUserId:(NSString*)userId success:(RCTResponseSenderBlock)successCallback error:(RCTResponseSenderBlock)errorCallback) {
+    
+    [[PWInAppManager sharedManager] setUserId:userId completion:^(NSError *error) {
+        if (!error && successCallback) {
+            successCallback(@[]);
+        }
+        
+        if (error && errorCallback) {
+            errorCallback(@[ objectOrNull([error localizedDescription]) ]);
+        }
+    }];
+}
+
 RCT_EXPORT_METHOD(postEvent:(NSString*)event withAttributes:(NSDictionary*)attributes) {
 	[[PWInAppManager sharedManager] postEvent:event withAttributes:attributes];
 }

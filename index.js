@@ -233,6 +233,22 @@ class PushNotification {
 		PushwooshModule.setUserId(userId);
 	}
 
+	//Function: setUserId: completion:
+	//[android, ios] Set User indetifier. This could be Facebook ID, username or email, or any other user ID.
+	//This allows data and events to be matched across multiple user devices.
+	//If setUserId succeeds competion is called with nil argument. If setUserId fails completion is called with error.
+	//Parameters:
+	// "userId" - user string identifier
+	setUserId(userId: string, success: ?Function, fail: ?Function) {
+		if (!success) {
+			success = function() {};
+		}
+		if (!fail) {
+			fail = function(error) {};
+		}
+		PushwooshModule.setUserId(userId, success, fail);
+	}
+
 	//Function: postEvent
 	//[android, ios] Post events for In-App Messages. This can trigger In-App message display as specified in Pushwoosh Control Panel.
 	//

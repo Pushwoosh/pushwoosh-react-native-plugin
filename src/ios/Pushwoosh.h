@@ -19,7 +19,7 @@
 #endif
 
 
-#define PUSHWOOSH_VERSION @"6.0.7"
+#define PUSHWOOSH_VERSION @"6.0.8"
 
 
 @class Pushwoosh, PWMessage, PWNotificationCenterDelegateProxy;
@@ -343,6 +343,17 @@ Unregisters from push notifications.
 /**
  Set User indentifier. This could be Facebook ID, username or email, or any other user ID.
  This allows data and events to be matched across multiple user devices.
+ If setUserId succeeds competion is called with nil argument. If setUserId fails completion is called with error.
+ 
+ @param userId user identifier
+ */
+- (void)setUserId:(NSString *)userId completion:(void(^)(NSError * error))completion;
+
+/**
+ Set User indentifier. This could be Facebook ID, username or email, or any other user ID.
+ This allows data and events to be matched across multiple user devices.
+ 
+ @param userId user identifier
  */
 - (void)setUserId:(NSString *)userId;
 
