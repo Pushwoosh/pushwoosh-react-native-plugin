@@ -287,6 +287,8 @@ This allows data and events to be matched across multiple user devices.
 <th align="left" colspan="3"><strong>Parameters</strong></th>
 </tr>
 <tr class="even"><td>string</td><td><b>userId</b></td><td>Identifier of currently logged in user</td></tr>
+<tr class="even"><td>function</td><td><b>success</b></td><td>(optional) method success callback.</td></tr>
+<tr class="even"><td>function</td><td><b>fail</b></td><td>(optional) method failure callback.</td></tr>
 </tbody>
 </table>
 
