@@ -18,6 +18,7 @@ import com.pushwoosh.Pushwoosh;
 import com.pushwoosh.badge.PushwooshBadge;
 import com.pushwoosh.exception.GetTagsException;
 import com.pushwoosh.exception.PushwooshException;
+import com.pushwoosh.exception.SetUserIdException;
 import com.pushwoosh.exception.RegisterForPushNotificationsException;
 import com.pushwoosh.exception.UnregisterForPushNotificationException;
 import com.pushwoosh.function.Result;
@@ -223,9 +224,9 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 
 	@ReactMethod
 	public void setUserId(String userId, final Callback success, final Callback error) {
-		Pushwoosh.getInstance().setUserId(userId, new com.pushwoosh.function.Callback<Void, PushwooshException>() {
+		Pushwoosh.getInstance().setUserId(userId, new com.pushwoosh.function.Callback<Boolean, SetUserIdException>() {
 			@Override
-			public void process(Result<Void, PushwooshException> result) {
+			public void process(Result<Boolean, SetUserIdException> result) {
 				if (result.isSuccess()) {
 					if (success != null) {
 						success.invoke();
