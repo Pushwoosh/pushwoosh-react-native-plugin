@@ -15,6 +15,6 @@ Pod::Spec.new do |s|
   s.static_framework = true
 
   s.dependency 'React'
-  s.dependency 'Pushwoosh'
+  s.dependency 'Pushwoosh', '6.1.0'
   s.dependency 'PushwooshInboxUI'
 end
