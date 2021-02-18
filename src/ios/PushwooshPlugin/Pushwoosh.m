@@ -471,6 +471,10 @@ RCT_EXPORT_METHOD(clearLocalNotification){
         [[UIApplication sharedApplication] cancelAllLocalNotifications];
     }
 }
+
+RCT_EXPORT_METHOD(enableHuaweiPushNotifications) {
+    // available in Android only
+}
     
 #pragma mark - PushNotificationDelegate
 

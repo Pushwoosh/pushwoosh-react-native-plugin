@@ -505,6 +505,11 @@ class PushNotification {
 	setLanguage(language: string) {
 		PushwooshModule.setLanguage(language);
 	}
+
+	// Enables Huawei push messaging 
+	enableHuaweiPushNotifications() {
+		PushwooshModule.enableHuaweiPushNotifications();
+	}
 }
 
 module.exports = new PushNotification();
