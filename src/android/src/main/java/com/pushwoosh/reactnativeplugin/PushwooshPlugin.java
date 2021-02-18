@@ -416,6 +416,11 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
         }
  	}
 
+	 @ReactMethod
+	 public void enableHuaweiPushNotifications() {
+		 Pushwoosh.getInstance().enableHuaweiPushNotifications();
+	 }
+
 	///
 	/// LifecycleEventListener callbacks
 	///
