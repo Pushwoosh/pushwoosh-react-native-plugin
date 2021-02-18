@@ -61,6 +61,7 @@ DeviceEventEmitter.addListener('pushOpened', (e: Event) => {
 <tr class="even"><td><a href="#showgdprdeletionui">showGDPRDeletionUI()</a></td></tr>
 <tr class="even"><td><a href="#setcommunicationenabled">setCommunicationEnabled()</a></td></tr>
 <tr class="even"><td><a href="#removealldevicedata">removeAllDeviceData()</a></td></tr>
+<tr class="even"><td><a href="#enableHuaweiPushNotifications">enableHuaweiPushNotifications()</a></td></tr>
 <tr>
 <th align="left" colspan="2"><strong>Events</strong></th>
 </tr>
@@ -482,6 +483,13 @@ removeAllDeviceData()
 **[android, ios]**  
 Removes all data about the device. Cannot be undone.
 
+### enableHuaweiPushNotifications
+
+```js
+enableHuaweiPushNotifications()
+```
+**[android]**  
+Enables Huawei push messaging. Requires configured Huawei platform for your Pushwoosh application. See the <a href="https://docs.pushwoosh.com/platform-docs/pushwoosh-sdk/android-push-notifications/huawei-integration/huawei-in-react-native">integration guide</a>.
 
 ### pushReceived
 
