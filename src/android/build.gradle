@@ -57,7 +57,6 @@ dependencies {
     implementation 'com.facebook.react:react-native:+'
     implementation "com.pushwoosh:pushwoosh:${pushwoosh}"
     implementation "com.pushwoosh:pushwoosh-firebase:${pushwoosh}"
-    implementation "com.pushwoosh:pushwoosh-huawei:${pushwoosh}"
     implementation "com.pushwoosh:pushwoosh-amazon:${pushwoosh}"
     implementation "com.pushwoosh:pushwoosh-badge:${pushwoosh}"
     implementation "com.pushwoosh:pushwoosh-inbox:${pushwoosh}"
