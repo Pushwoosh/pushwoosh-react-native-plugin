@@ -282,6 +282,11 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	}
 
 	@ReactMethod
+	public void clearNotificationCenter(){
+		AndroidPlatformModule.getManagerProvider().getNotificationManager().cancelAll();
+	}
+
+	@ReactMethod
 	public void setApplicationIconBadgeNumber(int badgeNumber) {
 		PushwooshBadge.setBadgeNumber(badgeNumber);
 	}
