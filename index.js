@@ -72,6 +72,17 @@ class PushNotification {
 		PushwooshModule.clearLocalNotification();
 	}
 
+    //Function: clearNotificationCenter
+	//Clears all existing and cancels all pending notifications
+	//
+	//Example:
+	//(start code)
+	//	Pushwoosh.clearNotificationCenter();
+	//(end)
+	clearNotificationCenter(){
+		PushwooshModule.clearNotificationCenter();
+	}
+
 	//Function: register
 	//Call this to register for push notifications and retreive a push Token
 	//

@@ -472,6 +472,11 @@ RCT_EXPORT_METHOD(clearLocalNotification){
     }
 }
 
+RCT_EXPORT_METHOD(clearLocalNotification){
+    [PushNotificationManager clearNotificationCenter];
+}
+
+
 RCT_EXPORT_METHOD(enableHuaweiPushNotifications) {
     // available in Android only
 }
