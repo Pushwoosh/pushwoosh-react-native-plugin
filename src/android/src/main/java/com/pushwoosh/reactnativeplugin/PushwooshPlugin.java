@@ -282,8 +282,12 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	}
 
 	@ReactMethod
-	public void clearNotificationCenter(){
-		AndroidPlatformModule.getManagerProvider().getNotificationManager().cancelAll();
+	public void clearNotificationCenter() {
+		if (AndroidPlatformModule.getManagerProvider() != null) {
+			if (AndroidPlatformModule.getManagerProvider().getNotificationManager() != null) {
+				AndroidPlatformModule.getManagerProvider().getNotificationManager().cancelAll();
+			}
+		}
 	}
 
 	@ReactMethod
