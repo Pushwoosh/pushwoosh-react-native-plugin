@@ -472,7 +472,7 @@ RCT_EXPORT_METHOD(clearLocalNotification){
     }
 }
 
-RCT_EXPORT_METHOD(clearLocalNotification){
+RCT_EXPORT_METHOD(clearNotificationCenter){
     [PushNotificationManager clearNotificationCenter];
 }
 
