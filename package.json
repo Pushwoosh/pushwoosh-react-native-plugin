@@ -3,6 +3,7 @@
   "version": "6.1.13",
   "description": "This plugin allows you to send and receive push notifications. Powered by Pushwoosh (www.pushwoosh.com).",
   "main": "index.js",
+  "types": "index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Pushwoosh/pushwoosh-react-native-plugin.git"

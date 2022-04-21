@@ -11,7 +11,7 @@ declare module 'pushwoosh-react-native-plugin' {
   }
 
   interface Pushwoosh {
-    init(config: PushwooshConfig, success?: () => void, fail?: () => void);
+    init(config: PushwooshConfig, success?: () => void, fail?: () => void): void;
     createLocalNotification(notification: LocalNotification): void;
     clearLocalNotification(): void;
     clearNotificationCenter(): void;
