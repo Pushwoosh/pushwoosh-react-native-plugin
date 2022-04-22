@@ -1,6 +1,6 @@
 buildscript {
     repositories {
-        jcenter()
+        mavenCentral()
         maven {
             url "https://maven.google.com"
         }
@@ -8,13 +8,12 @@ buildscript {
 
     dependencies {
         classpath 'com.android.tools.build:gradle:3.6.4'
-        classpath 'com.google.gms:google-services:4.3.3'
     }
 }
 
 allprojects {
     repositories {
-        jcenter()
+        mavenCentral()
         maven {
             url "https://maven.google.com"
         }
@@ -42,16 +41,6 @@ ext {
 }
 
 evaluationDependsOn(':app')
-
-rootProject.subprojects {
-    if (name == "app") {
-        if (!plugins.hasPlugin('com.google.gms.google-services')) {
-            apply {
-                plugin com.google.gms.googleservices.GoogleServicesPlugin
-            }
-        }
-    }
-}
 
 dependencies {
     implementation 'com.facebook.react:react-native:+'
