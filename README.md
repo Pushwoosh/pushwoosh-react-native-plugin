@@ -12,10 +12,25 @@ React Native Pushwoosh Push Notifications module
 
 
 ### Installation
-
 ```
 npm install pushwoosh-react-native-plugin --save
 react-native link pushwoosh-react-native-plugin
+```
+
+For Android platform, also add the following lines to your project's build.gradle:
+
+```
+//you should already have buildscript and dependencies blocks in your project's build.gradle so just put the classpath line there
+buildscript {
+ dependencies {
+ classpath 'com.google.gms:google-services:4.3.3'
+ }
+}
+
+//add these lines to the very end of your build.gradle
+apply {
+ plugin com.google.gms.googleservices.GoogleServicesPlugin
+}
 ```
 
 ### Usage
