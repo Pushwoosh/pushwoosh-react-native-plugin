@@ -10,6 +10,10 @@ declare module 'pushwoosh-react-native-plugin' {
     userData?: Object;
   }
 
+  interface PushwooshTags {
+    [index: string]: string | number | string[] | number[]
+  }
+
   interface Pushwoosh {
     init(config: PushwooshConfig, success?: () => void, fail?: () => void): void;
     createLocalNotification(notification: LocalNotification): void;
@@ -19,11 +23,11 @@ declare module 'pushwoosh-react-native-plugin' {
     unregister(success?: (token: string) => void, fail?: (error: Error) => void): void;
     onPushOpen(callback: () => void, fail?: ()=> void): void; 
     setTags(
-      tags: Record<string, unknown>,
+      tags: Record<string, PushwooshTags>,
       success?: () => void,
-      fail?: () => void
+      fail?: (error: Error) => void
     ): void;
-    getTags(success: () => void, fail?: () => void): void;
+    getTags(success: (tags: PushwooshTags) => void, fail?: (error: Error) => void): void;
     setShowPushnotificationAlert(showAlert: boolean): void;
     getShowPushnotificationAlert(callback: (willShow: boolean) => void): void;
     getPushToken(success?: (token: string) => void): void;
