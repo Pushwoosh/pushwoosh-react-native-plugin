@@ -15,6 +15,7 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 import com.pushwoosh.GDPRManager;
 import com.pushwoosh.Pushwoosh;
+import com.pushwoosh.RegisterForPushNotificationsResultData;
 import com.pushwoosh.badge.PushwooshBadge;
 import com.pushwoosh.exception.GetTagsException;
 import com.pushwoosh.exception.PushwooshException;
@@ -504,7 +505,7 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 		}
 	}
 
-	private class RegisterForPushNotificationCallback implements com.pushwoosh.function.Callback<String, RegisterForPushNotificationsException> {
+	private class RegisterForPushNotificationCallback implements com.pushwoosh.function.Callback<RegisterForPushNotificationsResultData, RegisterForPushNotificationsException> {
 		private Callback success;
 		private Callback error;
 
@@ -514,10 +515,10 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 		}
 
 		@Override
-		public void process(Result<String, RegisterForPushNotificationsException> result) {
+		public void process(Result<RegisterForPushNotificationsResultData, RegisterForPushNotificationsException> result) {
 			if (result.isSuccess()) {
-				if (success != null) {
-					success.invoke(result.getData());
+				if (success != null && result.getData() != null) {
+					success.invoke(result.getData().getToken());
 					success = null;
 				}
 			} else if (result.getException() != null) {
