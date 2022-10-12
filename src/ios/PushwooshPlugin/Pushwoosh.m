@@ -239,6 +239,14 @@ RCT_EXPORT_METHOD(presentInboxUI:(NSDictionary *)styleDictionary) {
     }
 }
 
+RCT_EXPORT_METHOD(messagesWithNoActionPerformedCount:(RCTResponseSenderBlock)callback) {
+    [PWInbox messagesWithNoActionPerformedCountWithCompletion:^(NSInteger count, NSError *error) {
+        if (callback) {
+            callback(@[ count ]);
+        }
+    }]
+}
+
 - (PWIInboxStyle *)inboxStyleForDictionary:(NSDictionary *)styleDictionary {
     PWIInboxStyle *style = [PWIInboxStyle defaultStyle];
     
