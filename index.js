@@ -459,15 +459,15 @@ class PushNotification {
 		PushwooshModule.presentInboxUI(style);
 	}
 
-	messagesWithNoActionPerformedCount(result: number) {
+	messagesWithNoActionPerformedCount(result: Function) {
 		PushwooshModule.messagesWithNoActionPerformedCount(result);
 	}
 
-	unreadMessagesCount(result: number) {
+	unreadMessagesCount(result: Function) {
 		PushwooshModule.unreadMessagesCount(result);
 	}
 
-	messagesCount(result: number) {
+	messagesCount(result: Function) {
 		PushwooshModule.messagesCount(result);
 	}
 
