@@ -459,6 +459,45 @@ class PushNotification {
 		PushwooshModule.presentInboxUI(style);
 	}
 
+	messagesWithNoActionPerformedCount(result: number) {
+		PushwooshModule.messagesWithNoActionPerformedCount(result);
+	}
+
+	unreadMessagesCount(result: number) {
+		PushwooshModule.unreadMessagesCount(result);
+	}
+
+	messagesCount(result: number) {
+		PushwooshModule.messagesCount(result);
+	}
+
+	loadMessages(success: Function, fail: ?Function) {
+		if (!fail) {
+			fail = function() {};
+		}
+		PushwooshModule.loadMessages(success, fail);
+	}
+
+	readMessage(id: string) {
+		PushwooshModule.readMessage(id);
+	}
+
+	readMessages(ids: Array) {
+		PushwooshModule.readMessages(ids);
+	}
+
+	deleteMessage(id: string) {
+		PushwooshModule.deleteMessage(id);
+	}
+
+	deleteMessages(ids: Array) {
+		PushwooshModule.deleteMessages(ids);
+	}
+
+	performAction(id: string) {
+		PushwooshModule.performAction(id);
+	}
+
 	// Show inApp for change setting Enable/disable all communication with Pushwoosh
 	showGDPRConsentUI(){
 		PushwooshModule.showGDPRConsentUI();
