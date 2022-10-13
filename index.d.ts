@@ -10,9 +10,7 @@ declare module 'pushwoosh-react-native-plugin' {
     userData?: Object;
   }
 
-  interface PushwooshTags {
-    [index: string]: string | number | string[] | number[]
-  }
+  type PushwooshTags = Record<string, string | number | string[] | number[]>
 
   type InboxNotification = {
     code: string;
@@ -37,7 +35,7 @@ declare module 'pushwoosh-react-native-plugin' {
     unregister(success?: (token: string) => void, fail?: (error: Error) => void): void;
     onPushOpen(callback: () => void, fail?: ()=> void): void; 
     setTags(
-      tags: Record<string, PushwooshTags>,
+      tags: PushwooshTags,
       success?: () => void,
       fail?: (error: Error) => void
     ): void;
