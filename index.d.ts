@@ -20,7 +20,7 @@ declare module 'pushwoosh-react-native-plugin' {
     message?: string;
     imageUrl?: string;
     sendDate?: string;
-    messageType?: number;
+    type?: number;
     bannerUrl?: string;
     customData?: Object;
     isRead?: boolean;
