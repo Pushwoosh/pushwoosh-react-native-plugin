@@ -302,7 +302,7 @@ RCT_EXPORT_METHOD(performAction:(NSString*)code) {
 
 - (NSDictionary*)inboxMessageToDictionary:(NSObject<PWInboxMessageProtocol>*) message {
     NSMutableDictionary* dictionary = [[NSMutableDictionary alloc] init];
-    [dictionary setValue:@(message.type) forKey:@"action_type"];
+    [dictionary setValue:@(message.type) forKey:@"type"];
     [dictionary setValue:[self stringOrEmpty: message.imageUrl] forKey:@"imageUrl"];
     [dictionary setValue:[self stringOrEmpty: message.code] forKey:@"code"];
     [dictionary setValue:[self stringOrEmpty: message.title] forKey:@"title"];

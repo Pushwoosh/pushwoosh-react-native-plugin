@@ -197,7 +197,7 @@ public final class ConversionUtil {
 					.put("imageUrl", message.getImageUrl())
 					.put("message",message.getMessage())
 					.put("sendDate",message.getSendDate().toString())
-					.put("messageType", message.getType().getCode())
+					.put("type", message.getType().getCode())
 					.put("bannerUrl", message.getBannerUrl())
 					.put("isRead",message.isRead())
 					.put("isActionPerformed",message.isActionPerformed());
