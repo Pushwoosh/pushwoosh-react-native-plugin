@@ -10,9 +10,23 @@ declare module 'pushwoosh-react-native-plugin' {
     userData?: Object;
   }
 
-  type PushwooshTags = Record<string, string | number | string[] | number[]>
+  type PushwooshTags = Record<string, string | number | string[] | number[] | boolean>
+
+  type InboxNotification = {
+    code: string;
+    title?: string;
+    message?: string;
+    imageUrl?: string;
+    sendDate?: string;
+    type?: number;
+    bannerUrl?: string;
+    customData?: Object;
+    isRead?: boolean;
+    isActionPerformed?: boolean;
+  }
 
   interface Pushwoosh {
+    //general interaction with Pushwoosh
     init(config: PushwooshConfig, success?: () => void, fail?: () => void): void;
     createLocalNotification(notification: LocalNotification): void;
     clearLocalNotification(): void;
@@ -32,16 +46,36 @@ declare module 'pushwoosh-react-native-plugin' {
     getHwid(success: (hwid: string) => void): void;
     setUserId(userId: string, success?: ()=> void, fail?: (error: Error) => void): void;
     postEvent(event: string, attributes?: Record<string, string>): void;
+    enableHuaweiPushNotifications(): void;
+
+    //badge methods
     setApplicationIconBadgeNumber(badgeNumber: number): void;
     getApplicationIconBadgeNumber(callback: (badge: number) => void): void;
     addToApplicationIconBadgeNumber(badgeNumber: number): void;
+
+    //Notification appearance
     setMultiNotificationMode(on: boolean): void;
     setLightScreenOnNotification(on: boolean): void;
     setEnableLED(on: boolean): void;
     setColorLED(color: number): void;
     setSoundType(type: number): void;
     setVibrateType(type: number): void;
+    setNotificationIconBackgroundColor(color: string): void;
+    setLanguage(language: string): void;
+
+    //Inbox API
     presentInboxUI(style?: Object): void;
+    messagesWithNoActionPerformedCount(callback: (result: number) => void): void;
+    unreadMessagesCount(callback: (result: number) => void): void;
+    messagesCount(callback: (result: number) => void): void;
+    loadMessages(success: (notifications: InboxNotification[]) => void, fail?: (error: Error) => void): void;
+    readMessage(id: string): void;
+    readMessages(ids: string[]): void;
+    deleteMessage(id: string): void;
+    deleteMessages(ids: string[]): void;
+    performAction(id: string): void;
+
+    //GDPR methods
     showGDPRConsentUI(): void;
     showGDPRDeletionUI(): void;
     isDeviceDataRemoved(success: (isRemoved: boolean) => void): void;
@@ -49,11 +83,8 @@ declare module 'pushwoosh-react-native-plugin' {
     isAvailableGDPR(success: (isAvailable: boolean) => void): void;
     setCommunicationEnabled(enabled: boolean, success?: () => void, fail?: (error: Error) => void): void;
     removeAllDeviceData(success?: () => void, fail?: (error: Error) => void): void;
-    setNotificationIconBackgroundColor(color: string): void;
-    setLanguage(language: string): void;
-    enableHuaweiPushNotifications(): void;
   }
 
-  declare const Pushwoosh: Pushwoosh;
+  const Pushwoosh: Pushwoosh;
   export = Pushwoosh;
 }

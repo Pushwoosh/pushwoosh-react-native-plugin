@@ -1,5 +1,9 @@
 package com.pushwoosh.reactnativeplugin;
 
+import android.os.Bundle;
+import android.util.Log;
+
+import java.util.ArrayList;
 import java.util.Iterator;
 
 import com.facebook.react.bridge.ReadableArray;
@@ -10,6 +14,8 @@ import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeArray;
 import com.facebook.react.bridge.WritableNativeMap;
+import com.pushwoosh.inbox.data.InboxMessage;
+import com.pushwoosh.internal.utils.JsonUtils;
 import com.pushwoosh.internal.utils.PWLog;
 import com.pushwoosh.tags.TagsBundle;
 
@@ -176,6 +182,51 @@ public final class ConversionUtil {
 			}
 		}
 
+		return result;
+	}
+
+	public static WritableMap inboxMessageToWritableMap(InboxMessage message) {
+		return toWritableMap(inboxMessageToJson(message));
+	}
+
+	public static JSONObject inboxMessageToJson(InboxMessage message) {
+		JSONObject object = new JSONObject();
+		try {
+			object.put("code", message.getCode())
+					.put("title", message.getTitle())
+					.put("imageUrl", message.getImageUrl())
+					.put("message",message.getMessage())
+					.put("sendDate",message.getSendDate().toString())
+					.put("type", message.getType().getCode())
+					.put("bannerUrl", message.getBannerUrl())
+					.put("isRead",message.isRead())
+					.put("isActionPerformed",message.isActionPerformed());
+
+			Bundle bundle = JsonUtils.jsonStringToBundle( message.getActionParams());
+			String customData = bundle.getString("u");
+			if (customData != null) {
+				object.put("customData", customData);
+			}
+		} catch (JSONException e) {
+			Log.e("PushwooshInbox", "Failed to fetch inbox message :" + e.getMessage());
+		}
+		return object;
+	}
+	
+	public static ArrayList<String> messageCodesArrayToArrayList(ReadableArray readableArray) {
+		ArrayList<String> result = new ArrayList<>();
+		for (int i = 0; i < readableArray.size(); i++) {
+			ReadableType indexType = readableArray.getType(i);
+			try {
+				if (indexType == ReadableType.String) {
+					result.add(readableArray.getString(i));
+				} else {
+					PWLog.error(PushwooshPlugin.TAG, "Could not convert object at index " + i + ".");
+				}
+			} catch (Exception e) {
+				PWLog.error(PushwooshPlugin.TAG, "Could not convert object at index " + i + ".", e);
+			}
+		}
 		return result;
 	}
 }

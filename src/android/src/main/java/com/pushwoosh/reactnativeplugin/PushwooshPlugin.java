@@ -7,12 +7,17 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.text.TextUtils;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.WritableNativeArray;
 import com.pushwoosh.GDPRManager;
 import com.pushwoosh.Pushwoosh;
 import com.pushwoosh.RegisterForPushNotificationsResultData;
@@ -24,6 +29,9 @@ import com.pushwoosh.exception.RegisterForPushNotificationsException;
 import com.pushwoosh.exception.UnregisterForPushNotificationException;
 import com.pushwoosh.function.Result;
 import com.pushwoosh.inapp.PushwooshInApp;
+import com.pushwoosh.inbox.PushwooshInbox;
+import com.pushwoosh.inbox.data.InboxMessage;
+import com.pushwoosh.inbox.exception.InboxMessagesException;
 import com.pushwoosh.inbox.ui.presentation.view.activity.InboxActivity;
 import com.pushwoosh.internal.network.NetworkModule;
 import com.pushwoosh.internal.platform.AndroidPlatformModule;
@@ -36,6 +44,9 @@ import com.pushwoosh.notification.LocalNotification;
 import com.pushwoosh.notification.LocalNotificationReceiver;
 
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class PushwooshPlugin extends ReactContextBaseJavaModule implements LifecycleEventListener {
 
@@ -350,6 +361,92 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 		}else {
 			PWLog.error(TAG, "current activity is null");
 		}
+	}
+
+	@ReactMethod
+	public void messagesWithNoActionPerformedCount(final Callback callback) {
+		PushwooshInbox.messagesWithNoActionPerformedCount(new com.pushwoosh.function.Callback<Integer, InboxMessagesException>() {
+			@Override
+			public void process(@NonNull Result<Integer, InboxMessagesException> result) {
+				if (result.isSuccess() && callback != null) {
+					callback.invoke(result.getData());
+				}
+			}
+		});
+	}
+
+	@ReactMethod
+	public void unreadMessagesCount(final Callback callback) {
+		PushwooshInbox.unreadMessagesCount(new com.pushwoosh.function.Callback<Integer, InboxMessagesException>() {
+			@Override
+			public void process(@NonNull Result<Integer, InboxMessagesException> result) {
+				if (result.isSuccess() && callback != null) {
+					callback.invoke(result.getData());
+				}
+			}
+		});
+	}
+
+	@ReactMethod
+	public void messagesCount(final Callback callback) {
+		PushwooshInbox.messagesCount(new com.pushwoosh.function.Callback<Integer, InboxMessagesException>() {
+			@Override
+			public void process(@NonNull Result<Integer, InboxMessagesException> result) {
+				if (result.isSuccess() && callback != null) {
+					callback.invoke(result.getData());
+				}
+			}
+		});
+	}
+
+	@ReactMethod
+	public void loadMessages(@NonNull final Callback success, @Nullable final Callback error) {
+		PushwooshInbox.loadMessages(new com.pushwoosh.function.Callback<Collection<InboxMessage>, InboxMessagesException>() {
+			@Override
+			public void process(@NonNull Result<Collection<InboxMessage>, InboxMessagesException> result) {
+				try {
+					if (result.isSuccess() && result.getData() != null) {
+						ArrayList<InboxMessage> messagesList = new ArrayList<>(result.getData());
+						WritableNativeArray writableArray = new WritableNativeArray();
+						for (InboxMessage message : messagesList) {
+							writableArray.pushMap(ConversionUtil.inboxMessageToWritableMap(message));
+						}
+						success.invoke(writableArray);
+					} else if (error != null) {
+						error.invoke(TAG + "Failed to fetch inbox messages from server");
+					}
+				} catch (Exception e) {
+					if (error != null) {
+						error.invoke(e.getLocalizedMessage());
+					}
+				}
+			}
+		});
+	}
+
+	@ReactMethod
+	public void readMessage(String id) {
+		PushwooshInbox.readMessage(id);
+	}
+
+	@ReactMethod
+	public void readMessages(ReadableArray codes) {
+		PushwooshInbox.readMessages(ConversionUtil.messageCodesArrayToArrayList(codes));
+	}
+
+	@ReactMethod
+	public void deleteMessage(String id) {
+		PushwooshInbox.deleteMessage(id);
+	}
+
+	@ReactMethod
+	public void deleteMessages(ReadableArray codes) {
+		PushwooshInbox.deleteMessages(ConversionUtil.messageCodesArrayToArrayList(codes));
+	}
+
+	@ReactMethod
+	public void performAction(String id) {
+		PushwooshInbox.performAction(id);
 	}
 
 	@ReactMethod

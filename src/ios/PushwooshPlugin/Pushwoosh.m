@@ -42,25 +42,25 @@ RCT_EXPORT_MODULE(Pushwoosh);
 }
 
 RCT_EXPORT_METHOD(init:(NSDictionary*)config success:(RCTResponseSenderBlock)success error:(RCTResponseSenderBlock)error) {
-	NSString *appCode = config[@"pw_appid"];
+    NSString *appCode = config[@"pw_appid"];
     NSString *notificationHandling = config[@"pw_notification_handling"];
     
-	if (!appCode || ![appCode isKindOfClass:[NSString class]]) {
-		if (error) {
-			error(@[ @"pw_appid is missing" ]);
-		}
-		
-		return;
-	}
+    if (!appCode || ![appCode isKindOfClass:[NSString class]]) {
+        if (error) {
+            error(@[ @"pw_appid is missing" ]);
+        }
+        
+        return;
+    }
     
     NSString *proxyUrl = config[@"reverse_proxy_url"];
     if (proxyUrl && ![proxyUrl isEqualToString:@""]) {
         [[Pushwoosh sharedInstance] setReverseProxy:proxyUrl];
     }
     
-	[PushNotificationManager initializeWithAppCode:appCode appName:nil];
-	[[PushNotificationManager pushManager] sendAppOpen];
-	[PushNotificationManager pushManager].delegate = self;
+    [PushNotificationManager initializeWithAppCode:appCode appName:nil];
+    [[PushNotificationManager pushManager] sendAppOpen];
+    [PushNotificationManager pushManager].delegate = self;
 
     // We set Pushwoosh UNUserNotificationCenter delegate unless CUSTOM is specified in the config
     if(![notificationHandling isEqualToString:@"CUSTOM"]) {
@@ -71,7 +71,7 @@ RCT_EXPORT_METHOD(init:(NSDictionary*)config success:(RCTResponseSenderBlock)suc
         success(@[]);
     }
     
-	if (gStartPushData) {
+    if (gStartPushData) {
         NSString *link = gStartPushData[@"l"];
         
         //get deeplink from the payload and write it to the launchOptions for proper RCTLinking behavior
@@ -82,7 +82,7 @@ RCT_EXPORT_METHOD(init:(NSDictionary*)config success:(RCTResponseSenderBlock)suc
         }
         
         [self sendJSEvent:kPushReceivedJSEvent withArgs:gStartPushData];
-		[self sendJSEvent:kPushOpenJSEvent withArgs:gStartPushData];
+        [self sendJSEvent:kPushOpenJSEvent withArgs:gStartPushData];
     } else if([PushNotificationManager pushManager].launchNotification) {
         [self sendJSEvent:kPushReceivedJSEvent withArgs:[PushNotificationManager pushManager].launchNotification];
         [self sendJSEvent:kPushOpenJSEvent withArgs:[PushNotificationManager pushManager].launchNotification];
@@ -90,10 +90,10 @@ RCT_EXPORT_METHOD(init:(NSDictionary*)config success:(RCTResponseSenderBlock)suc
 }
 
 RCT_EXPORT_METHOD(register:(RCTResponseSenderBlock)success error:(RCTResponseSenderBlock)error) {
-	[[PWEventDispatcher sharedDispatcher] subscribe:success toEvent:kRegistrationSuccesEvent];
-	[[PWEventDispatcher sharedDispatcher] subscribe:error toEvent:kRegistrationErrorEvent];
-	
-	[[PushNotificationManager pushManager] registerForPushNotifications];
+    [[PWEventDispatcher sharedDispatcher] subscribe:success toEvent:kRegistrationSuccesEvent];
+    [[PWEventDispatcher sharedDispatcher] subscribe:error toEvent:kRegistrationErrorEvent];
+    
+    [[PushNotificationManager pushManager] registerForPushNotifications];
 }
 
 RCT_EXPORT_METHOD(unregister:(RCTResponseSenderBlock)successCallback error:(RCTResponseSenderBlock)errorCallback) {
@@ -109,13 +109,13 @@ RCT_EXPORT_METHOD(unregister:(RCTResponseSenderBlock)successCallback error:(RCTR
 }
 
 RCT_EXPORT_METHOD(onPushOpen:(RCTResponseSenderBlock)callback) {
-	[[PWEventDispatcher sharedDispatcher] subscribe:callback toEvent:kPushOpenEvent];
-	
-	if (gStartPushData) {
-		NSDictionary *pushData = gStartPushData;
-		gStartPushData = nil;
-		[[PWEventDispatcher sharedDispatcher] dispatchEvent:kPushOpenEvent withArgs:@[ objectOrNull(pushData) ]];
-	}
+    [[PWEventDispatcher sharedDispatcher] subscribe:callback toEvent:kPushOpenEvent];
+    
+    if (gStartPushData) {
+        NSDictionary *pushData = gStartPushData;
+        gStartPushData = nil;
+        [[PWEventDispatcher sharedDispatcher] dispatchEvent:kPushOpenEvent withArgs:@[ objectOrNull(pushData) ]];
+    }
 }
 
 RCT_EXPORT_METHOD(onPushReceived:(RCTResponseSenderBlock)callback) {
@@ -129,39 +129,39 @@ RCT_EXPORT_METHOD(onPushReceived:(RCTResponseSenderBlock)callback) {
 }
 
 RCT_EXPORT_METHOD(getHwid:(RCTResponseSenderBlock)callback) {
-	if (callback) {
-		callback(@[ [[PushNotificationManager pushManager] getHWID] ]);
-	}
+    if (callback) {
+        callback(@[ [[PushNotificationManager pushManager] getHWID] ]);
+    }
 }
 
 RCT_EXPORT_METHOD(getPushToken:(RCTResponseSenderBlock)callback) {
-	if (callback) {
-		callback(@[ objectOrNull([[PushNotificationManager pushManager] getPushToken]) ]);
-	}
+    if (callback) {
+        callback(@[ objectOrNull([[PushNotificationManager pushManager] getPushToken]) ]);
+    }
 }
 
 RCT_EXPORT_METHOD(setTags:(NSDictionary*)tags success:(RCTResponseSenderBlock)successCallback error:(RCTResponseSenderBlock)errorCallback) {
-	[[PushNotificationManager pushManager] setTags:tags withCompletion:^(NSError* error) {
-		if (!error && successCallback) {
-			successCallback(@[]);
-		}
-		
-		if (error && errorCallback) {
-			errorCallback(@[ objectOrNull([error localizedDescription]) ]);
-		}
-	}];
+    [[PushNotificationManager pushManager] setTags:tags withCompletion:^(NSError* error) {
+        if (!error && successCallback) {
+            successCallback(@[]);
+        }
+        
+        if (error && errorCallback) {
+            errorCallback(@[ objectOrNull([error localizedDescription]) ]);
+        }
+    }];
 }
 
 RCT_EXPORT_METHOD(getTags:(RCTResponseSenderBlock)successCallback error:(RCTResponseSenderBlock)errorCallback) {
-	[[PushNotificationManager pushManager] loadTags:^(NSDictionary* tags) {
-		if (successCallback) {
-			successCallback(@[ tags ]);
-		}
-	} error:^(NSError *error) {
-		if (errorCallback) {
-			errorCallback(@[ objectOrNull([error localizedDescription]) ]);
-		}
-	}];
+    [[PushNotificationManager pushManager] loadTags:^(NSDictionary* tags) {
+        if (successCallback) {
+            successCallback(@[ tags ]);
+        }
+    } error:^(NSError *error) {
+        if (errorCallback) {
+            errorCallback(@[ objectOrNull([error localizedDescription]) ]);
+        }
+    }];
 }
 
 RCT_EXPORT_METHOD(setShowPushnotificationAlert:(BOOL)showPushnotificationAlert) {
@@ -175,7 +175,7 @@ RCT_EXPORT_METHOD(getShowPushnotificationAlert:(RCTResponseSenderBlock)callback)
 }
 
 RCT_EXPORT_METHOD(setUserId:(NSString*)userId) {
-	[[PWInAppManager sharedManager] setUserId:userId];
+    [[PWInAppManager sharedManager] setUserId:userId];
 }
 
 RCT_EXPORT_METHOD(setUserId:(NSString*)userId success:(RCTResponseSenderBlock)successCallback error:(RCTResponseSenderBlock)errorCallback) {
@@ -192,7 +192,7 @@ RCT_EXPORT_METHOD(setUserId:(NSString*)userId success:(RCTResponseSenderBlock)su
 }
 
 RCT_EXPORT_METHOD(postEvent:(NSString*)event withAttributes:(NSDictionary*)attributes) {
-	[[PWInAppManager sharedManager] postEvent:event withAttributes:attributes];
+    [[PWInAppManager sharedManager] postEvent:event withAttributes:attributes];
 }
 
 RCT_EXPORT_METHOD(setApplicationIconBadgeNumber:(nonnull NSNumber*)badgeNumber) {
@@ -206,11 +206,11 @@ RCT_EXPORT_METHOD(setLanguage:(NSString *)language) {
 }
 
 RCT_EXPORT_METHOD(getApplicationIconBadgeNumber:(RCTResponseSenderBlock)callback) {
-	if(callback) {
+    if(callback) {
         dispatch_async(dispatch_get_main_queue(), ^{
            callback(@[ @([UIApplication sharedApplication].applicationIconBadgeNumber) ]);
         });
-	}
+    }
 }
 
 RCT_EXPORT_METHOD(addToApplicationIconBadgeNumber:(nonnull NSNumber*)badgeNumber) {
@@ -237,6 +237,98 @@ RCT_EXPORT_METHOD(presentInboxUI:(NSDictionary *)styleDictionary) {
             };
         }];
     }
+}
+
+RCT_EXPORT_METHOD(messagesWithNoActionPerformedCount:(RCTResponseSenderBlock)callback) {
+    [PWInbox messagesWithNoActionPerformedCountWithCompletion:^(NSInteger count, NSError *error) {
+        if (callback) {
+            callback(@[ @(count) ]);
+        }
+    }];
+}
+
+RCT_EXPORT_METHOD(unreadMessagesCount:(RCTResponseSenderBlock)callback) {
+    [PWInbox unreadMessagesCountWithCompletion:^(NSInteger count, NSError *error) {
+        if (callback) {
+            callback(@[ @(count) ]);
+        }
+    }];
+}
+
+RCT_EXPORT_METHOD(messagesCount:(RCTResponseSenderBlock)callback) {
+    [PWInbox messagesCountWithCompletion:^(NSInteger count, NSError *error) {
+        if (callback) {
+            callback(@[ @(count) ]);
+        }
+    }];
+}
+
+RCT_EXPORT_METHOD(loadMessages:(RCTResponseSenderBlock)success fail:(RCTResponseSenderBlock)fail) {
+    [PWInbox loadMessagesWithCompletion:^(NSArray<NSObject<PWInboxMessageProtocol> *> *messages, NSError *error) {
+        if (success) {
+            NSMutableArray* array = [[NSMutableArray alloc] init];
+                for (NSObject<PWInboxMessageProtocol>* message in messages) {
+                    NSDictionary* dict = [self inboxMessageToDictionary:message];
+                    [array addObject:dict];
+                }
+            success( @[ array ]);
+        } else if (error != nil && fail != nil) {
+            fail(@[ error ]);
+        }
+    }];
+}
+
+RCT_EXPORT_METHOD(readMessage:(NSString*)code) {
+    NSArray* arr = [NSArray arrayWithObject:code];
+    [PWInbox readMessagesWithCodes:arr];
+}
+
+RCT_EXPORT_METHOD(readMessages:(NSArray<NSString*>*)codes) {
+    [PWInbox readMessagesWithCodes:codes];
+}
+
+RCT_EXPORT_METHOD(deleteMessage:(NSString*)code) {
+    NSArray* arr = [NSArray arrayWithObject:code];
+    [PWInbox deleteMessagesWithCodes:arr];
+}
+
+RCT_EXPORT_METHOD(deleteMessages:(NSArray<NSString*>*)codes) {
+    [PWInbox deleteMessagesWithCodes:codes];
+}
+
+RCT_EXPORT_METHOD(performAction:(NSString*)code) {
+    [PWInbox performActionForMessageWithCode:code];
+}
+
+- (NSDictionary*)inboxMessageToDictionary:(NSObject<PWInboxMessageProtocol>*) message {
+    NSMutableDictionary* dictionary = [[NSMutableDictionary alloc] init];
+    [dictionary setValue:@(message.type) forKey:@"type"];
+    [dictionary setValue:[self stringOrEmpty: message.imageUrl] forKey:@"imageUrl"];
+    [dictionary setValue:[self stringOrEmpty: message.code] forKey:@"code"];
+    [dictionary setValue:[self stringOrEmpty: message.title] forKey:@"title"];
+    [dictionary setValue:[self stringOrEmpty: message.message] forKey:@"message"];
+    [dictionary setValue:[self stringOrEmpty: [self dateToString:message.sendDate]] forKey:@"sendDate"];
+    [dictionary setValue:@(message.isRead) forKey:@"isRead"];
+    [dictionary setValue:@(message.isActionPerformed) forKey:@"isActionPerformed"];
+    
+    NSDictionary* actionParams = [NSDictionary dictionaryWithDictionary:message.actionParams];
+    NSData* customData = [actionParams valueForKey:@"u"];
+    [dictionary setValue:customData forKey:@"customData"];
+    
+    NSDictionary* result = [NSDictionary dictionaryWithDictionary:dictionary];
+    return result;
+}
+
+- (NSString *)stringOrEmpty:(NSString *)string {
+    return string != nil ? string : @"";
+}
+
+- (NSString*)dateToString:(NSDate*)date {
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    [formatter setFormatterBehavior:NSDateFormatterBehaviorDefault];
+    [formatter setDateStyle:NSDateFormatterFullStyle];
+    [formatter setTimeStyle:NSDateFormatterMediumStyle];
+    return [formatter stringFromDate:date];
 }
 
 - (PWIInboxStyle *)inboxStyleForDictionary:(NSDictionary *)styleDictionary {
@@ -484,11 +576,11 @@ RCT_EXPORT_METHOD(enableHuaweiPushNotifications) {
 #pragma mark - PushNotificationDelegate
 
 - (void)onDidRegisterForRemoteNotificationsWithDeviceToken:(NSString *)token {
-	[[PWEventDispatcher sharedDispatcher] dispatchEvent:kRegistrationSuccesEvent withArgs:@[ objectOrNull(token) ]];
+    [[PWEventDispatcher sharedDispatcher] dispatchEvent:kRegistrationSuccesEvent withArgs:@[ objectOrNull(token) ]];
 }
 
 - (void)onDidFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
-	[[PWEventDispatcher sharedDispatcher] dispatchEvent:kRegistrationErrorEvent withArgs:@[ objectOrNull([error localizedDescription]) ]];
+    [[PWEventDispatcher sharedDispatcher] dispatchEvent:kRegistrationErrorEvent withArgs:@[ objectOrNull([error localizedDescription]) ]];
 }
 
 - (void)onPushReceived:(PushNotificationManager *)pushManager withNotification:(NSDictionary *)pushNotification onStart:(BOOL)onStart {
@@ -498,20 +590,20 @@ RCT_EXPORT_METHOD(enableHuaweiPushNotifications) {
 }
 
 - (void)onPushAccepted:(PushNotificationManager *)manager withNotification:(NSDictionary *)pushNotification onStart:(BOOL)onStart {
-	[[PWEventDispatcher sharedDispatcher] dispatchEvent:kPushOpenEvent withArgs:@[ objectOrNull(pushNotification) ]];
-	
+    [[PWEventDispatcher sharedDispatcher] dispatchEvent:kPushOpenEvent withArgs:@[ objectOrNull(pushNotification) ]];
+    
     [self sendJSEvent:kPushOpenJSEvent withArgs:pushNotification];
 }
 
 #pragma mark - RCTEventEmitter
 
 - (void)sendJSEvent:(NSString*)event withArgs:(NSDictionary*)args {
-//	[self sendEventWithName:event body:args];
-	[self.bridge.eventDispatcher sendDeviceEventWithName:event body:args];
+//    [self sendEventWithName:event body:args];
+    [self.bridge.eventDispatcher sendDeviceEventWithName:event body:args];
 }
 
 - (NSArray<NSString *> *)supportedEvents {
-	return @[ kPushOpenJSEvent ];
+    return @[ kPushOpenJSEvent ];
 }
 
 @end
@@ -519,7 +611,7 @@ RCT_EXPORT_METHOD(enableHuaweiPushNotifications) {
 @implementation UIApplication (InternalPushRuntime)
 
 - (BOOL)pushwooshUseRuntimeMagic {
-	return YES;
+    return YES;
 }
 
 // Just keep the launch notification until the module starts and callback functions initalizes
@@ -529,13 +621,13 @@ RCT_EXPORT_METHOD(enableHuaweiPushNotifications) {
     }
 }
 - (void)onPushAccepted:(PushNotificationManager *)manager withNotification:(NSDictionary *)pushNotification onStart:(BOOL)onStart {
-	if (onStart) {
-		gStartPushData = pushNotification;
-	}
+    if (onStart) {
+        gStartPushData = pushNotification;
+    }
 }
 
 - (NSObject<PushNotificationDelegate> *)getPushwooshDelegate {
-	return (NSObject<PushNotificationDelegate> *)self;
+    return (NSObject<PushNotificationDelegate> *)self;
 }
 
 @end
