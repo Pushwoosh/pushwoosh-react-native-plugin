@@ -10,7 +10,7 @@ declare module 'pushwoosh-react-native-plugin' {
     userData?: Object;
   }
 
-  type PushwooshTags = Record<string, string | number | string[] | number[]>
+  type PushwooshTags = Record<string, string | number | string[] | number[] | boolean>
 
   type InboxNotification = {
     code: string;
