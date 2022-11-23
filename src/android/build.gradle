@@ -40,8 +40,6 @@ ext {
     pushwoosh = "6.6.2"
 }
 
-evaluationDependsOn(':app')
-
 dependencies {
     implementation 'com.facebook.react:react-native:+'
     implementation "com.pushwoosh:pushwoosh:${pushwoosh}"
