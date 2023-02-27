@@ -325,9 +325,7 @@ RCT_EXPORT_METHOD(performAction:(NSString*)code) {
 
 - (NSString*)dateToString:(NSDate*)date {
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-    [formatter setFormatterBehavior:NSDateFormatterBehaviorDefault];
-    [formatter setDateStyle:NSDateFormatterFullStyle];
-    [formatter setTimeStyle:NSDateFormatterMediumStyle];
+    [formatter setDateFormat:@"yyyy-MM-dd'T'H:mm:ssZ"];
     return [formatter stringFromDate:date];
 }
 
