@@ -22,6 +22,7 @@ declare module 'pushwoosh-react-native-plugin' {
     bannerUrl?: string;
     customData?: Object;
     isRead?: boolean;
+    actionParams?: Object;
     isActionPerformed?: boolean;
   }
 
