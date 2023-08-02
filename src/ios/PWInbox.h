@@ -47,7 +47,6 @@ typedef NS_ENUM(NSInteger, PWInboxMessageType) {
 @property (readonly, nonatomic) BOOL isActionPerformed;
 @property (readonly, nonatomic) NSDictionary *actionParams;
 @property (readonly, nonatomic) NSString *attachmentUrl;
-@property (readonly, nonatomic) NSDictionary *actionParams;
 
 @end
 
