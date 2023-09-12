@@ -8,7 +8,7 @@ Pod::Spec.new do |s|
   s.homepage     = 'n/a'
   s.source       = { :git => "https://github.com/Pushwoosh/pushwoosh-react-native-plugin.git" }
   s.source_files = 'src/ios/PushwooshPlugin/Pushwoosh.{h,m}', 'src/ios/PushwooshPlugin/PWEventDispatcher.{h,m}', 'src/ios/PushwooshPlugin/PWInlineInAppManager.{h,m}'
-  s.platform     = :ios, "8.0"
+  s.platform     = :ios, "11.0"
   s.xcconfig = {
     "HEADER_SEARCH_PATHS" => "${PODS_ROOT}/Headers/Public/React"
   }
