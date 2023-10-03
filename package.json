@@ -22,10 +22,8 @@
       "sourceDir": "./src/android"
     },
     "ios": {
-      "sharedLibraries" : [ 
-        "libstdc++", 
-        "libz" 
-      ],
+      "podspecName": "pushwoosh-react-native-plugin",
+      "podspecPath": "./pushwoosh-react-native-plugin.podspec"
       "assets" : [ "./src/ios/PushwooshInboxBundle.bundle" ]
     }
   }
