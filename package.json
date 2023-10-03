@@ -23,7 +23,7 @@
     },
     "ios": {
       "podspecName": "pushwoosh-react-native-plugin",
-      "podspecPath": "./pushwoosh-react-native-plugin.podspec"
+      "podspecPath": "./pushwoosh-react-native-plugin.podspec",
       "assets" : [ "./src/ios/PushwooshInboxBundle.bundle" ]
     }
   }
