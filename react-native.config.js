@@ -1,8 +1,7 @@
 module.exports = {
-  dependency: {
+  dependencies: {
     platforms: {
       ios: {
-        sharedLibraries: ["libstdc++", "libz"],
         project: "./src/ios/PushwooshPlugin.xcodeproj"
       },
       android: {
