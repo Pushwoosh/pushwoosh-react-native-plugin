@@ -1,15 +1,9 @@
 module.exports = {
-  dependencies: {
+  dependency: {
     platforms: {
-      ios: {
-        project: "./src/ios/PushwooshPlugin.xcodeproj"
-      },
       android: {
         sourceDir: "./src/android"
       }
-    },
-    assets: [
-    	"./src/ios/PushwooshInboxBundle.bundle"
-    ]
+    }
   }
 };
