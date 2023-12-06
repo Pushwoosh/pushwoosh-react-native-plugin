@@ -58,6 +58,7 @@ body:
       label: Your Pushwoosh React Native Plugin version
       description: Your React Native Plugin version which was integrated to the app. You may find it on the [releases page](https://github.com/Pushwoosh/pushwoosh-react-native-plugin/releases)
       options:
+        - 6.1.25
         - 6.1.23
         - 6.1.22
         - 6.1.21
