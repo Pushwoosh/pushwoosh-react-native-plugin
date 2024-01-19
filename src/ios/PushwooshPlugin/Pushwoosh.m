@@ -71,6 +71,7 @@ RCT_EXPORT_METHOD(init:(NSDictionary*)config success:(RCTResponseSenderBlock)suc
     [PushNotificationManager initializeWithAppCode:appCode appName:nil];
     [[PushNotificationManager pushManager] sendAppOpen];
     [PushNotificationManager pushManager].delegate = self;
+    [[UIApplication sharedApplication] setDelegate:self];
 
     // We set Pushwoosh UNUserNotificationCenter delegate unless CUSTOM is specified in the config
     if(![notificationHandling isEqualToString:@"CUSTOM"]) {
@@ -331,8 +332,16 @@ RCT_EXPORT_METHOD(performAction:(NSString*)code) {
     [PWInbox performActionForMessageWithCode:code];
 }
 
-#pragma mark - UNUserNotificationCenter Delegate Methods
+#pragma mark - UIApplicationDelegate Methods
 #pragma mark -
+
+- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
+    [[Pushwoosh sharedInstance] handlePushRegistration:deviceToken];
+}
+
+- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
+    [[Pushwoosh sharedInstance] handlePushRegistrationFailure:error];
+}
 
 #pragma mark - UNUserNotificationCenter Delegate Methods
 #pragma mark -
