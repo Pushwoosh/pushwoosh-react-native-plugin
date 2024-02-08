@@ -187,6 +187,42 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	}
 
 	@ReactMethod
+	public void setEmails(@NonNull ReadableArray emails, final Callback success, final Callback error) {
+		Pushwoosh.getInstance().setEmail(ConversionUtil.messageCodesArrayToArrayList(emails), new com.pushwoosh.function.Callback<Boolean, SetEmailException>() {
+			@Override
+			public void process(@NonNull Result<Boolean, SetEmailException> result) {
+				if (result.isSuccess()) {
+					if (success != null) {
+						success.invoke();
+					}
+				} else {
+					if (error != null) {
+						error.invoke(result.getException().getMessage());
+					}
+				}
+			}
+		});
+	}
+
+	@ReactMethod
+	public void setUserEmails(@NonNull String userId, @NonNull ReadableArray emails, final Callback success, final Callback error) {
+		Pushwoosh.getInstance().setUser(userId, ConversionUtil.messageCodesArrayToArrayList(emails), new com.pushwoosh.function.Callback<Boolean, SetUserException>() {
+			@Override
+			public void process(@NonNull Result<Boolean, SetUserException> result) {
+				if (result.isSuccess()) {
+					if (success != null) {
+						success.invoke();
+					}
+				} else {
+					if (error != null) {
+						error.invoke(result.getException().getMessage());
+					}
+				}
+			}
+		});
+	}
+
+	@ReactMethod
 	public void setTags(ReadableMap tags, final Callback success, final Callback error) {
 		Pushwoosh.getInstance().sendTags(ConversionUtil.convertToTagsBundle(tags), new com.pushwoosh.function.Callback<Void, PushwooshException>() {
 			@Override
