@@ -166,6 +166,12 @@ RCT_EXPORT_METHOD(getHwid:(RCTResponseSenderBlock)callback) {
     }
 }
 
+RCT_EXPORT_METHOD(getUserId:(RCTResponseSenderBlock)callback) {
+    if (callback) {
+        callback(@[ [[Pushwoosh sharedInstance] getUserId] ]);
+    }
+}
+
 RCT_EXPORT_METHOD(getPushToken:(RCTResponseSenderBlock)callback) {
     if (callback) {
         callback(@[ objectOrNull([[PushNotificationManager pushManager] getPushToken]) ]);

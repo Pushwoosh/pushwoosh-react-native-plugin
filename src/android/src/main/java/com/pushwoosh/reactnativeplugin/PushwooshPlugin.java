@@ -269,6 +269,11 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	}
 
 	@ReactMethod
+	public void getUserId(Callback callback) {
+		callback.invoke(Pushwoosh.getInstance().getUserId());
+	}
+
+	@ReactMethod
 	public void setUserId(String userId) {
 		PushwooshInApp.getInstance().setUserId(userId);
 	}
