@@ -166,10 +166,40 @@ RCT_EXPORT_METHOD(getHwid:(RCTResponseSenderBlock)callback) {
     }
 }
 
+RCT_EXPORT_METHOD(getUserId:(RCTResponseSenderBlock)callback) {
+    if (callback) {
+        callback(@[ [[Pushwoosh sharedInstance] getUserId] ]);
+    }
+}
+
 RCT_EXPORT_METHOD(getPushToken:(RCTResponseSenderBlock)callback) {
     if (callback) {
         callback(@[ objectOrNull([[PushNotificationManager pushManager] getPushToken]) ]);
     }
+}
+
+RCT_EXPORT_METHOD(setEmails:(NSArray *)emails success:(RCTResponseSenderBlock)successCallback error:(RCTResponseSenderBlock)errorCallback) {
+    [[Pushwoosh sharedInstance] setEmails:emails completion:^(NSError * _Nullable error) {
+        if (!error && successCallback) {
+            successCallback(@[]);
+        }
+        
+        if (error && errorCallback) {
+            errorCallback(@[ objectOrNull([error localizedDescription]) ]);
+        }
+    }];
+}
+
+RCT_EXPORT_METHOD(setUserEmails:(NSString*)userId emails:(NSArray *)emails success:(RCTResponseSenderBlock)successCallback error:(RCTResponseSenderBlock)errorCallback) {
+    [[Pushwoosh sharedInstance] setUser:userId emails:emails completion:^(NSError * _Nullable error) {
+        if (!error && successCallback) {
+            successCallback(@[]);
+        }
+        
+        if (error && errorCallback) {
+            errorCallback(@[ objectOrNull([error localizedDescription]) ]);
+        }
+    }];
 }
 
 RCT_EXPORT_METHOD(setTags:(NSDictionary*)tags success:(RCTResponseSenderBlock)successCallback error:(RCTResponseSenderBlock)errorCallback) {

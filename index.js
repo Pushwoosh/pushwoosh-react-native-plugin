@@ -127,6 +127,55 @@ class PushNotification {
 		PushwooshModule.onPushOpen(callback);
 	}
 
+	//Function: setUserEmails
+	//Register emails list associated to the current user.
+	//
+	//Example:
+	//(start code)
+	//	Pushwoosh.setUserEmails("someUser", ["example@mail.some"],
+	//		function(status) {
+	//			console.warn('setUserEmails success');
+	//		},
+	//		function(status) {
+	//			console.warn('setUserEmails failed');
+	//		}
+	//	);
+	//
+	setUserEmails(userId: string, emails: Object, success: ?Function, fail: ?Function) {
+		if (!success) {
+			success = function() {};
+		}
+		if (!fail) {
+			fail = function(error) {};
+		}
+		PushwooshModule.setUserEmails(userId, emails, success, fail);
+	}
+
+
+	//Function: setEmails
+	//Register emails list associated to the current user.
+	//
+	//Example:
+	//(start code)
+	//	Pushwoosh.setEmails(["example@mail.some"],
+	//		function(status) {
+	//			console.warn('setEmails success');
+	//		},
+	//		function(status) {
+	//			console.warn('setEmails failed');
+	//		}
+	//	);
+	//
+	setEmails(emails: Object, success: ?Function, fail: ?Function) {
+		if (!success) {
+			success = function() {};
+		}
+		if (!fail) {
+			fail = function(error) {};
+		}
+		PushwooshModule.setEmails(emails, success, fail);
+	}
+
 	//Function: setTags
 	//Call this to set tags for the device
 	//
@@ -231,6 +280,17 @@ class PushNotification {
 	//(end)
 	getHwid(success: Function) {
 		PushwooshModule.getHwid(success);
+	}
+
+	//Function: getUserId
+	//Call this to get Pushwoosh User ID used for communications with Pushwoosh API
+	//
+	//Example:
+	//(start code)
+	//	Pushwoosh.getUserId();
+	//(end)
+	getUserId(success: Function) {
+		PushwooshModule.getUserId(success);
 	}
 
 	//Function: setUserId
