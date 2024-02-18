@@ -373,6 +373,10 @@ RCT_EXPORT_METHOD(performAction:(NSString*)code) {
     [[Pushwoosh sharedInstance] handlePushRegistrationFailure:error];
 }
 
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
+    [[Pushwoosh sharedInstance] handlePushReceived:userInfo];
+}
+
 #pragma mark - UNUserNotificationCenter Delegate Methods
 #pragma mark -
 
