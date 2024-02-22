@@ -15,6 +15,8 @@
 #import <UserNotifications/UserNotifications.h>
 #import <Pushwoosh/PushNotificationManager.h>
 
+#import <objc/runtime.h>
+
 static id objectOrNull(id object) {
     if (object) {
         return object;
@@ -31,6 +33,28 @@ static NSString * const kPushOpenEvent = @"PWPushOpen";
 
 static NSString * const kPushOpenJSEvent = @"pushOpened";
 static NSString * const kPushReceivedJSEvent = @"pushReceived";
+
+@interface PushwooshPlugin (InnerPushwooshPlugin)
+
+- (void) application:(UIApplication *)application pwplugin_didRegisterWithDeviceToken:(NSData *)deviceToken;
+- (void) application:(UIApplication *)application pwplugin_didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler;
+- (void) application:(UIApplication *)application pwplugin_didFailToRegisterForRemoteNotificationsWithError:(NSError *)error;
+
+@end
+
+void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, const char * signature) {
+    Method method = nil;
+    method = class_getInstanceMethod(class, fromChange);
+    
+    if (method) {
+        //method exists add a new method and swap with original
+        class_addMethod(class, toChange, impl, signature);
+        method_exchangeImplementations(class_getInstanceMethod(class, fromChange), class_getInstanceMethod(class, toChange));
+    } else {
+        //just add as orignal method
+        class_addMethod(class, fromChange, impl, signature);
+    }
+}
 
 @implementation PushwooshPlugin
 
@@ -71,7 +95,8 @@ RCT_EXPORT_METHOD(init:(NSDictionary*)config success:(RCTResponseSenderBlock)suc
     [PushNotificationManager initializeWithAppCode:appCode appName:nil];
     [[PushNotificationManager pushManager] sendAppOpen];
     [PushNotificationManager pushManager].delegate = self;
-    [[UIApplication sharedApplication] setDelegate:self];
+
+    [PushwooshPlugin swizzleNotificationSettingsHandler];
 
     // We set Pushwoosh UNUserNotificationCenter delegate unless CUSTOM is specified in the config
     if(![notificationHandling isEqualToString:@"CUSTOM"]) {
@@ -362,19 +387,55 @@ RCT_EXPORT_METHOD(performAction:(NSString*)code) {
     [PWInbox performActionForMessageWithCode:code];
 }
 
-#pragma mark - UIApplicationDelegate Methods
 #pragma mark -
+#pragma mark - Swizzling
 
-- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
++ (void)swizzleNotificationSettingsHandler {
+    if ([UIApplication sharedApplication].delegate == nil) {
+        return;
+    }
+    
+    if ([[[UIDevice currentDevice] systemVersion] floatValue] < 8.0) {
+        return;
+    }
+    
+    static Class appDelegateClass = nil;
+    
+    //do not swizzle the same class twice
+    id delegate = [UIApplication sharedApplication].delegate;
+    if(appDelegateClass == [delegate class]) {
+        return;
+    }
+    
+    appDelegateClass = [delegate class];
+    
+    pushwoosh_swizzle([delegate class], @selector(application:didRegisterForRemoteNotificationsWithDeviceToken:), @selector(application:pwplugin_didRegisterWithDeviceToken:), (IMP)pwplugin_didRegisterWithDeviceToken, "v@:::");
+    pushwoosh_swizzle([delegate class], @selector(application:didFailToRegisterForRemoteNotificationsWithError:), @selector(application:pwplugin_didFailToRegisterForRemoteNotificationsWithError:), (IMP)pwplugin_didFailToRegisterForRemoteNotificationsWithError, "v@:::");
+    pushwoosh_swizzle([delegate class], @selector(application:didReceiveRemoteNotification:fetchCompletionHandler:), @selector(application:pwplugin_didReceiveRemoteNotification:fetchCompletionHandler:), (IMP)pwplugin_didReceiveRemoteNotification, "v@::::");
+}
+
+void pwplugin_didReceiveRemoteNotification(id self, SEL _cmd, UIApplication * application, NSDictionary * userInfo, void (^completionHandler)(UIBackgroundFetchResult)) {
+    if ([self respondsToSelector:@selector(application:pwplugin_didReceiveRemoteNotification:fetchCompletionHandler:)]) {
+        [self application:application pwplugin_didReceiveRemoteNotification:userInfo fetchCompletionHandler:completionHandler];
+    }
+    
+    [[Pushwoosh sharedInstance] handlePushReceived:userInfo];
+}
+
+void pwplugin_didRegisterWithDeviceToken(id self, SEL _cmd, id application, NSData *deviceToken) {
+    if ([self respondsToSelector:@selector(application: pwplugin_didRegisterWithDeviceToken:)]) {
+        [self application:application pwplugin_didRegisterWithDeviceToken:deviceToken];
+    }
+    
     [[Pushwoosh sharedInstance] handlePushRegistration:deviceToken];
 }
 
-- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
+void pwplugin_didFailToRegisterForRemoteNotificationsWithError(id self, SEL _cmd, UIApplication *application, NSError *error) {
+    if ([self respondsToSelector:@selector(application:pwplugin_didFailToRegisterForRemoteNotificationsWithError:)]) {
+        [self application:application pwplugin_didFailToRegisterForRemoteNotificationsWithError:error];
+    }
+    
     [[Pushwoosh sharedInstance] handlePushRegistrationFailure:error];
-}
-
-- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
-    [[Pushwoosh sharedInstance] handlePushReceived:userInfo];
 }
 
 #pragma mark - UNUserNotificationCenter Delegate Methods
