@@ -101,10 +101,17 @@ RCT_EXPORT_METHOD(init:(NSDictionary*)config success:(RCTResponseSenderBlock)suc
     // We set Pushwoosh UNUserNotificationCenter delegate unless CUSTOM is specified in the config
     if(![notificationHandling isEqualToString:@"CUSTOM"]) {
         if (@available(iOS 10, *)) {
+            BOOL shouldReplaceDelegate = YES;
 
             UNUserNotificationCenter *notificationCenter = [UNUserNotificationCenter currentNotificationCenter];
+
+#if !TARGET_OS_OSX
+            if ([notificationCenter.delegate conformsToProtocol:@protocol(PushNotificationDelegate)]) {
+                shouldReplaceDelegate = NO;
+            }
+#endif
             
-            if (notificationCenter.delegate != nil) {
+            if (notificationCenter.delegate != nil && shouldReplaceDelegate) {
                 _originalNotificationCenterDelegate = notificationCenter.delegate;
                 _originalNotificationCenterDelegateResponds.openSettingsForNotification =
                 (unsigned int)[_originalNotificationCenterDelegate
@@ -119,8 +126,10 @@ RCT_EXPORT_METHOD(init:(NSDictionary*)config success:(RCTResponseSenderBlock)suc
                                                             didReceiveNotificationResponse:withCompletionHandler:)];
             }
             
-            __strong PushwooshPlugin<UNUserNotificationCenterDelegate> *strongSelf = (PushwooshPlugin<UNUserNotificationCenterDelegate> *)self;
-            notificationCenter.delegate = (id<UNUserNotificationCenterDelegate>)strongSelf;
+            if (shouldReplaceDelegate) {
+                __strong PushwooshPlugin<UNUserNotificationCenterDelegate> *strongSelf = (PushwooshPlugin<UNUserNotificationCenterDelegate> *)self;
+                notificationCenter.delegate = (id<UNUserNotificationCenterDelegate>)strongSelf;
+            }
         }
     }
 
@@ -448,20 +457,6 @@ void pwplugin_didFailToRegisterForRemoteNotificationsWithError(id self, SEL _cmd
 API_AVAILABLE(ios(10.0)) {
     
     if ([self isRemoteNotification:notification] && [PWMessage isPushwooshMessage:notification.request.content.userInfo]) {
-        UNMutableNotificationContent *content = notification.request.content.mutableCopy;
-        
-        NSMutableDictionary *userInfo = content.userInfo.mutableCopy;
-        userInfo[@"pw_push"] = @(YES);
-        
-        content.userInfo = userInfo;
-        
-        //newsstand push
-        if (![self isContentAvailablePush:userInfo]) {
-            [[PWEventDispatcher sharedDispatcher] dispatchEvent:kPushReceivedEvent withArgs:@[ objectOrNull(userInfo) ]];
-            
-            [self sendJSEvent:kPushReceivedJSEvent withArgs:userInfo];
-        }
-        
         completionHandler(UNNotificationPresentationOptionNone);
     } else if ([PushNotificationManager pushManager].showPushnotificationAlert || [notification.request.content.userInfo objectForKey:@"pw_push"] == nil) {
         completionHandler(UNNotificationPresentationOptionBadge | UNNotificationPresentationOptionAlert | UNNotificationPresentationOptionSound);
@@ -499,20 +494,10 @@ API_AVAILABLE(ios(10.0)) {
             if (![response.actionIdentifier isEqualToString:UNNotificationDefaultActionIdentifier] && [[PushNotificationManager pushManager].delegate respondsToSelector:@selector(onActionIdentifierReceived:withNotification:)]) {
                 [[PushNotificationManager pushManager].delegate onActionIdentifierReceived:response.actionIdentifier withNotification:[self pushPayloadFromContent:response.notification.request.content]];
             }
-
-            [[PWEventDispatcher sharedDispatcher] dispatchEvent:kPushOpenEvent withArgs:@[ objectOrNull(response.notification.request.content.userInfo) ]];
-            
-            [self sendJSEvent:kPushOpenJSEvent withArgs:response.notification.request.content.userInfo];
         }
     };
     
     if ([self isRemoteNotification:response.notification]  && [PWMessage isPushwooshMessage:response.notification.request.content.userInfo]) {
-        if (![self isContentAvailablePush:response.notification.request.content.userInfo]) {
-            [[PWEventDispatcher sharedDispatcher] dispatchEvent:kPushOpenEvent withArgs:@[ objectOrNull(response.notification.request.content.userInfo) ]];
-            
-            [self sendJSEvent:kPushOpenJSEvent withArgs:response.notification.request.content.userInfo];
-        }
-        
         handlePushAcceptanceBlock();
     } else if ([response.notification.request.content.userInfo objectForKey:@"pw_push"]) {
         handlePushAcceptanceBlock();
@@ -827,6 +812,18 @@ RCT_EXPORT_METHOD(enableHuaweiPushNotifications) {
 
 - (void)onDidFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
     [[PWEventDispatcher sharedDispatcher] dispatchEvent:kRegistrationErrorEvent withArgs:@[ objectOrNull([error localizedDescription]) ]];
+}
+
+- (void)onPushReceived:(PushNotificationManager *)pushManager withNotification:(NSDictionary *)pushNotification onStart:(BOOL)onStart {
+    [[PWEventDispatcher sharedDispatcher] dispatchEvent:kPushReceivedEvent withArgs:@[ objectOrNull(pushNotification) ]];
+    
+    [self sendJSEvent:kPushReceivedJSEvent withArgs:pushNotification];
+}
+
+- (void)onPushAccepted:(PushNotificationManager *)manager withNotification:(NSDictionary *)pushNotification onStart:(BOOL)onStart {
+    [[PWEventDispatcher sharedDispatcher] dispatchEvent:kPushOpenEvent withArgs:@[ objectOrNull(pushNotification) ]];
+    
+    [self sendJSEvent:kPushOpenJSEvent withArgs:pushNotification];
 }
 
 #pragma mark - RCTEventEmitter
