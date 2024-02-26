@@ -11,7 +11,6 @@ declare module 'pushwoosh-react-native-plugin' {
   }
 
   type PushwooshTags = Record<string, string | number | string[] | number[] | boolean>
-  type PushwooshEmails = Record<string, string | string[]>
 
   type InboxNotification = {
     code: string;
@@ -36,17 +35,6 @@ declare module 'pushwoosh-react-native-plugin' {
     register(success?: (token: string) => void, fail?: (error: Error) => void): void;
     unregister(success?: (token: string) => void, fail?: (error: Error) => void): void;
     onPushOpen(callback: () => void, fail?: ()=> void): void; 
-    setEmails(
-      emails: PushwooshEmails,
-      success?: () => void,
-      fail?: (error: Error) => void
-    ): void;
-    setUserEmails(
-      userId: string,
-      emails: PushwooshEmails,
-      success?: () => void,
-      fail?: (error: Error) => void
-    ): void;
     setTags(
       tags: PushwooshTags,
       success?: () => void,
@@ -62,6 +50,9 @@ declare module 'pushwoosh-react-native-plugin' {
     postEvent(event: string, attributes?: Record<string, string>): void;
     enableHuaweiPushNotifications(): void;
 
+    //email methods
+    setUserEmails(userId: string, emails: (string | string[]), success?: () => void, fail?: (error: Error) => void): void;
+    setEmails(emails: (string | string[]), success?: () => void, fail?: (error: Error) => void): void; 
     //badge methods
     setApplicationIconBadgeNumber(badgeNumber: number): void;
     getApplicationIconBadgeNumber(callback: (badge: number) => void): void;
