@@ -24,6 +24,8 @@ import com.pushwoosh.RegisterForPushNotificationsResultData;
 import com.pushwoosh.badge.PushwooshBadge;
 import com.pushwoosh.exception.GetTagsException;
 import com.pushwoosh.exception.PushwooshException;
+import com.pushwoosh.exception.SetEmailException;
+import com.pushwoosh.exception.SetUserException;
 import com.pushwoosh.exception.SetUserIdException;
 import com.pushwoosh.exception.RegisterForPushNotificationsException;
 import com.pushwoosh.exception.UnregisterForPushNotificationException;

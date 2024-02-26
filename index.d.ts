@@ -45,10 +45,14 @@ declare module 'pushwoosh-react-native-plugin' {
     getShowPushnotificationAlert(callback: (willShow: boolean) => void): void;
     getPushToken(success?: (token: string) => void): void;
     getHwid(success: (hwid: string) => void): void;
+    getUserId(success: (userId: string) => void): void;
     setUserId(userId: string, success?: ()=> void, fail?: (error: Error) => void): void;
     postEvent(event: string, attributes?: Record<string, string>): void;
     enableHuaweiPushNotifications(): void;
 
+    //email methods
+    setUserEmails(userId: string, emails: (string | string[]), success?: () => void, fail?: (error: Error) => void): void;
+    setEmails(emails: (string | string[]), success?: () => void, fail?: (error: Error) => void): void; 
     //badge methods
     setApplicationIconBadgeNumber(badgeNumber: number): void;
     getApplicationIconBadgeNumber(callback: (badge: number) => void): void;
