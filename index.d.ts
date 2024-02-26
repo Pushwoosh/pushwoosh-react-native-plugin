@@ -11,6 +11,7 @@ declare module 'pushwoosh-react-native-plugin' {
   }
 
   type PushwooshTags = Record<string, string | number | string[] | number[] | boolean>
+  type PushwooshEmails = Record<string, string | string[]>
 
   type InboxNotification = {
     code: string;
@@ -35,6 +36,17 @@ declare module 'pushwoosh-react-native-plugin' {
     register(success?: (token: string) => void, fail?: (error: Error) => void): void;
     unregister(success?: (token: string) => void, fail?: (error: Error) => void): void;
     onPushOpen(callback: () => void, fail?: ()=> void): void; 
+    setEmails(
+      emails: PushwooshEmails,
+      success?: () => void,
+      fail?: (error: Error) => void
+    ): void;
+    setUserEmails(
+      userId: string,
+      emails: PushwooshEmails,
+      success?: () => void,
+      fail?: (error: Error) => void
+    ): void;
     setTags(
       tags: PushwooshTags,
       success?: () => void,
@@ -45,6 +57,7 @@ declare module 'pushwoosh-react-native-plugin' {
     getShowPushnotificationAlert(callback: (willShow: boolean) => void): void;
     getPushToken(success?: (token: string) => void): void;
     getHwid(success: (hwid: string) => void): void;
+    getUserId(success: (userId: string) => void): void;
     setUserId(userId: string, success?: ()=> void, fail?: (error: Error) => void): void;
     postEvent(event: string, attributes?: Record<string, string>): void;
     enableHuaweiPushNotifications(): void;
