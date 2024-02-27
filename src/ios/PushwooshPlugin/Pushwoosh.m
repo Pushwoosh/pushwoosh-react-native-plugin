@@ -213,27 +213,35 @@ RCT_EXPORT_METHOD(getPushToken:(RCTResponseSenderBlock)callback) {
 }
 
 RCT_EXPORT_METHOD(setEmails:(NSArray *)emails success:(RCTResponseSenderBlock)successCallback error:(RCTResponseSenderBlock)errorCallback) {
+    __block NSError* gError = nil;
     [[Pushwoosh sharedInstance] setEmails:emails completion:^(NSError * _Nullable error) {
-        if (!error && successCallback) {
-            successCallback(@[]);
-        }
-        
-        if (error && errorCallback) {
-            errorCallback(@[ objectOrNull([error localizedDescription]) ]);
+        if (error) {
+            gError = error;
         }
     }];
+    if (!gError && successCallback) {
+        successCallback(@[]);
+    }
+    
+    if (gError && errorCallback) {
+        errorCallback(@[ objectOrNull([gError localizedDescription]) ]);
+    }
 }
 
 RCT_EXPORT_METHOD(setUserEmails:(NSString*)userId emails:(NSArray *)emails success:(RCTResponseSenderBlock)successCallback error:(RCTResponseSenderBlock)errorCallback) {
+    __block NSError* gError = nil;
     [[Pushwoosh sharedInstance] setUser:userId emails:emails completion:^(NSError * _Nullable error) {
-        if (!error && successCallback) {
-            successCallback(@[]);
-        }
-        
-        if (error && errorCallback) {
-            errorCallback(@[ objectOrNull([error localizedDescription]) ]);
+        if (error) {
+            gError = error;
         }
     }];
+    if (!gError && successCallback) {
+        successCallback(@[]);
+    }
+    
+    if (gError && errorCallback) {
+        errorCallback(@[ objectOrNull([gError localizedDescription]) ]);
+    }
 }
 
 RCT_EXPORT_METHOD(setTags:(NSDictionary*)tags success:(RCTResponseSenderBlock)successCallback error:(RCTResponseSenderBlock)errorCallback) {
