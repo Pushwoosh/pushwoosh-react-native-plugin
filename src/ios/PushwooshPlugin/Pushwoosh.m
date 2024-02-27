@@ -15,6 +15,8 @@
 #import <UserNotifications/UserNotifications.h>
 #import <Pushwoosh/PushNotificationManager.h>
 
+#import <objc/runtime.h>
+
 static id objectOrNull(id object) {
     if (object) {
         return object;
@@ -31,6 +33,28 @@ static NSString * const kPushOpenEvent = @"PWPushOpen";
 
 static NSString * const kPushOpenJSEvent = @"pushOpened";
 static NSString * const kPushReceivedJSEvent = @"pushReceived";
+
+@interface PushwooshPlugin (InnerPushwooshPlugin)
+
+- (void) application:(UIApplication *)application pwplugin_didRegisterWithDeviceToken:(NSData *)deviceToken;
+- (void) application:(UIApplication *)application pwplugin_didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler;
+- (void) application:(UIApplication *)application pwplugin_didFailToRegisterForRemoteNotificationsWithError:(NSError *)error;
+
+@end
+
+void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, const char * signature) {
+    Method method = nil;
+    method = class_getInstanceMethod(class, fromChange);
+    
+    if (method) {
+        //method exists add a new method and swap with original
+        class_addMethod(class, toChange, impl, signature);
+        method_exchangeImplementations(class_getInstanceMethod(class, fromChange), class_getInstanceMethod(class, toChange));
+    } else {
+        //just add as orignal method
+        class_addMethod(class, fromChange, impl, signature);
+    }
+}
 
 @implementation PushwooshPlugin
 
@@ -71,15 +95,23 @@ RCT_EXPORT_METHOD(init:(NSDictionary*)config success:(RCTResponseSenderBlock)suc
     [PushNotificationManager initializeWithAppCode:appCode appName:nil];
     [[PushNotificationManager pushManager] sendAppOpen];
     [PushNotificationManager pushManager].delegate = self;
-    [[UIApplication sharedApplication] setDelegate:self];
+
+    [PushwooshPlugin swizzleNotificationSettingsHandler];
 
     // We set Pushwoosh UNUserNotificationCenter delegate unless CUSTOM is specified in the config
     if(![notificationHandling isEqualToString:@"CUSTOM"]) {
         if (@available(iOS 10, *)) {
+            BOOL shouldReplaceDelegate = YES;
 
             UNUserNotificationCenter *notificationCenter = [UNUserNotificationCenter currentNotificationCenter];
+
+#if !TARGET_OS_OSX
+            if ([notificationCenter.delegate conformsToProtocol:@protocol(PushNotificationDelegate)]) {
+                shouldReplaceDelegate = NO;
+            }
+#endif
             
-            if (notificationCenter.delegate != nil) {
+            if (notificationCenter.delegate != nil && shouldReplaceDelegate) {
                 _originalNotificationCenterDelegate = notificationCenter.delegate;
                 _originalNotificationCenterDelegateResponds.openSettingsForNotification =
                 (unsigned int)[_originalNotificationCenterDelegate
@@ -94,8 +126,10 @@ RCT_EXPORT_METHOD(init:(NSDictionary*)config success:(RCTResponseSenderBlock)suc
                                                             didReceiveNotificationResponse:withCompletionHandler:)];
             }
             
-            __strong PushwooshPlugin<UNUserNotificationCenterDelegate> *strongSelf = (PushwooshPlugin<UNUserNotificationCenterDelegate> *)self;
-            notificationCenter.delegate = (id<UNUserNotificationCenterDelegate>)strongSelf;
+            if (shouldReplaceDelegate) {
+                __strong PushwooshPlugin<UNUserNotificationCenterDelegate> *strongSelf = (PushwooshPlugin<UNUserNotificationCenterDelegate> *)self;
+                notificationCenter.delegate = (id<UNUserNotificationCenterDelegate>)strongSelf;
+            }
         }
     }
 
@@ -179,27 +213,35 @@ RCT_EXPORT_METHOD(getPushToken:(RCTResponseSenderBlock)callback) {
 }
 
 RCT_EXPORT_METHOD(setEmails:(NSArray *)emails success:(RCTResponseSenderBlock)successCallback error:(RCTResponseSenderBlock)errorCallback) {
+    __block NSError* gError = nil;
     [[Pushwoosh sharedInstance] setEmails:emails completion:^(NSError * _Nullable error) {
-        if (!error && successCallback) {
-            successCallback(@[]);
-        }
-        
-        if (error && errorCallback) {
-            errorCallback(@[ objectOrNull([error localizedDescription]) ]);
+        if (error) {
+            gError = error;
         }
     }];
+    if (!gError && successCallback) {
+        successCallback(@[]);
+    }
+    
+    if (gError && errorCallback) {
+        errorCallback(@[ objectOrNull([gError localizedDescription]) ]);
+    }
 }
 
 RCT_EXPORT_METHOD(setUserEmails:(NSString*)userId emails:(NSArray *)emails success:(RCTResponseSenderBlock)successCallback error:(RCTResponseSenderBlock)errorCallback) {
+    __block NSError* gError = nil;
     [[Pushwoosh sharedInstance] setUser:userId emails:emails completion:^(NSError * _Nullable error) {
-        if (!error && successCallback) {
-            successCallback(@[]);
-        }
-        
-        if (error && errorCallback) {
-            errorCallback(@[ objectOrNull([error localizedDescription]) ]);
+        if (error) {
+            gError = error;
         }
     }];
+    if (!gError && successCallback) {
+        successCallback(@[]);
+    }
+    
+    if (gError && errorCallback) {
+        errorCallback(@[ objectOrNull([gError localizedDescription]) ]);
+    }
 }
 
 RCT_EXPORT_METHOD(setTags:(NSDictionary*)tags success:(RCTResponseSenderBlock)successCallback error:(RCTResponseSenderBlock)errorCallback) {
@@ -362,19 +404,55 @@ RCT_EXPORT_METHOD(performAction:(NSString*)code) {
     [PWInbox performActionForMessageWithCode:code];
 }
 
-#pragma mark - UIApplicationDelegate Methods
 #pragma mark -
+#pragma mark - Swizzling
 
-- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
++ (void)swizzleNotificationSettingsHandler {
+    if ([UIApplication sharedApplication].delegate == nil) {
+        return;
+    }
+    
+    if ([[[UIDevice currentDevice] systemVersion] floatValue] < 8.0) {
+        return;
+    }
+    
+    static Class appDelegateClass = nil;
+    
+    //do not swizzle the same class twice
+    id delegate = [UIApplication sharedApplication].delegate;
+    if(appDelegateClass == [delegate class]) {
+        return;
+    }
+    
+    appDelegateClass = [delegate class];
+    
+    pushwoosh_swizzle([delegate class], @selector(application:didRegisterForRemoteNotificationsWithDeviceToken:), @selector(application:pwplugin_didRegisterWithDeviceToken:), (IMP)pwplugin_didRegisterWithDeviceToken, "v@:::");
+    pushwoosh_swizzle([delegate class], @selector(application:didFailToRegisterForRemoteNotificationsWithError:), @selector(application:pwplugin_didFailToRegisterForRemoteNotificationsWithError:), (IMP)pwplugin_didFailToRegisterForRemoteNotificationsWithError, "v@:::");
+    pushwoosh_swizzle([delegate class], @selector(application:didReceiveRemoteNotification:fetchCompletionHandler:), @selector(application:pwplugin_didReceiveRemoteNotification:fetchCompletionHandler:), (IMP)pwplugin_didReceiveRemoteNotification, "v@::::");
+}
+
+void pwplugin_didReceiveRemoteNotification(id self, SEL _cmd, UIApplication * application, NSDictionary * userInfo, void (^completionHandler)(UIBackgroundFetchResult)) {
+    if ([self respondsToSelector:@selector(application:pwplugin_didReceiveRemoteNotification:fetchCompletionHandler:)]) {
+        [self application:application pwplugin_didReceiveRemoteNotification:userInfo fetchCompletionHandler:completionHandler];
+    }
+    
+    [[Pushwoosh sharedInstance] handlePushReceived:userInfo];
+}
+
+void pwplugin_didRegisterWithDeviceToken(id self, SEL _cmd, id application, NSData *deviceToken) {
+    if ([self respondsToSelector:@selector(application: pwplugin_didRegisterWithDeviceToken:)]) {
+        [self application:application pwplugin_didRegisterWithDeviceToken:deviceToken];
+    }
+    
     [[Pushwoosh sharedInstance] handlePushRegistration:deviceToken];
 }
 
-- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
+void pwplugin_didFailToRegisterForRemoteNotificationsWithError(id self, SEL _cmd, UIApplication *application, NSError *error) {
+    if ([self respondsToSelector:@selector(application:pwplugin_didFailToRegisterForRemoteNotificationsWithError:)]) {
+        [self application:application pwplugin_didFailToRegisterForRemoteNotificationsWithError:error];
+    }
+    
     [[Pushwoosh sharedInstance] handlePushRegistrationFailure:error];
-}
-
-- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo fetchCompletionHandler:(void (^)(UIBackgroundFetchResult))completionHandler {
-    [[Pushwoosh sharedInstance] handlePushReceived:userInfo];
 }
 
 #pragma mark - UNUserNotificationCenter Delegate Methods
@@ -387,20 +465,6 @@ RCT_EXPORT_METHOD(performAction:(NSString*)code) {
 API_AVAILABLE(ios(10.0)) {
     
     if ([self isRemoteNotification:notification] && [PWMessage isPushwooshMessage:notification.request.content.userInfo]) {
-        UNMutableNotificationContent *content = notification.request.content.mutableCopy;
-        
-        NSMutableDictionary *userInfo = content.userInfo.mutableCopy;
-        userInfo[@"pw_push"] = @(YES);
-        
-        content.userInfo = userInfo;
-        
-        //newsstand push
-        if (![self isContentAvailablePush:userInfo]) {
-            [[PWEventDispatcher sharedDispatcher] dispatchEvent:kPushReceivedEvent withArgs:@[ objectOrNull(userInfo) ]];
-            
-            [self sendJSEvent:kPushReceivedJSEvent withArgs:userInfo];
-        }
-        
         completionHandler(UNNotificationPresentationOptionNone);
     } else if ([PushNotificationManager pushManager].showPushnotificationAlert || [notification.request.content.userInfo objectForKey:@"pw_push"] == nil) {
         completionHandler(UNNotificationPresentationOptionBadge | UNNotificationPresentationOptionAlert | UNNotificationPresentationOptionSound);
@@ -438,20 +502,10 @@ API_AVAILABLE(ios(10.0)) {
             if (![response.actionIdentifier isEqualToString:UNNotificationDefaultActionIdentifier] && [[PushNotificationManager pushManager].delegate respondsToSelector:@selector(onActionIdentifierReceived:withNotification:)]) {
                 [[PushNotificationManager pushManager].delegate onActionIdentifierReceived:response.actionIdentifier withNotification:[self pushPayloadFromContent:response.notification.request.content]];
             }
-
-            [[PWEventDispatcher sharedDispatcher] dispatchEvent:kPushOpenEvent withArgs:@[ objectOrNull(response.notification.request.content.userInfo) ]];
-            
-            [self sendJSEvent:kPushOpenJSEvent withArgs:response.notification.request.content.userInfo];
         }
     };
     
     if ([self isRemoteNotification:response.notification]  && [PWMessage isPushwooshMessage:response.notification.request.content.userInfo]) {
-        if (![self isContentAvailablePush:response.notification.request.content.userInfo]) {
-            [[PWEventDispatcher sharedDispatcher] dispatchEvent:kPushOpenEvent withArgs:@[ objectOrNull(response.notification.request.content.userInfo) ]];
-            
-            [self sendJSEvent:kPushOpenJSEvent withArgs:response.notification.request.content.userInfo];
-        }
-        
         handlePushAcceptanceBlock();
     } else if ([response.notification.request.content.userInfo objectForKey:@"pw_push"]) {
         handlePushAcceptanceBlock();
@@ -766,6 +820,18 @@ RCT_EXPORT_METHOD(enableHuaweiPushNotifications) {
 
 - (void)onDidFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
     [[PWEventDispatcher sharedDispatcher] dispatchEvent:kRegistrationErrorEvent withArgs:@[ objectOrNull([error localizedDescription]) ]];
+}
+
+- (void)onPushReceived:(PushNotificationManager *)pushManager withNotification:(NSDictionary *)pushNotification onStart:(BOOL)onStart {
+    [[PWEventDispatcher sharedDispatcher] dispatchEvent:kPushReceivedEvent withArgs:@[ objectOrNull(pushNotification) ]];
+    
+    [self sendJSEvent:kPushReceivedJSEvent withArgs:pushNotification];
+}
+
+- (void)onPushAccepted:(PushNotificationManager *)manager withNotification:(NSDictionary *)pushNotification onStart:(BOOL)onStart {
+    [[PWEventDispatcher sharedDispatcher] dispatchEvent:kPushOpenEvent withArgs:@[ objectOrNull(pushNotification) ]];
+    
+    [self sendJSEvent:kPushOpenJSEvent withArgs:pushNotification];
 }
 
 #pragma mark - RCTEventEmitter
