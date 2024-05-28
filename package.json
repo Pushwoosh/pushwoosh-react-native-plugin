@@ -1,6 +1,6 @@
 {
   "name": "pushwoosh-react-native-plugin",
-  "version": "6.1.30",
+  "version": "6.1.31",
   "description": "This plugin allows you to send and receive push notifications. Powered by Pushwoosh (www.pushwoosh.com).",
   "main": "index.js",
   "types": "index.d.ts",
