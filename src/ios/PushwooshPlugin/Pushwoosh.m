@@ -278,10 +278,6 @@ RCT_EXPORT_METHOD(getShowPushnotificationAlert:(RCTResponseSenderBlock)callback)
     }
 }
 
-RCT_EXPORT_METHOD(setUserId:(NSString*)userId) {
-    [[PWInAppManager sharedManager] setUserId:userId];
-}
-
 RCT_EXPORT_METHOD(setUserId:(NSString*)userId success:(RCTResponseSenderBlock)successCallback error:(RCTResponseSenderBlock)errorCallback) {
     
     [[PWInAppManager sharedManager] setUserId:userId completion:^(NSError *error) {
