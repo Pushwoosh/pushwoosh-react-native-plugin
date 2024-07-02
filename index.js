@@ -303,7 +303,6 @@ class PushNotification {
 	setUserId(userId: string) {
 		PushwooshModule.setUserId(userId);
 	}
-	
 
 	//Function: setUserId: completion:
 	//[android, ios] Set User indetifier. This could be Facebook ID, username or email, or any other user ID.
