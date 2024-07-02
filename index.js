@@ -293,17 +293,6 @@ class PushNotification {
 		PushwooshModule.getUserId(success);
 	}
 
-	//Function: setUserId
-	//[android, ios] Set User indentifier. This could be Facebook ID, username or email, or any other user ID.
-	//This allows data and events to be matched across multiple user devices.
-	//
-	//Parameters:
-	// "userId" - user string identifier
-	//
-	setUserId(userId: string) {
-		PushwooshModule.setUserId(userId);
-	}
-
 	//Function: setUserId: completion:
 	//[android, ios] Set User indetifier. This could be Facebook ID, username or email, or any other user ID.
 	//This allows data and events to be matched across multiple user devices.
