@@ -17,7 +17,7 @@ public class PushwooshNotificationServiceExtension extends NotificationServiceEx
 			ApplicationInfo ai = getApplicationContext().getPackageManager().getApplicationInfo(packageName, PackageManager.GET_META_DATA);
 
 			if (ai.metaData != null) {
-				showForegroundPush = ai.metaData.getBoolean("PW_BROADCAST_PUSH", false) || ai.metaData.getBoolean("com.pushwoosh.foreground_push", false);
+				showForegroundPush = ai.metaData.getBoolean("PW_BROADCAST_PUSH", true) || ai.metaData.getBoolean("com.pushwoosh.foreground_push", true);
 			}
 		} catch (Exception e) {
 			PWLog.exception(e);
