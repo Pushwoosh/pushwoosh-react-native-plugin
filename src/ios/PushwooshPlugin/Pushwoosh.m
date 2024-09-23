@@ -13,7 +13,7 @@
 #import <React/RCTConvert.h>
 
 #import <UserNotifications/UserNotifications.h>
-#import <Pushwoosh/PushNotificationManager.h>
+#import <PushwooshFramework/PushNotificationManager.h>
 
 #import <objc/runtime.h>
 
