@@ -6,7 +6,7 @@
 //
 
 #import "RCTViewManager.h"
-#import "Pushwoosh.h"
+#import "PushwooshFramework.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

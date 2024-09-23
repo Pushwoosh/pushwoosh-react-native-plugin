@@ -4,7 +4,7 @@
 //  (c) Pushwoosh 2016
 //
 
-#import "Pushwoosh.h"
+#import "PushwooshFramework.h"
 
 #import <React/RCTUtils.h>
 #import <React/RCTBridge.h>
