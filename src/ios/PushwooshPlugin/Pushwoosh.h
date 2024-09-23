@@ -8,15 +8,15 @@
 
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventEmitter.h>
-#import <Pushwoosh/Pushwoosh.h>
+#import <PushwooshFramework/PushwooshFramework.h>
 
-#if __has_include(<Pushwoosh/PushNotificationManager.h>)
-#import <Pushwoosh/PushNotificationManager.h>
-#import <Pushwoosh/PWInAppManager.h>
+#if __has_include(<PushwooshFramework/PushNotificationManager.h>)
+#import <PushwooshFramework/PushNotificationManager.h>
+#import <PushwooshFramework/PWInAppManager.h>
 #import <PushwooshInboxUI/PushwooshInboxUI.h>
-#import <Pushwoosh/PWGDPRManager.h>
-#import <Pushwoosh/PWInlineInAppView.h>
-#import <Pushwoosh/PWInbox.h>
+#import <PushwooshFramework/PWGDPRManager.h>
+#import <PushwooshFramework/PWInlineInAppView.h>
+#import <PushwooshFramework/PWInbox.h>
 #else
 #import "PushNotificationManager.h"
 #import "PWInAppManager.h"
