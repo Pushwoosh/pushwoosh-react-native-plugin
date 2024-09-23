@@ -1,11 +1,11 @@
 //
-//  Pushwoosh.h
+//  PushwooshFramework.h
 //  Pushwoosh SDK
-//  (c) Pushwoosh 2016
+//  (c) Pushwoosh 2024
 //
 
 #import "PushNotificationManager.h"
-#import "Pushwoosh.h"
+#import "PushwooshFramework.h"
 #import "PWInAppManager.h"
 #import "PWLog.h"
 #import "PWGDPRManager.h"
