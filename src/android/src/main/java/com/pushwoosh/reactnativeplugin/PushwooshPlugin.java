@@ -189,6 +189,17 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	}
 
 	@ReactMethod
+	public void addListener(String eventName) {
+		// Required for NativeEventEmitter. No need to do anything here.
+	}
+
+	@ReactMethod
+	public void removeListeners(Integer count) {
+		// Required for NativeEventEmitter. No need to do anything here.
+	}
+
+
+	@ReactMethod
 	public void setEmails(@NonNull ReadableArray emails, final Callback success, final Callback error) {
 		Pushwoosh.getInstance().setEmail(ConversionUtil.messageCodesArrayToArrayList(emails), new com.pushwoosh.function.Callback<Boolean, SetEmailException>() {
 			@Override

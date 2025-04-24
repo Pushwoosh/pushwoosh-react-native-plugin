@@ -906,7 +906,7 @@ RCT_EXPORT_METHOD(enableHuaweiPushNotifications) {
 }
 
 - (NSArray<NSString *> *)supportedEvents {
-    return @[ kPushOpenJSEvent ];
+    return @[ kPushOpenJSEvent, kPushReceivedJSEvent ];
 }
 
 @end
