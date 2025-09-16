@@ -245,6 +245,39 @@ const Actions = () => {
                     }); 
                 }} 
             />
+            <ButtonWithTextInput buttonText="REGISTER SMS NUMBER" onPress={(phoneNumber) => { 
+                /**
+                * REGISTER SMS NUMBER
+                * Registers phone number associated to the current user.
+                * SMS numbers must be in E.164 format (e.g., "+1234567890") and be valid.
+                * 
+                * PUSHWOOSH CODE 
+                *    |   |
+                *   _|   |_
+                *   \     /
+                *    \   /
+                *     \_/
+                */
+                Pushwoosh.registerSMSNumber(phoneNumber);
+                Alert.alert('SMS number registration sent');
+            }} placeholder1="+1234567890" />
+            
+            <ButtonWithTextInput buttonText="REGISTER WHATSAPP NUMBER" onPress={(phoneNumber) => { 
+                /**
+                * REGISTER WHATSAPP NUMBER
+                * Registers WhatsApp number associated to the current user.
+                * WhatsApp numbers must be in E.164 format (e.g., "+1234567890") and be valid
+                * 
+                * PUSHWOOSH CODE 
+                *    |   |
+                *   _|   |_
+                *   \     /
+                *    \   /
+                *     \_/
+                */
+                Pushwoosh.registerWhatsappNumber(phoneNumber);
+                Alert.alert('WhatsApp number registration sent');
+            }} placeholder1="+1234567890" />
         </ScrollView>
     );
 };

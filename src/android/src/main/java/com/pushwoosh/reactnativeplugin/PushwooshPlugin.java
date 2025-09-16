@@ -580,6 +580,16 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 		 Pushwoosh.getInstance().enableHuaweiPushNotifications();
 	 }
 
+	@ReactMethod
+	public void registerSMSNumber(String phoneNumber) {
+		Pushwoosh.getInstance().registerSMSNumber(phoneNumber);
+	}
+
+	@ReactMethod
+	public void registerWhatsappNumber(String phoneNumber) {
+		Pushwoosh.getInstance().registerWhatsappNumber(phoneNumber);
+	}
+
 	///
 	/// LifecycleEventListener callbacks
 	///

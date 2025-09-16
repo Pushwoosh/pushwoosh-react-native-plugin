@@ -875,6 +875,14 @@ RCT_EXPORT_METHOD(clearNotificationCenter){
 RCT_EXPORT_METHOD(enableHuaweiPushNotifications) {
     // available in Android only
 }
+
+RCT_EXPORT_METHOD(registerSMSNumber:(NSString *)phoneNumber) {
+    [[Pushwoosh sharedInstance] registerSmsNumber:phoneNumber];
+}
+
+RCT_EXPORT_METHOD(registerWhatsappNumber:(NSString *)phoneNumber) {
+    [[Pushwoosh sharedInstance] registerWhatsappNumber:phoneNumber];
+}
     
 #pragma mark - PushNotificationDelegate
 

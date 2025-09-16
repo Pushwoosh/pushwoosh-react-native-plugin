@@ -176,6 +176,38 @@ class PushNotification {
 		PushwooshModule.setEmails(emails, success, fail);
 	}
 
+	//Function: registerSMSNumber
+	//Registers phone number associated to the current user.
+	//SMS numbers must be in E.164 format (e.g., "+1234567890") and be valid.
+	//
+	//Example:
+	//(start code)
+	//	Pushwoosh.registerSMSNumber("+1234567890");
+	//(end)
+	registerSMSNumber(phoneNumber: string) {
+		if (!phoneNumber || phoneNumber.trim() === '') {
+			console.warn('Pushwoosh: SMS number is null or empty');
+			return;
+		}
+		PushwooshModule.registerSMSNumber(phoneNumber);
+	}
+
+	//Function: registerWhatsappNumber
+	//Registers WhatsApp number associated to the current user.
+	//WhatsApp numbers must be in E.164 format (e.g., "+1234567890") and be valid.
+	//
+	//Example:
+	//(start code)
+	//	Pushwoosh.registerWhatsappNumber("+1234567890");
+	//(end)
+	registerWhatsappNumber(phoneNumber: string) {
+		if (!phoneNumber || phoneNumber.trim() === '') {
+			console.warn('Pushwoosh: WhatsApp number is null or empty');
+			return;
+		}
+		PushwooshModule.registerWhatsappNumber(phoneNumber);
+	}
+
 	//Function: setTags
 	//Call this to set tags for the device
 	//
@@ -620,6 +652,7 @@ class PushNotification {
 	enableHuaweiPushNotifications() {
 		PushwooshModule.enableHuaweiPushNotifications();
 	}
+
 }
 
 module.exports = new PushNotification();

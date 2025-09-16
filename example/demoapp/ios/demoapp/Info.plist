@@ -4,6 +4,8 @@
 <dict>
 	<key>PW_APP_GROUPS_NAME</key>
 	<string></string>
+	<key>Pushwoosh_API_TOKEN</key>
+	<string>__YOUR_DEVICE_TYPE_API_TOKEN_FROM_PW_CONTROL_PANEL_</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>

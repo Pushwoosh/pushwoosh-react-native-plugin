@@ -62,6 +62,8 @@ DeviceEventEmitter.addListener('pushOpened', (e: Event) => {
 <tr class="even"><td><a href="#setcommunicationenabled">setCommunicationEnabled()</a></td></tr>
 <tr class="even"><td><a href="#removealldevicedata">removeAllDeviceData()</a></td></tr>
 <tr class="even"><td><a href="#enableHuaweiPushNotifications">enableHuaweiPushNotifications()</a></td></tr>
+<tr class="even"><td><a href="#registersmsnumber">registerSMSNumber(phoneNumber)</a></td></tr>
+<tr class="even"><td><a href="#registerwhatsappnumber">registerWhatsappNumber(phoneNumber)</a></td></tr>
 <tr>
 <th align="left" colspan="2"><strong>Events</strong></th>
 </tr>
@@ -490,6 +492,24 @@ enableHuaweiPushNotifications()
 ```
 **[android]**  
 Enables Huawei push messaging. Requires configured Huawei platform for your Pushwoosh application. See the <a href="https://docs.pushwoosh.com/platform-docs/pushwoosh-sdk/android-push-notifications/huawei-integration/huawei-in-react-native">integration guide</a>.
+
+### registerSMSNumber
+
+```js
+registerSMSNumber(phoneNumber)
+```
+**[android, ios]**  
+Registers phone number associated to the current user.
+SMS numbers must be in E.164 format (e.g., "+1234567890") and be valid.
+
+### registerWhatsappNumber
+
+```js
+registerWhatsappNumber(phoneNumber)
+```
+**[android, ios]**  
+Registers WhatsApp number associated to the current user.
+WhatsApp numbers must be in E.164 format (e.g., "+1234567890") and be valid.
 
 ### pushReceived
 

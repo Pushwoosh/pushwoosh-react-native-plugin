@@ -53,6 +53,9 @@ declare module 'pushwoosh-react-native-plugin' {
     //email methods
     setUserEmails(userId: string, emails: (string | string[]), success?: () => void, fail?: (error: Error) => void): void;
     setEmails(emails: (string | string[]), success?: () => void, fail?: (error: Error) => void): void; 
+    //SMS and WhatsApp methods
+    registerSMSNumber(phoneNumber: string): void;
+    registerWhatsappNumber(phoneNumber: string): void;
     //badge methods
     setApplicationIconBadgeNumber(badgeNumber: number): void;
     getApplicationIconBadgeNumber(callback: (badge: number) => void): void;
@@ -88,6 +91,7 @@ declare module 'pushwoosh-react-native-plugin' {
     isAvailableGDPR(success: (isAvailable: boolean) => void): void;
     setCommunicationEnabled(enabled: boolean, success?: () => void, fail?: (error: Error) => void): void;
     removeAllDeviceData(success?: () => void, fail?: (error: Error) => void): void;
+
   }
 
   const Pushwoosh: Pushwoosh;
