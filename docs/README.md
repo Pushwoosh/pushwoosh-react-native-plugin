@@ -57,10 +57,7 @@ DeviceEventEmitter.addListener('pushOpened', (e: Event) => {
 <tr class="even"><td><a href="#setsoundtype">setSoundType(type)</a></td></tr>
 <tr class="even"><td><a href="#setvibratetype">setVibrateType(type)</a></td></tr>
 <tr class="even"><td><a href="#presentinboxui">presentInboxUI()</a></td></tr>
-<tr class="even"><td><a href="#showgdprconsentui">showGDPRConsentUI()</a></td></tr>
-<tr class="even"><td><a href="#showgdprdeletionui">showGDPRDeletionUI()</a></td></tr>
 <tr class="even"><td><a href="#setcommunicationenabled">setCommunicationEnabled()</a></td></tr>
-<tr class="even"><td><a href="#removealldevicedata">removeAllDeviceData()</a></td></tr>
 <tr class="even"><td><a href="#enableHuaweiPushNotifications">enableHuaweiPushNotifications()</a></td></tr>
 <tr class="even"><td><a href="#registersmsnumber">registerSMSNumber(phoneNumber)</a></td></tr>
 <tr class="even"><td><a href="#registerwhatsappnumber">registerWhatsappNumber(phoneNumber)</a></td></tr>
@@ -450,23 +447,6 @@ Opens [Inbox](https://www.pushwoosh.com/docs/message-inbox) screen.
 Before using Message Inbox, please add node_modules/pushwoosh-react-native-plugin/src/ios/PushwooshInboxBundle.bundle to your project. Or, launch a script 'node node_modules/pushwoosh-react-native-plugin/scripts/add_inbox_ios_resources.js' to do it.
 
 
-### showGDPRConsentUI
-
-```js
-showGDPRConsentUI()
-```
-**[android, ios]**  
-A part of [The GDPR Compliance](https://www.pushwoosh.com/docs/the-gdpr-compliance) solution that shows the GDPR Consent Form, ensuring lawful basis for processing personal data of EU citizens.
-
-
-### showGDPRDeletionUI
-
-```js
-showGDPRDeletionUI()
-```
-**[android, ios]**  
-A part of [The GDPR Compliance](https://www.pushwoosh.com/docs/the-gdpr-compliance) solution that shows the GDPR Deletion Form, ensuring means to comply with the right to erasure.
-
 
 ### setCommunicationEnabled
 
@@ -477,13 +457,6 @@ setCommunicationEnabled(on: boolean)
 A binary method enabling/disabling all communication with Pushwoosh. The boolean value is false unsubscribes the device from receiving push notifications and stops in-app messages download. The value true reverses the effect.
 
 
-### removeAllDeviceData
-
-```js
-removeAllDeviceData()
-```
-**[android, ios]**  
-Removes all data about the device. Cannot be undone.
 
 ### enableHuaweiPushNotifications
 

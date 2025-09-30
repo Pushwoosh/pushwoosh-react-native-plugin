@@ -18,7 +18,6 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableNativeArray;
-import com.pushwoosh.GDPRManager;
 import com.pushwoosh.Pushwoosh;
 import com.pushwoosh.RegisterForPushNotificationsResultData;
 import com.pushwoosh.badge.PushwooshBadge;
@@ -30,7 +29,7 @@ import com.pushwoosh.exception.SetUserIdException;
 import com.pushwoosh.exception.RegisterForPushNotificationsException;
 import com.pushwoosh.exception.UnregisterForPushNotificationException;
 import com.pushwoosh.function.Result;
-import com.pushwoosh.inapp.PushwooshInApp;
+import com.pushwoosh.inapp.InAppManager;
 import com.pushwoosh.inbox.PushwooshInbox;
 import com.pushwoosh.inbox.data.InboxMessage;
 import com.pushwoosh.inbox.exception.InboxMessagesException;
@@ -306,7 +305,7 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 
 	@ReactMethod
 	public void postEvent(String event, ReadableMap attributes) {
-		PushwooshInApp.getInstance().postEvent(event, ConversionUtil.convertToTagsBundle(attributes));
+		InAppManager.getInstance().postEvent(event, ConversionUtil.convertToTagsBundle(attributes));
 	}
 
 	@ReactMethod
@@ -499,65 +498,26 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	}
 
 	@ReactMethod
-	public void showGDPRConsentUI(){
-		GDPRManager.getInstance().showGDPRConsentUI();
-	}
-
-	@ReactMethod
-	public void showGDPRDeletionUI(){
-		GDPRManager.getInstance().showGDPRDeletionUI();
-	}
-
-	@ReactMethod
-	public void isDeviceDataRemoved(final Callback success){
-		success.invoke(GDPRManager.getInstance().isDeviceDataRemoved());
-	}
-
-	@ReactMethod
 	public void isCommunicationEnabled(final Callback success){
-		success.invoke(GDPRManager.getInstance().isCommunicationEnabled());
-	}
-
-	@ReactMethod
-	public void isAvailableGDPR(final Callback success){
-		success.invoke(GDPRManager.getInstance().isAvailable());
+		success.invoke(Pushwoosh.getInstance().isServerCommunicationAllowed());
 	}
 
 	@ReactMethod
 	public void setCommunicationEnabled(boolean enable, final Callback success, final Callback error) {
-		GDPRManager.getInstance().setCommunicationEnabled(enable, new com.pushwoosh.function.Callback<Void, PushwooshException>() {
-			@Override
-			public void process(Result<Void, PushwooshException> result) {
-				if (result.isSuccess()) {
-					if (success != null) {
-						success.invoke(result.getData());
-					}
-				} else if (result.getException() != null) {
-					if (error != null) {
-						error.invoke(result.getException().getLocalizedMessage());
-					}
-				}
+		try {
+			if (enable) {
+				Pushwoosh.getInstance().startServerCommunication();
+			} else {
+				Pushwoosh.getInstance().stopServerCommunication();
 			}
-		});
+			success.invoke();
+		} catch (Exception e) {
+			if (error != null) {
+				error.invoke(e.getMessage());
+			}
+		}
 	}
 
-	@ReactMethod
-	public void removeAllDeviceData(final Callback success, final Callback error) {
-		GDPRManager.getInstance().removeAllDeviceData(new com.pushwoosh.function.Callback<Void, PushwooshException>() {
-			@Override
-			public void process(Result<Void, PushwooshException> result) {
-				if (result.isSuccess()) {
-					if (success != null) {
-						success.invoke(result.getData());
-					}
-				} else if (result.getException() != null) {
-					if (error != null) {
-						error.invoke(result.getException().getLocalizedMessage());
-					}
-				}
-			}
-		});
-	}
 
 	@ReactMethod
 	public void setLanguage(String language){

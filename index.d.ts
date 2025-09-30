@@ -83,14 +83,9 @@ declare module 'pushwoosh-react-native-plugin' {
     deleteMessages(ids: string[]): void;
     performAction(id: string): void;
 
-    //GDPR methods
-    showGDPRConsentUI(): void;
-    showGDPRDeletionUI(): void;
-    isDeviceDataRemoved(success: (isRemoved: boolean) => void): void;
+    //Communication methods
     isCommunicationEnabled(success: (isEnabled: boolean)=> void): void;
-    isAvailableGDPR(success: (isAvailable: boolean) => void): void;
     setCommunicationEnabled(enabled: boolean, success?: () => void, fail?: (error: Error) => void): void;
-    removeAllDeviceData(success?: () => void, fail?: (error: Error) => void): void;
 
   }
 

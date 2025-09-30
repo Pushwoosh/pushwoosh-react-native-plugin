@@ -19,6 +19,10 @@
 
 #define kPushwooshPluginImplementationInfoPlistKey @"Pushwoosh_PLUGIN_NOTIFICATION_HANDLER"
 
+#define PW_COMMUNICATION_ENABLED_KEY @"PushwooshCommunicationEnabled"
+#define PW_COMMUNICATION_ENABLED_PLIST_KEY @"Pushwoosh_ALLOW_SERVER_COMMUNICATION"
+
+
 static id objectOrNull(id object) {
     if (object) {
         return object;
@@ -773,53 +777,45 @@ API_AVAILABLE(ios(10.0)) {
     return controller;
 }
 
-RCT_EXPORT_METHOD(showGDPRConsentUI) {
-    [[PWGDPRManager sharedManager] showGDPRConsentUI];
-}
-
-RCT_EXPORT_METHOD(showGDPRDeletionUI) {
-    [[PWGDPRManager sharedManager] showGDPRDeletionUI];
-}
-
-RCT_EXPORT_METHOD(isDeviceDataRemoved:(RCTResponseSenderBlock)callback) {
-    callback(@[@([PWGDPRManager sharedManager].isDeviceDataRemoved)]);
-}
-
 RCT_EXPORT_METHOD(isCommunicationEnabled:(RCTResponseSenderBlock)callback) {
-    callback(@[@([PWGDPRManager sharedManager].isCommunicationEnabled)]);
-}
+    BOOL isCommunicationEnabled = [self getCommunicationEnabledState];
 
-RCT_EXPORT_METHOD(isAvailableGDPR:(RCTResponseSenderBlock)callback) {
-    callback(@[@([PWGDPRManager sharedManager].isAvailable)]);
+    callback(@[@(isCommunicationEnabled)]);
 }
 
 RCT_EXPORT_METHOD(setCommunicationEnabled:(BOOL)enabled success:(RCTResponseSenderBlock)successCallback error:(RCTResponseSenderBlock)errorCallback) {
-    [[PWGDPRManager sharedManager] setCommunicationEnabled:enabled completion:^(NSError *error) {
-        if (error) {
-            if (errorCallback) {
-                errorCallback(@[error.localizedDescription]);
-            }
-        } else {
-            if (successCallback) {
-                successCallback(@[]);
-            }
-        }
-    }];
+    [[NSUserDefaults standardUserDefaults] setBool:enabled forKey:PW_COMMUNICATION_ENABLED_KEY];
+        
+    if (enabled) {
+        [[Pushwoosh sharedInstance] startServerCommunication];
+    } else {
+        [[Pushwoosh sharedInstance] stopServerCommunication];
+    }
+
+    
+    successCallback(@[]);
 }
 
-RCT_EXPORT_METHOD(removeAllDeviceData:(RCTResponseSenderBlock)successCallback error:(RCTResponseSenderBlock)errorCallback) {
-    [[PWGDPRManager sharedManager] removeAllDeviceDataWithCompletion:^(NSError *error) {
-        if (error) {
-            if (errorCallback) {
-                errorCallback(@[error.localizedDescription]);
-            }
-        } else {
-            if (successCallback) {
-                successCallback(@[]);
-            }
+- (BOOL)getCommunicationEnabledState {
+    NSBundle *bundle = [NSBundle mainBundle];
+    NSObject *plistValue = [bundle objectForInfoDictionaryKey:PW_COMMUNICATION_ENABLED_PLIST_KEY];
+    
+    if (plistValue != nil) {
+        if ([plistValue isKindOfClass:[NSNumber class]]) {
+            return [(NSNumber *)plistValue boolValue];
+        } else if ([plistValue isKindOfClass:[NSString class]]) {
+            NSString *stringValue = [(NSString *)plistValue lowercaseString];
+            return [stringValue isEqualToString:@"true"] || [stringValue isEqualToString:@"yes"] || [stringValue isEqualToString:@"1"];
         }
-    }];
+    }
+
+    if ([[NSUserDefaults standardUserDefaults] objectForKey:PW_COMMUNICATION_ENABLED_KEY] != nil) {
+        return [[NSUserDefaults standardUserDefaults] boolForKey:PW_COMMUNICATION_ENABLED_KEY];
+    }
+    
+    return YES;
 }
+
 
 RCT_EXPORT_METHOD(createLocalNotification:(NSDictionary *)params){
     NSString *body = params[@"msg"];

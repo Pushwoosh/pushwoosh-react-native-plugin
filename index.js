@@ -590,29 +590,12 @@ class PushNotification {
 		PushwooshModule.performAction(id);
 	}
 
-	// Show inApp for change setting Enable/disable all communication with Pushwoosh
-	showGDPRConsentUI(){
-		PushwooshModule.showGDPRConsentUI();
-	}
-
-	// Show inApp for all device data from Pushwoosh and stops all interactions and communication permanently.
-	showGDPRDeletionUI(){
-		PushwooshModule.showGDPRDeletionUI();
-	}
-
-	isDeviceDataRemoved(success: Function){
-		 PushwooshModule.isDeviceDataRemoved(success);
-	}
 
 	// Return flag is enable communication with server
 	isCommunicationEnabled(success: Function){
 		PushwooshModule.isCommunicationEnabled(success);
 	}
 
-	// Return flag is enabled GDPR on server	
-	isAvailableGDPR(success: Function){
-		PushwooshModule.isAvailableGDPR(success);
-	}
 
 	// Enable/disable all communication with Pushwoosh. Enabled by default.
 	setCommunicationEnabled(enable: boolean, success: ?Function, fail: ?Function) {
@@ -625,16 +608,6 @@ class PushNotification {
 		PushwooshModule.setCommunicationEnabled(enable, success, fail);
 	}
 
-	// Removes all device data from Pushwoosh and stops all interactions and communication permanently.
-	removeAllDeviceData( success: ?Function, fail: ?Function) {
-		if (!success) {
-			success = function() {};
-		}
-		if (!fail) {
-			fail = function(error) {};
-		}
-		PushwooshModule.removeAllDeviceData(success, fail);
-	}
 
 	// Set notification icon background color
 	setNotificationIconBackgroundColor(color: string) {
