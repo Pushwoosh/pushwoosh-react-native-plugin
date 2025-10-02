@@ -296,7 +296,7 @@ RCT_EXPORT_METHOD(getShowPushnotificationAlert:(RCTResponseSenderBlock)callback)
 
 RCT_EXPORT_METHOD(setUserId:(NSString*)userId success:(RCTResponseSenderBlock)successCallback error:(RCTResponseSenderBlock)errorCallback) {
     
-    [[PWInAppManager sharedManager] setUserId:userId completion:^(NSError *error) {
+    [[Pushwoosh sharedInstance] setUserId:userId completion:^(NSError *error) {
         if (!error && successCallback) {
             successCallback(@[]);
         }
