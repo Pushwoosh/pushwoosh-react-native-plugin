@@ -7,7 +7,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.3'
+        classpath 'com.android.tools.build:gradle:8.1.1'
     }
 }
 
@@ -23,10 +23,10 @@ allprojects {
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 33
+    compileSdkVersion 34
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 33
+        targetSdkVersion 34
     }
     buildTypes {
         release {
@@ -37,7 +37,7 @@ android {
 }
 
 ext {
-    pushwoosh = "6.7.37"
+    pushwoosh = "6.7.38"
 }
 
 dependencies {
@@ -49,7 +49,7 @@ dependencies {
     implementation "com.pushwoosh:pushwoosh-badge:${pushwoosh}"
     implementation "com.pushwoosh:pushwoosh-inbox:${pushwoosh}"
     implementation "com.pushwoosh:pushwoosh-inbox-ui:${pushwoosh}"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.4.20"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22"
     implementation "com.google.firebase:firebase-messaging:23.1.0"
 }
 

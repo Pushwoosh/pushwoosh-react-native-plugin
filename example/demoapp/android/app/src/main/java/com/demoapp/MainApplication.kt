@@ -1,4 +1,4 @@
-package com.demoapp
+package com.pushwoosh.demoapp
 
 import android.app.Application
 import com.facebook.react.PackageList
