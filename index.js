@@ -4,6 +4,22 @@ import { NativeModules } from 'react-native';
 
 const PushwooshModule = NativeModules.Pushwoosh;
 
+//Constant: RichMediaStyle
+//Rich Media presentation style constants.
+//
+//Values:
+// MODAL - Rich Media displayed as modal dialog
+// LEGACY - Rich Media displayed as full-screen activity
+//
+//Example:
+//(start code)
+//	Pushwoosh.setRichMediaType(Pushwoosh.RichMediaStyle.MODAL);
+//(end)
+const RichMediaStyle = {
+	MODAL: 0,
+	LEGACY: 1
+};
+
 //Class: PushNotification
 //Use `PushNotification` to register device for push notifications on Pushwoosh and customize notification appearance.
 //
@@ -621,11 +637,38 @@ class PushNotification {
 		PushwooshModule.setLanguage(language);
 	}
 
-	// Enables Huawei push messaging 
+	// Enables Huawei push messaging
 	enableHuaweiPushNotifications() {
 		PushwooshModule.enableHuaweiPushNotifications();
 	}
 
+	// Sets the Rich Media presentation style.
+	//
+	// Parameters:
+	// "type" - Rich Media style (Pushwoosh.RichMediaStyle.MODAL or Pushwoosh.RichMediaStyle.LEGACY)
+	//
+	// Example:
+	// Pushwoosh.setRichMediaType(Pushwoosh.RichMediaStyle.MODAL);
+	setRichMediaType(type: number) {
+		PushwooshModule.setRichMediaType(type);
+	}
+
+	// Returns the current Rich Media presentation style.
+	//
+	// Parameters:
+	// "callback" - callback function that receives the current style (MODAL, LEGACY)
+	//
+	// Example:
+	// Pushwoosh.getRichMediaType((type) => {
+	//	console.log("Rich Media Type: " + (type === Pushwoosh.RichMediaStyle.MODAL ? "MODAL" : "LEGACY"));
+	// });
+	getRichMediaType(callback: Function) {
+		PushwooshModule.getRichMediaType(callback);
+	}
+
 }
+
+// Export RichMediaStyle constants
+PushNotification.prototype.RichMediaStyle = RichMediaStyle;
 
 module.exports = new PushNotification();

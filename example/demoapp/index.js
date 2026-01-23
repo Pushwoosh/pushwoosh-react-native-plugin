@@ -10,6 +10,7 @@ import {
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { enableScreens } from 'react-native-screens';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import Actions from './Actions';
 import Settings from './Settings';
 
@@ -18,9 +19,21 @@ const Tab = createBottomTabNavigator();
 const App = () => {
     return (
         <NavigationContainer>
-            <Tab.Navigator>
-                <Tab.Screen name="Actions" component={Actions} options={{ 
-                  title: 'PUSHWOOSH DEMO', 
+            <Tab.Navigator
+                screenOptions={({ route }) => ({
+                    tabBarIcon: ({ focused, color, size }) => {
+                        let iconName;
+                        if (route.name === 'Actions') {
+                            iconName = focused ? 'list' : 'list-outline';
+                        } else if (route.name === 'Settings') {
+                            iconName = focused ? 'settings' : 'settings-outline';
+                        }
+                        return <Ionicons name={iconName} size={size} color={color} />;
+                    },
+                })}
+            >
+                <Tab.Screen name="Actions" component={Actions} options={{
+                  title: 'PUSHWOOSH DEMO',
                   tabBarLabel: 'Actions',
                   }} />
                 <Tab.Screen name="Settings" component={Settings} options={{ title: 'PUSHWOOSH DEMO', tabBarLabel: 'Settings' }}  />

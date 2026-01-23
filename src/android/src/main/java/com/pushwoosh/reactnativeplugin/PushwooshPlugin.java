@@ -43,6 +43,8 @@ import com.pushwoosh.notification.VibrateType;
 import com.pushwoosh.tags.TagsBundle;
 import com.pushwoosh.notification.LocalNotification;
 import com.pushwoosh.notification.LocalNotificationReceiver;
+import com.pushwoosh.richmedia.RichMediaManager;
+import com.pushwoosh.richmedia.RichMediaType;
 
 import org.json.JSONObject;
 
@@ -92,7 +94,6 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	public String getName() {
 		return "Pushwoosh";
 	}
-
 
 	@ReactMethod
 	public void init(ReadableMap config, Callback success, Callback error) {
@@ -548,6 +549,18 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	@ReactMethod
 	public void registerWhatsappNumber(String phoneNumber) {
 		Pushwoosh.getInstance().registerWhatsappNumber(phoneNumber);
+	}
+
+	@ReactMethod
+	public void setRichMediaType(int type) {
+		RichMediaType richMediaType = type == 0 ? RichMediaType.MODAL : RichMediaType.DEFAULT;
+		RichMediaManager.setRichMediaType(richMediaType);
+	}
+
+	@ReactMethod
+	public void getRichMediaType(Callback callback) {
+		RichMediaType type = RichMediaManager.getRichMediaType();
+		callback.invoke(type.ordinal());
 	}
 
 	///

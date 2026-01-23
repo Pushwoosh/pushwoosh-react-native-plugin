@@ -879,7 +879,21 @@ RCT_EXPORT_METHOD(registerSMSNumber:(NSString *)phoneNumber) {
 RCT_EXPORT_METHOD(registerWhatsappNumber:(NSString *)phoneNumber) {
     [[Pushwoosh sharedInstance] registerWhatsappNumber:phoneNumber];
 }
-    
+
+RCT_EXPORT_METHOD(setRichMediaType:(nonnull NSNumber *)type) {
+    PWRichMediaPresentationStyle style = [type integerValue] == 0
+        ? PWRichMediaPresentationStyleModal
+        : PWRichMediaPresentationStyleLegacy;
+    [Pushwoosh.media setRichMediaPresentationStyle:style];
+}
+
+RCT_EXPORT_METHOD(getRichMediaType:(RCTResponseSenderBlock)callback) {
+    PWRichMediaPresentationStyle style = [Pushwoosh.media richMediaPresentationStyle];
+    if (callback) {
+        callback(@[@(style)]);
+    }
+}
+
 #pragma mark - PushNotificationDelegate
 
 - (void)onDidRegisterForRemoteNotificationsWithDeviceToken:(NSString *)token {

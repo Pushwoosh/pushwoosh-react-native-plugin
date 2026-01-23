@@ -12,16 +12,16 @@
 
 #if __has_include(<PushwooshFramework/PushNotificationManager.h>)
 #import <PushwooshFramework/PushNotificationManager.h>
-#import <PushwooshFramework/PWInAppManager.h>
-#import <PushwooshInboxUI/PushwooshInboxUI.h>
-#import <PushwooshFramework/PWInlineInAppView.h>
 #import <PushwooshFramework/PWInbox.h>
+#import <PushwooshCore/PWInAppManager.h>
+#import <PushwooshCore/PWMedia.h>
+#import <PushwooshInboxUI/PushwooshInboxUI.h>
 #else
 #import "PushNotificationManager.h"
-#import "PWInAppManager.h"
-#import "PushwooshInboxUI.h"
-#import "PWInlineInAppView.h"
 #import "PWInbox.h"
+#import "PWInAppManager.h"
+#import "PWMedia.h"
+#import "PushwooshInboxUI.h"
 #endif
 
 @interface PushwooshPlugin: RCTEventEmitter<RCTBridgeModule, PushNotificationDelegate>
