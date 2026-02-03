@@ -11,11 +11,13 @@
 #import "PWEventDispatcher.h"
 #import <React/RCTEventDispatcher.h>
 #import <React/RCTConvert.h>
+#import <React/RCTLinkingManager.h>
 
 #import <UserNotifications/UserNotifications.h>
 #import <PushwooshFramework/PushNotificationManager.h>
 
 #import <objc/runtime.h>
+#import <objc/message.h>
 
 #define kPushwooshPluginImplementationInfoPlistKey @"Pushwoosh_PLUGIN_NOTIFICATION_HANDLER"
 
@@ -32,6 +34,7 @@ static id objectOrNull(id object) {
 }
 
 static NSDictionary * gStartPushData = nil;
+static NSURL * gPushDeepLinkURL = nil;  // Deep link URL for New Architecture support
 static NSString * const kRegistrationSuccesEvent = @"PWRegistrationSuccess";
 static NSString * const kRegistrationErrorEvent = @"PWRegistrationError";
 static NSString * const kPushReceivedEvent = @"PWPushReceived";
@@ -47,6 +50,31 @@ static NSString * const kPushReceivedJSEvent = @"pushReceived";
 - (void) application:(UIApplication *)application pwplugin_didFailToRegisterForRemoteNotificationsWithError:(NSError *)error;
 
 @end
+
+@interface RCTLinkingManager (PushwooshSwizzle)
+- (void)pwplugin_original_getInitialURL:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
+@end
+
+// Swizzled getInitialURL for RCTLinkingManager (New Architecture support)
+static void pwplugin_getInitialURL(id self, SEL _cmd, RCTPromiseResolveBlock resolve, RCTPromiseRejectBlock reject) {
+    // If we have a saved deep link URL from push notification, return it
+    if (gPushDeepLinkURL) {
+        NSURL *url = gPushDeepLinkURL;
+        gPushDeepLinkURL = nil;  // Clear after use (one-time)
+        resolve(url.absoluteString);
+        return;
+    }
+
+    // Otherwise call the original implementation
+    SEL originalSelector = @selector(pwplugin_original_getInitialURL:reject:);
+    if ([self respondsToSelector:originalSelector]) {
+        void (*originalIMP)(id, SEL, RCTPromiseResolveBlock, RCTPromiseRejectBlock);
+        originalIMP = (void (*)(id, SEL, RCTPromiseResolveBlock, RCTPromiseRejectBlock))objc_msgSend;
+        originalIMP(self, originalSelector, resolve, reject);
+    } else {
+        resolve([NSNull null]);
+    }
+}
 
 void pushwoosh_swizzle(Class class, SEL fromChange, SEL toChange, IMP impl, const char * signature) {
     Method method = nil;
@@ -939,16 +967,114 @@ RCT_EXPORT_METHOD(getRichMediaType:(RCTResponseSenderBlock)callback) {
 - (void)onPushReceived:(PushNotificationManager *)manager withNotification:(NSDictionary *)pushNotification onStart:(BOOL)onStart {
     if (onStart) {
         gStartPushData = pushNotification;
+        // Save deep link URL for New Architecture (Linking.getInitialURL support)
+        NSString *link = pushNotification[@"l"];
+        if (link) {
+            gPushDeepLinkURL = [NSURL URLWithString:link];
+        }
     }
 }
 - (void)onPushAccepted:(PushNotificationManager *)manager withNotification:(NSDictionary *)pushNotification onStart:(BOOL)onStart {
     if (onStart) {
         gStartPushData = pushNotification;
+        // Save deep link URL for New Architecture (Linking.getInitialURL support)
+        NSString *link = pushNotification[@"l"];
+        if (link) {
+            gPushDeepLinkURL = [NSURL URLWithString:link];
+        }
     }
 }
 
 - (NSObject<PushNotificationDelegate> *)getPushwooshDelegate {
     return (NSObject<PushNotificationDelegate> *)self;
+}
+
+@end
+
+#pragma mark - RCTLinkingManager Swizzle for New Architecture
+
+// Temporary delegate to capture push notification on cold start before React Native initializes
+API_AVAILABLE(ios(10.0))
+@interface PWEarlyNotificationDelegate : NSObject <UNUserNotificationCenterDelegate>
+@property (nonatomic, weak) id<UNUserNotificationCenterDelegate> originalDelegate;
+@end
+
+@implementation PWEarlyNotificationDelegate
+
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center
+didReceiveNotificationResponse:(UNNotificationResponse *)response
+         withCompletionHandler:(void (^)(void))completionHandler API_AVAILABLE(ios(10.0)) {
+    // Capture deep link from push notification on cold start
+    if ([response.notification.request.trigger isKindOfClass:[UNPushNotificationTrigger class]]) {
+        NSDictionary *userInfo = response.notification.request.content.userInfo;
+        NSString *link = userInfo[@"l"];
+        if (link) {
+            gPushDeepLinkURL = [NSURL URLWithString:link];
+        }
+    }
+
+    // Forward to original delegate
+    if (self.originalDelegate && [self.originalDelegate respondsToSelector:@selector(userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:)]) {
+        [self.originalDelegate userNotificationCenter:center didReceiveNotificationResponse:response withCompletionHandler:completionHandler];
+    } else {
+        completionHandler();
+    }
+}
+
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center
+       willPresentNotification:(UNNotification *)notification
+         withCompletionHandler:(void (^)(UNNotificationPresentationOptions))completionHandler API_AVAILABLE(ios(10.0)) {
+    // Forward to original delegate
+    if (self.originalDelegate && [self.originalDelegate respondsToSelector:@selector(userNotificationCenter:willPresentNotification:withCompletionHandler:)]) {
+        [self.originalDelegate userNotificationCenter:center willPresentNotification:notification withCompletionHandler:completionHandler];
+    } else {
+        completionHandler(UNNotificationPresentationOptionNone);
+    }
+}
+
+@end
+
+static PWEarlyNotificationDelegate *gEarlyDelegate = nil;
+
+@implementation RCTLinkingManager (PushwooshDeepLink)
+
++ (void)load {
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        // Swizzle getInitialURL:reject: to support deep links from push on New Architecture
+        pushwoosh_swizzle(
+            [RCTLinkingManager class],
+            @selector(getInitialURL:reject:),
+            @selector(pwplugin_original_getInitialURL:reject:),
+            (IMP)pwplugin_getInitialURL,
+            "v@:@@"
+        );
+
+        // Set up early notification delegate to capture push on cold start
+        if (@available(iOS 10.0, *)) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+                gEarlyDelegate = [[PWEarlyNotificationDelegate alloc] init];
+                gEarlyDelegate.originalDelegate = center.delegate;
+                center.delegate = gEarlyDelegate;
+            });
+        }
+
+        // Also check launchOptions when app finishes launching
+        [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidFinishLaunchingNotification
+                                                          object:nil
+                                                           queue:nil
+                                                      usingBlock:^(NSNotification *notification) {
+            NSDictionary *launchOptions = notification.userInfo;
+            NSDictionary *remoteNotification = launchOptions[UIApplicationLaunchOptionsRemoteNotificationKey];
+            if (remoteNotification) {
+                NSString *link = remoteNotification[@"l"];
+                if (link && !gPushDeepLinkURL) {
+                    gPushDeepLinkURL = [NSURL URLWithString:link];
+                }
+            }
+        }];
+    });
 }
 
 @end

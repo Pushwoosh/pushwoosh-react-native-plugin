@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = "pushwoosh-react-native-plugin"
-  s.version          = "6.1.51"
+  s.version          = "6.1.52"
   s.summary          = "React Native Pushwoosh Push Notifications module"
   s.requires_arc = true
   s.author       = 'Pushwoosh'
@@ -15,6 +15,6 @@ Pod::Spec.new do |s|
   s.static_framework = true
 
   s.dependency 'React'
-  s.dependency 'PushwooshXCFramework', '7.0.14'
+  s.dependency 'PushwooshXCFramework', '7.0.21'
   s.dependency 'PushwooshInboxUIXCFramework'
 end
