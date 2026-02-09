@@ -1,5 +1,187 @@
 'use strict';
 
+/**
+ * @fileoverview Pushwoosh React Native Plugin - Integration Guide
+ *
+ * @description
+ * Pushwoosh is a customer engagement platform for push notifications, in-app messages,
+ * emails, SMS, and WhatsApp. This React Native plugin wraps native iOS and Android
+ * Pushwoosh SDKs and provides a JavaScript bridge for hybrid mobile applications.
+ *
+ * @section Installation
+ *
+ * ```bash
+ * npm install pushwoosh-react-native-plugin --save
+ * cd ios && pod install
+ * ```
+ *
+ * @section Quick Start
+ *
+ * Step 1: Initialize the plugin and register for push notifications
+ *
+ * ```javascript
+ * import Pushwoosh from 'pushwoosh-react-native-plugin';
+ * import { DeviceEventEmitter } from 'react-native';
+ *
+ * // Listen for push notification events
+ * DeviceEventEmitter.addListener('pushOpened', (e) => {
+ *     console.log("Push opened: " + JSON.stringify(e));
+ * });
+ *
+ * // Initialize Pushwoosh
+ * Pushwoosh.init({
+ *     pw_appid: "XXXXX-XXXXX",
+ *     project_number: "YOUR_FCM_SENDER_ID"
+ * });
+ *
+ * // Register for push notifications
+ * Pushwoosh.register(
+ *     (token) => {
+ *         console.log("Registered with push token: " + token);
+ *     },
+ *     (error) => {
+ *         console.error("Failed to register: " + error);
+ *     }
+ * );
+ * ```
+ *
+ * @section Common Use Cases
+ *
+ * User identification and cross-device tracking:
+ *
+ * ```javascript
+ * import Pushwoosh from 'pushwoosh-react-native-plugin';
+ *
+ * // After user login
+ * Pushwoosh.setUserId("user_12345");
+ * Pushwoosh.setEmails(["user@example.com"]);
+ * ```
+ *
+ * User segmentation with tags:
+ *
+ * ```javascript
+ * import Pushwoosh from 'pushwoosh-react-native-plugin';
+ *
+ * Pushwoosh.setTags(
+ *     { subscription: "premium", age: 25, interests: ["sports", "music"] },
+ *     () => console.log("Tags set successfully"),
+ *     (error) => console.error("Failed to set tags: " + error)
+ * );
+ *
+ * Pushwoosh.getTags(
+ *     (tags) => console.log("Tags: " + JSON.stringify(tags)),
+ *     (error) => console.error("Get tags error: " + error)
+ * );
+ * ```
+ *
+ * Trigger In-App Messages with events:
+ *
+ * ```javascript
+ * import Pushwoosh from 'pushwoosh-react-native-plugin';
+ *
+ * Pushwoosh.setUserId("user_12345");
+ * Pushwoosh.postEvent("purchase_complete", {
+ *     productName: "Premium Plan",
+ *     amount: "9.99"
+ * });
+ * ```
+ *
+ * Schedule a local notification:
+ *
+ * ```javascript
+ * import Pushwoosh from 'pushwoosh-react-native-plugin';
+ *
+ * Pushwoosh.createLocalNotification({
+ *     msg: "Your order is ready!",
+ *     seconds: 60,
+ *     userData: { orderId: "12345" }
+ * });
+ * ```
+ *
+ * Message Inbox with custom styling:
+ *
+ * ```javascript
+ * import Pushwoosh from 'pushwoosh-react-native-plugin';
+ * import { processColor } from 'react-native';
+ *
+ * Pushwoosh.presentInboxUI({
+ *     dateFormat: "dd.MM.yyyy",
+ *     accentColor: processColor('#3498db'),
+ *     backgroundColor: processColor('#ffffff'),
+ *     titleColor: processColor('#333333'),
+ *     descriptionColor: processColor('#666666'),
+ *     listEmptyMessage: "No messages yet"
+ * });
+ *
+ * // Or load messages programmatically
+ * Pushwoosh.loadMessages(
+ *     (messages) => {
+ *         messages.forEach((msg) => {
+ *             console.log(msg.title + ": " + msg.message);
+ *         });
+ *     },
+ *     (error) => console.error("Failed to load: " + error)
+ * );
+ *
+ * Pushwoosh.unreadMessagesCount((count) => {
+ *     console.log("Unread messages: " + count);
+ * });
+ * ```
+ *
+ * Multi-channel communication:
+ *
+ * ```javascript
+ * import Pushwoosh from 'pushwoosh-react-native-plugin';
+ *
+ * Pushwoosh.setEmails(["user@example.com"]);
+ * Pushwoosh.registerSMSNumber("+1234567890");
+ * Pushwoosh.registerWhatsappNumber("+1234567890");
+ * ```
+ *
+ * Enable/disable Pushwoosh communication (e.g. for GDPR):
+ *
+ * ```javascript
+ * import Pushwoosh from 'pushwoosh-react-native-plugin';
+ *
+ * // User opted out
+ * Pushwoosh.setCommunicationEnabled(false);
+ *
+ * // User opted in
+ * Pushwoosh.setCommunicationEnabled(true);
+ *
+ * // Check current status
+ * Pushwoosh.isCommunicationEnabled((enabled) => {
+ *     console.log("Communication enabled: " + enabled);
+ * });
+ * ```
+ *
+ * Custom notification handling on iOS:
+ *
+ * ```javascript
+ * import Pushwoosh from 'pushwoosh-react-native-plugin';
+ *
+ * Pushwoosh.init({
+ *     pw_appid: "XXXXX-XXXXX",
+ *     project_number: "YOUR_FCM_SENDER_ID",
+ *     pw_notification_handling: "CUSTOM"
+ * });
+ * ```
+ *
+ * @section Configuration Parameters
+ *
+ * - pw_appid (required) - Pushwoosh Application ID from Control Panel
+ * - project_number (required for Android) - FCM Sender ID
+ * - pw_notification_handling (optional, iOS) - Set to "CUSTOM" for custom notification handling
+ * - reverse_proxy_url (optional) - URL to reverse proxy for Pushwoosh server communication
+ *
+ * @section Events (DeviceEventEmitter)
+ *
+ * - "pushOpened" - Fired when a notification is opened by the user.
+ * - "pushReceived" - Fired when a notification is received.
+ *
+ * @module pushwoosh-react-native-plugin
+ */
+
 import { NativeModules } from 'react-native';
 
 const PushwooshModule = NativeModules.Pushwoosh;
@@ -20,29 +202,12 @@ const RichMediaStyle = {
 	LEGACY: 1
 };
 
-//Class: PushNotification
-//Use `PushNotification` to register device for push notifications on Pushwoosh and customize notification appearance.
-//
-//Example:
-//(start code)
-//DeviceEventEmitter.addListener('pushOpened', (e: Event) => {
-//  console.warn("pushOpened: " + JSON.stringify(e));
-//  alert(JSON.stringify(e));
-//});
-//
-//const Pushwoosh = require('pushwoosh-react-native-plugin');
-//
-//Pushwoosh.init({ "pw_appid" : "XXXX-XXXX", "project_number" : "XXXXXXXXXXXXX", "reverse_proxy_url" : "your_url_proxy" });
-//
-//Pushwoosh.register(
-//  (token) => {
-//    console.warn("Registered for pushes: " + token);
-//  },
-//  (error) => {
-//    console.warn("Failed to register: " + error);
-//  }
-//);
-//(end)
+/**
+ * PushNotification class provides the JavaScript API for interacting with the Pushwoosh SDK.
+ * Import it via: `import Pushwoosh from 'pushwoosh-react-native-plugin';`
+ *
+ * @class PushNotification
+ */
 class PushNotification {
 
 	//Function: init
