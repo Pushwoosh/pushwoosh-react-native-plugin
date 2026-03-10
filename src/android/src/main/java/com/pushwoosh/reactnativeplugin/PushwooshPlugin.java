@@ -110,7 +110,7 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 		if (config.hasKey("reverse_proxy_url")) {
 			String proxyUrl = config.getString("reverse_proxy_url");
 			if (!TextUtils.isEmpty(proxyUrl) && NetworkModule.getRequestManager() != null) {
-				NetworkModule.getRequestManager().setReverseProxyUrl(proxyUrl);
+				NetworkModule.getRequestManager().setReverseProxyUrl(proxyUrl, null);
 			}
 		}
 
