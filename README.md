@@ -53,17 +53,28 @@ npm install pushwoosh-react-native-plugin --save
 cd ios && pod install
 ```
 
-### Android Setup
+### Android Setup (Firebase Cloud Messaging)
 
-Add to your project's `build.gradle`:
+Push notifications on Android require Firebase Cloud Messaging (FCM).
 
-```groovy
-buildscript {
-    dependencies {
-        classpath 'com.google.gms:google-services:4.3.15'
-    }
-}
-```
+**Option A — Android Studio (recommended):**
+Open the `android/` folder in Android Studio, then go to
+Tools > Firebase > Cloud Messaging > Set up Firebase Cloud Messaging.
+The wizard will automatically add all required configuration.
+
+**Option B — Manual setup:**
+1. Create a project in [Firebase Console](https://console.firebase.google.com)
+2. Download `google-services.json` and place it in `android/app/`
+3. Add the Google Services classpath to `android/build.gradle`:
+   ```groovy
+   classpath("com.google.gms:google-services:4.3.15")
+   ```
+4. Apply the plugin in `android/app/build.gradle`:
+   ```groovy
+   apply plugin: "com.google.gms.google-services"
+   ```
+
+The Pushwoosh plugin already includes the `firebase-messaging` dependency, so you do not need to add it manually.
 
 ## AI-Assisted Integration
 
@@ -131,8 +142,7 @@ DeviceEventEmitter.addListener('pushOpened', (e) => {
 
 // Initialize Pushwoosh
 Pushwoosh.init({
-    pw_appid: "YOUR_PUSHWOOSH_APP_ID",
-    project_number: "YOUR_FCM_SENDER_ID"
+    pw_appid: "YOUR_PUSHWOOSH_APP_ID"
 });
 
 // Register for push notifications
@@ -228,7 +238,6 @@ import Pushwoosh from 'pushwoosh-react-native-plugin';
 
 Pushwoosh.init({
     pw_appid: "YOUR_PUSHWOOSH_APP_ID",
-    project_number: "YOUR_FCM_SENDER_ID",
     pw_notification_handling: "CUSTOM"
 });
 ```
@@ -317,6 +326,12 @@ Pushwoosh.init({
 |--------|-------------|
 | `setCommunicationEnabled(enable, success?, fail?)` | Enable/disable all Pushwoosh communication |
 | `isCommunicationEnabled(success)` | Check if communication is enabled |
+
+### Reverse Proxy
+
+| Method | Description |
+|--------|-------------|
+| `setReverseProxy(url, headers?)` | Route all SDK requests through a reverse proxy. Call before `init()` |
 
 ### Events (DeviceEventEmitter)
 

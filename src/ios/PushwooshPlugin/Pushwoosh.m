@@ -15,6 +15,7 @@
 
 #import <UserNotifications/UserNotifications.h>
 #import <PushwooshFramework/PushNotificationManager.h>
+#import <PushwooshCore/PushwooshConfig.h>
 
 #import <objc/runtime.h>
 #import <objc/message.h>
@@ -125,11 +126,6 @@ RCT_EXPORT_METHOD(init:(NSDictionary*)config success:(RCTResponseSenderBlock)suc
         }
         
         return;
-    }
-    
-    NSString *proxyUrl = config[@"reverse_proxy_url"];
-    if (proxyUrl && ![proxyUrl isEqualToString:@""]) {
-        [[Pushwoosh sharedInstance] setReverseProxy:proxyUrl];
     }
     
     [PushNotificationManager initializeWithAppCode:appCode appName:nil];
@@ -895,6 +891,10 @@ RCT_EXPORT_METHOD(clearNotificationCenter){
     [PushNotificationManager clearNotificationCenter];
 }
 
+
+RCT_EXPORT_METHOD(setReverseProxy:(NSString *)url headers:(NSDictionary *)headers) {
+    [PushwooshConfig setReverseProxy:url headers:headers];
+}
 
 RCT_EXPORT_METHOD(enableHuaweiPushNotifications) {
     // available in Android only

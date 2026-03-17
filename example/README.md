@@ -8,46 +8,21 @@
 ### Android
  <img src="https://github.com/Pushwoosh/pushwoosh-reactnative-sample/blob/main/Screenshots/Android_1.png" alt="Alt text" width="300"> <img src="https://github.com/Pushwoosh/pushwoosh-reactnative-sample/blob/main/Screenshots/Android_2.png" alt="Alt text" width="300"> 
 
-### 1. Open demoapp -> Settings.js and add your App ID and FCM Sender ID.
+### 1. Open demoapp -> index.js and set your Pushwoosh App ID.
 
-```
-/**
-* initialize Pushwoosh SDK.
-* Example params: {"pw_appid": "application id", "project_number": "FCM sender id"}
-* 
-* 1. app_id - YOUR_APP_ID
-* 2. sender_id - FCM_SENDER_ID
-*/
-
-Pushwoosh.init({ "pw_appid" : "XXXXX-XXXXX", "project_number":"XXXXXXXXXXXX"});
-
+```js
+Pushwoosh.init({ "pw_appid": "XXXXX-XXXXX" });
 ```
 
-### 2. Add 'google-services.json' file in android -> app folder.
+### 2. Set up Firebase Cloud Messaging for Android.
 
-### 3. Add GoogleServices gradle plugin to your project's build.gradle
+Open the `android/` folder in Android Studio, then go to
+Tools > Firebase > Cloud Messaging > Set up Firebase Cloud Messaging.
 
-```
-// you should already have buildscript and dependencies blocks in your project's build.gradle so just put the classpath line there
-
-buildscript {
-  dependencies {
-  classpath 'com.google.gms:google-services:4.3.3'
-  }
-}
-
-```
-
-### 4. Apply GoogleServicesPlugin in your app's build.gradle
-
-```
-// add these lines to the very end of your build.gradle
-
-apply {
- plugin com.google.gms.googleservices.GoogleServicesPlugin
-}
-
-```
+Or manually:
+1. Add `google-services.json` to `android/app/`
+2. Add `classpath("com.google.gms:google-services:4.3.15")` to root `build.gradle`
+3. Add `apply plugin: "com.google.gms.google-services"` to `app/build.gradle`
 
 ## The guide for SDK integration is available on Pushwoosh [website](https://docs.pushwoosh.com/platform-docs/pushwoosh-sdk/cross-platform-frameworks/react-native/integrating-react-native-plugin).
 

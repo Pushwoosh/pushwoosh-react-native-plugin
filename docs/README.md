@@ -8,7 +8,7 @@ Example:
 ```js
 var Pushwoosh = require('pushwoosh-react-native-plugin');
 
-Pushwoosh.init({ "pw_appid" : "PUSHWOOSH_APP_ID" , "project_number" : "GOOGLE_PROJECT_NUMBER" });
+Pushwoosh.init({ "pw_appid" : "PUSHWOOSH_APP_ID" });
 
 Pushwoosh.register(
   (token) => {
@@ -61,6 +61,7 @@ DeviceEventEmitter.addListener('pushOpened', (e: Event) => {
 <tr class="even"><td><a href="#enableHuaweiPushNotifications">enableHuaweiPushNotifications()</a></td></tr>
 <tr class="even"><td><a href="#registersmsnumber">registerSMSNumber(phoneNumber)</a></td></tr>
 <tr class="even"><td><a href="#registerwhatsappnumber">registerWhatsappNumber(phoneNumber)</a></td></tr>
+<tr class="even"><td><a href="#setreverseproxy">setReverseProxy(url, headers)</a></td></tr>
 <tr>
 <th align="left" colspan="2"><strong>Events</strong></th>
 </tr>
@@ -77,7 +78,7 @@ DeviceEventEmitter.addListener('pushOpened', (e: Event) => {
 init(config, success, fail)
 ```
 
-Initializes Pushwoosh module with application id and google project number.
+Initializes Pushwoosh module with application id.
 
 <table width=100% style='background-color:#0EA7ED;'>
 <colgroup>
@@ -91,8 +92,6 @@ Initializes Pushwoosh module with application id and google project number.
 </tr>
 <tr class="even"><td>object</td><td><b>config</b></td><td>Pushwoosh initialization config.</td></tr>
 <tr class="even"><td>string</td><td><b>config.pw_appid</b></td><td>Pushwoosh application id.</td></tr>
-<tr class="even"><td>string</td><td><b>config.project_number</b></td><td>GCM project number (for Android push notifications).</td></tr>
-<tr class="even"><td>string</td><td><b>config.reverse_proxy_url</b></td><td>(optional) Url to your reverse proxy.</td></tr>
 <tr class="even"><td>string</td><td><b>config.pw_notification_handling</b></td><td>(optional) To use custom notification handling on iOS specify the parameter "pw_notification_handling" to "CUSTOM".</td></tr>
 <tr class="even"><td>function</td><td><b>success</b></td><td>(optional) initialization success callback.</td></tr>
 <tr class="even"><td>function</td><td><b>fail</b></td><td>(optional) initialization failure callback.</td></tr>
@@ -483,6 +482,40 @@ registerWhatsappNumber(phoneNumber)
 **[android, ios]**  
 Registers WhatsApp number associated to the current user.
 WhatsApp numbers must be in E.164 format (e.g., "+1234567890") and be valid.
+
+### setReverseProxy
+
+```js
+setReverseProxy(url, headers)
+```
+**[android, ios]**
+Routes all SDK network requests through a reverse proxy server. Must be called before `init()`.
+
+<table width=100% style='background-color:#0EA7ED;'>
+<colgroup>
+<col width="10%" />
+<col width="20%" />
+<col width="70%" />
+</colgroup>
+<tbody>
+<tr>
+<th align="left" colspan="3"><strong>Parameters</strong></th>
+</tr>
+<tr class="even"><td>string</td><td><b>url</b></td><td>Reverse proxy URL.</td></tr>
+<tr class="even"><td>object</td><td><b>headers</b></td><td>(optional) Custom HTTP headers for all requests.</td></tr>
+</tbody>
+</table>
+
+**Prerequisites:**
+- **Android:** add `<meta-data android:name="com.pushwoosh.allow_reverse_proxy" android:value="true" />` to AndroidManifest.xml
+- **iOS:** add `Pushwoosh_ALLOW_REVERSE_PROXY = YES` to Info.plist
+
+Example:
+
+```js
+Pushwoosh.setReverseProxy("https://your-proxy.example.com/", { "X-Proxy-Auth": "my-token" });
+Pushwoosh.init({ "pw_appid": "XXXXX-XXXXX" });
+```
 
 ### pushReceived
 

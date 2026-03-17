@@ -1,7 +1,8 @@
 declare module 'pushwoosh-react-native-plugin' {
   interface PushwooshConfig {
     pw_appid: string;
-    project_number: string;
+    /** @deprecated FCM Sender ID is no longer required. Firebase Cloud Messaging configuration is handled automatically via google-services.json. */
+    project_number?: string;
     pw_notification_handling?: string;
   }
   type LocalNotification = {
@@ -28,6 +29,7 @@ declare module 'pushwoosh-react-native-plugin' {
 
   interface Pushwoosh {
     //general interaction with Pushwoosh
+    setReverseProxy(url: string, headers?: Record<string, string>): void;
     init(config: PushwooshConfig, success?: () => void, fail?: () => void): void;
     createLocalNotification(notification: LocalNotification): void;
     clearLocalNotification(): void;

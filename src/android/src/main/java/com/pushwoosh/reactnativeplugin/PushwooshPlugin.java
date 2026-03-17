@@ -34,7 +34,6 @@ import com.pushwoosh.inbox.PushwooshInbox;
 import com.pushwoosh.inbox.data.InboxMessage;
 import com.pushwoosh.inbox.exception.InboxMessagesException;
 import com.pushwoosh.inbox.ui.presentation.view.activity.InboxActivity;
-import com.pushwoosh.internal.network.NetworkModule;
 import com.pushwoosh.internal.platform.AndroidPlatformModule;
 import com.pushwoosh.internal.utils.PWLog;
 import com.pushwoosh.notification.PushwooshNotificationSettings;
@@ -50,6 +49,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PushwooshPlugin extends ReactContextBaseJavaModule implements LifecycleEventListener {
 
@@ -96,22 +97,27 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	}
 
 	@ReactMethod
-	public void init(ReadableMap config, Callback success, Callback error) {
-		String appId = config.getString("pw_appid");
-		String projectId = config.getString("project_number");
+	public void setReverseProxy(String url, ReadableMap headers) {
+		Map<String, String> headersMap = null;
+		if (headers != null) {
+			headersMap = new HashMap<>();
+			for (Map.Entry<String, Object> entry : headers.toHashMap().entrySet()) {
+				headersMap.put(entry.getKey(), String.valueOf(entry.getValue()));
+			}
+		}
+		Pushwoosh.getInstance().setReverseProxy(url, headersMap);
+	}
 
-		if (appId == null || projectId == null) {
+	@ReactMethod
+	public void init(ReadableMap config, Callback success, Callback error) {
+		String appId = config.hasKey("pw_appid") ? config.getString("pw_appid") : null;
+		String projectId = config.hasKey("project_number") ? config.getString("project_number") : null;
+
+		if (appId == null) {
 			if (error != null) {
-				error.invoke("Pushwoosh Application id and GCM project number not specified");
+				error.invoke("Pushwoosh Application id not specified");
 			}
 			return;
-		}
-
-		if (config.hasKey("reverse_proxy_url")) {
-			String proxyUrl = config.getString("reverse_proxy_url");
-			if (!TextUtils.isEmpty(proxyUrl) && NetworkModule.getRequestManager() != null) {
-				NetworkModule.getRequestManager().setReverseProxyUrl(proxyUrl, null);
-			}
 		}
 
 		Pushwoosh.getInstance().setAppId(appId);

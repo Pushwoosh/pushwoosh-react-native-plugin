@@ -15,6 +15,29 @@
  * cd ios && pod install
  * ```
  *
+ * @section Android Setup (Firebase Cloud Messaging)
+ *
+ * Push notifications on Android require Firebase Cloud Messaging (FCM).
+ * Add Firebase to your Android project using one of the following methods:
+ *
+ * Option A — Android Studio (recommended):
+ *   Open the `android/` folder in Android Studio, then go to
+ *   Tools → Firebase → Cloud Messaging → Set up Firebase Cloud Messaging.
+ *   The wizard will automatically add all required configuration.
+ *
+ * Option B — Manual setup:
+ *   1. Create a project in the Firebase Console (https://console.firebase.google.com)
+ *   2. Download `google-services.json` and place it in `android/app/`
+ *   3. Add the Google Services classpath to `android/build.gradle`:
+ *      `classpath("com.google.gms:google-services:4.3.15")`
+ *   4. Apply the plugin in `android/app/build.gradle`:
+ *      `apply plugin: "com.google.gms.google-services"`
+ *
+ * The Pushwoosh plugin already includes the `firebase-messaging` dependency,
+ * so you do not need to add it manually.
+ *
+ * For more details, see: https://firebase.google.com/docs/android/setup
+ *
  * @section Quick Start
  *
  * Step 1: Initialize the plugin and register for push notifications
@@ -30,8 +53,7 @@
  *
  * // Initialize Pushwoosh
  * Pushwoosh.init({
- *     pw_appid: "XXXXX-XXXXX",
- *     project_number: "YOUR_FCM_SENDER_ID"
+ *     pw_appid: "XXXXX-XXXXX"
  * });
  *
  * // Register for push notifications
@@ -162,7 +184,6 @@
  *
  * Pushwoosh.init({
  *     pw_appid: "XXXXX-XXXXX",
- *     project_number: "YOUR_FCM_SENDER_ID",
  *     pw_notification_handling: "CUSTOM"
  * });
  * ```
@@ -170,9 +191,7 @@
  * @section Configuration Parameters
  *
  * - pw_appid (required) - Pushwoosh Application ID from Control Panel
- * - project_number (required for Android) - FCM Sender ID
  * - pw_notification_handling (optional, iOS) - Set to "CUSTOM" for custom notification handling
- * - reverse_proxy_url (optional) - URL to reverse proxy for Pushwoosh server communication
  *
  * @section Events (DeviceEventEmitter)
  *
@@ -210,13 +229,55 @@ const RichMediaStyle = {
  */
 class PushNotification {
 
-	//Function: init
-	//Call this first thing with your Pushwoosh App ID (pw_appid parameter) and Google Project ID for Android (projectid parameter)
+	//Function: setReverseProxy
+	//Routes all SDK network requests through a reverse proxy server instead of Pushwoosh servers directly.
+	//The proxy server must be configured to forward requests to Pushwoosh APIs.
+	//
+	//Settings are not persisted and must be set on every app start.
+	//Must be called before init() to ensure no SDK requests are sent without the proxy.
+	//
+	//When the reverse proxy flag is enabled, the SDK blocks all network requests until
+	//setReverseProxy() is called. This guarantees that no traffic goes directly to Pushwoosh servers.
+	//
+	//Prerequisites:
+	// Android: add the following meta-data to AndroidManifest.xml:
+	//   <meta-data android:name="com.pushwoosh.allow_reverse_proxy" android:value="true" />
+	//
+	// iOS: add the following key to Info.plist (main app target):
+	//   Pushwoosh_ALLOW_REVERSE_PROXY = YES
+	//
+	// iOS Notification Service Extension (required for delivery tracking via proxy):
+	//   If your app uses a Notification Service Extension (NSE), you must configure App Groups
+	//   so the main app can share the proxy URL with the extension process:
+	//   1. In Xcode, enable the "App Groups" capability for both the main app target
+	//      and the NSE target with the same group identifier (e.g. "group.com.yourcompany.app").
+	//   2. Add the following keys to Info.plist of BOTH the main app and the NSE target:
+	//      PW_APP_GROUPS_NAME = group.com.yourcompany.app
+	//      Pushwoosh_ALLOW_REVERSE_PROXY = YES
+	//      Pushwoosh_APPID = XXXXX-XXXXX
+	//   Without App Groups, the NSE cannot access the proxy URL and delivery event
+	//   requests will either be sent directly to Pushwoosh servers or be silently dropped.
+	//
+	//Parameters:
+	// "url" - reverse proxy URL (must be a valid https:// or http:// URL)
+	// "headers" - optional map of custom HTTP headers to include in all requests (e.g. authorization headers)
 	//
 	//Example:
 	//(start code)
-	//	//initialize Pushwoosh with projectid: "GOOGLE_PROJECT_ID", appid : "PUSHWOOSH_APP_ID". This will trigger all pending push notifications on start.
-	//	Pushwoosh.init({ projectid: "XXXXXXXXXXXXXXX", pw_appid : "XXXXX-XXXXX" });
+	//	Pushwoosh.setReverseProxy("https://your-proxy.example.com/", { "X-Proxy-Auth": "my-token" });
+	//	Pushwoosh.init({ pw_appid: "XXXXX-XXXXX" });
+	//	Pushwoosh.register();
+	//(end)
+	setReverseProxy(url: string, headers: ?Object) {
+		PushwooshModule.setReverseProxy(url, headers || null);
+	}
+
+	//Function: init
+	//Call this first thing with your Pushwoosh App ID (pw_appid parameter).
+	//
+	//Example:
+	//(start code)
+	//	Pushwoosh.init({ pw_appid: "XXXXX-XXXXX" });
 	//(end)
 	init(config: Object, success: ?Function, fail: ?Function) {
 		if (!success) {

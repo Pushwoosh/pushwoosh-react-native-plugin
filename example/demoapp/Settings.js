@@ -18,28 +18,19 @@ const Settings = () => {
         setIsEnabledRegister(isChecked);
         if (isChecked) {
             /**
-            * initialize Pushwoosh SDK.
-            * Example params: {"pw_appid": "application id", "project_number": "FCM sender id"}
-            *
-            * 1. app_id - YOUR_APP_ID
-            * 2. sender_id - FCM_SENDER_ID
-            */
-            Pushwoosh.init({ "pw_appid" : "XXXXX-XXXXX", "project_number":"XXXXXXXXXXXX"});
-
-           /**
-            * To register for push notifications, call the following method:
-            *
-            * PUSHWOOSH CODE
-            *    |   |
-            *   _|   |_
-            *   \     /
-            *    \   /
-            *     \_/
-            */
+             * To register for push notifications, call the following method:
+             *
+             * PUSHWOOSH CODE
+             *    |   |
+             *   _|   |_
+             *   \     /
+             *    \   /
+             *     \_/
+             */
             Pushwoosh.register(
                 (token) => {
                     console.warn("Registered for pushes: " + token);
-                    Pushwoosh.getPushToken(function(token) {
+                    Pushwoosh.getPushToken(function (token) {
                         console.warn("Push token: " + token);
                     });
                 },
@@ -48,16 +39,16 @@ const Settings = () => {
                 }
             );
         } else {
-        /**
-         * To unregister for push notifications, call the following method:
-         *
-         * PUSHWOOSH CODE
-         *    |   |
-         *   _|   |_
-         *   \     /
-         *    \   /
-         *     \_/
-         */
+            /**
+             * To unregister for push notifications, call the following method:
+             *
+             * PUSHWOOSH CODE
+             *    |   |
+             *   _|   |_
+             *   \     /
+             *    \   /
+             *     \_/
+             */
             Pushwoosh.unregister();
         }
     };
@@ -140,10 +131,10 @@ const Settings = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'flex-start', 
+        justifyContent: 'flex-start',
         alignItems: 'center',
         backgroundColor: '#ffffff',
-        paddingTop: 20, 
+        paddingTop: 20,
     },
     row: {
         flexDirection: 'row',
