@@ -5,8 +5,6 @@ import android.os.Bundle;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
-import android.text.TextUtils;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -111,7 +109,6 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	@ReactMethod
 	public void init(ReadableMap config, Callback success, Callback error) {
 		String appId = config.hasKey("pw_appid") ? config.getString("pw_appid") : null;
-		String projectId = config.hasKey("project_number") ? config.getString("project_number") : null;
 
 		if (appId == null) {
 			if (error != null) {
@@ -121,10 +118,6 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 		}
 
 		Pushwoosh.getInstance().setAppId(appId);
-		
-		if (!TextUtils.isEmpty(projectId)) {
-			Pushwoosh.getInstance().setSenderId(projectId);
-		}
 
 		synchronized (sStartPushLock) {
 			if (sReceivedPushData != null) {
