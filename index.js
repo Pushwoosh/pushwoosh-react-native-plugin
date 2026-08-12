@@ -383,14 +383,26 @@ class PushNotification {
 	//		}
 	//	);
 	//
-	setUserEmails(userId: string, emails: Object, success: ?Function, fail: ?Function) {
+	setUserEmails(userId: string, emails: string | Array<string>, success: ?Function, fail: ?Function) {
 		if (!success) {
 			success = function() {};
 		}
 		if (!fail) {
 			fail = function(error) {};
 		}
-		PushwooshModule.setUserEmails(userId, emails, success, fail);
+		// Both native SDKs return silently on an empty user id without touching the callback.
+		if (typeof userId !== 'string' || userId.length === 0) {
+			fail('userId must not be empty');
+			return;
+		}
+		// The native bridge accepts arrays only, while the public type allows a single address.
+		const emailsList = (Array.isArray(emails) ? emails : [emails])
+			.filter(email => typeof email === 'string' && email.length > 0);
+		if (emailsList.length === 0) {
+			fail('emails must be a non-empty array of strings');
+			return;
+		}
+		PushwooshModule.setUserEmails(userId, emailsList, success, fail);
 	}
 
 
@@ -408,14 +420,21 @@ class PushNotification {
 	//		}
 	//	);
 	//
-	setEmails(emails: Object, success: ?Function, fail: ?Function) {
+	setEmails(emails: string | Array<string>, success: ?Function, fail: ?Function) {
 		if (!success) {
 			success = function() {};
 		}
 		if (!fail) {
 			fail = function(error) {};
 		}
-		PushwooshModule.setEmails(emails, success, fail);
+		// The native bridge accepts arrays only, while the public type allows a single address.
+		const emailsList = (Array.isArray(emails) ? emails : [emails])
+			.filter(email => typeof email === 'string' && email.length > 0);
+		if (emailsList.length === 0) {
+			fail('emails must be a non-empty array of strings');
+			return;
+		}
+		PushwooshModule.setEmails(emailsList, success, fail);
 	}
 
 	//Function: registerSMSNumber

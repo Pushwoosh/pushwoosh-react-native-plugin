@@ -25,7 +25,7 @@
 
 - [Integration Guide](https://docs.pushwoosh.com/platform-docs/pushwoosh-sdk/cross-platform-frameworks/react-native/integrating-react-native-plugin) — step-by-step setup
 - [API Reference](docs/README.md) — full API documentation
-- [Sample Project](https://github.com/Pushwoosh/pushwoosh-react-native-sample) — ready-to-run demo app
+- [Sample Project](https://github.com/Pushwoosh/pushwoosh-react-native-plugin/tree/master/example/demoapp) — ready-to-run demo app
 
 ## Features
 

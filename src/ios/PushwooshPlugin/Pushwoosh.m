@@ -34,6 +34,40 @@ static id objectOrNull(id object) {
     }
 }
 
+typedef void (^PWEmailsCompletion)(NSError *error);
+
+// The SDK invokes the completion once per address, an RCTResponseSenderBlock only once:
+// the first error wins, success is reported after the last address.
+static PWEmailsCompletion emailsCompletionHandler(NSUInteger addressCount, RCTResponseSenderBlock successCallback, RCTResponseSenderBlock errorCallback) {
+    NSObject *lock = [NSObject new];
+    __block NSUInteger completedCount = 0;
+    __block BOOL responded = NO;
+
+    return ^(NSError *error) {
+        @synchronized (lock) {
+            if (responded) {
+                return;
+            }
+
+            if (error) {
+                responded = YES;
+                if (errorCallback) {
+                    errorCallback(@[ objectOrNull([error localizedDescription]) ]);
+                }
+                return;
+            }
+
+            completedCount++;
+            if (completedCount >= addressCount) {
+                responded = YES;
+                if (successCallback) {
+                    successCallback(@[]);
+                }
+            }
+        }
+    };
+}
+
 static NSDictionary * gStartPushData = nil;
 static NSURL * gPushDeepLinkURL = nil;  // Deep link URL for New Architecture support
 static NSString * const kRegistrationSuccesEvent = @"PWRegistrationSuccess";
@@ -253,35 +287,34 @@ RCT_EXPORT_METHOD(getPushToken:(RCTResponseSenderBlock)callback) {
 }
 
 RCT_EXPORT_METHOD(setEmails:(NSArray *)emails success:(RCTResponseSenderBlock)successCallback error:(RCTResponseSenderBlock)errorCallback) {
-    __block NSError* gError = nil;
-    [[Pushwoosh sharedInstance] setEmails:emails completion:^(NSError * _Nullable error) {
-        if (error) {
-            gError = error;
+    if (emails.count == 0) {
+        // The SDK ignores an empty list without invoking the completion block.
+        if (errorCallback) {
+            errorCallback(@[ @"emails must be a non-empty array" ]);
         }
-    }];
-    if (!gError && successCallback) {
-        successCallback(@[]);
+        return;
     }
-    
-    if (gError && errorCallback) {
-        errorCallback(@[ objectOrNull([gError localizedDescription]) ]);
-    }
+
+    [[Pushwoosh sharedInstance] setEmails:emails completion:emailsCompletionHandler(emails.count, successCallback, errorCallback)];
 }
 
 RCT_EXPORT_METHOD(setUserEmails:(NSString*)userId emails:(NSArray *)emails success:(RCTResponseSenderBlock)successCallback error:(RCTResponseSenderBlock)errorCallback) {
-    __block NSError* gError = nil;
-    [[Pushwoosh sharedInstance] setUser:userId emails:emails completion:^(NSError * _Nullable error) {
-        if (error) {
-            gError = error;
+    if (userId.length == 0) {
+        // The SDK ignores an empty user id without invoking the completion block.
+        if (errorCallback) {
+            errorCallback(@[ @"userId must not be empty" ]);
         }
-    }];
-    if (!gError && successCallback) {
-        successCallback(@[]);
+        return;
     }
-    
-    if (gError && errorCallback) {
-        errorCallback(@[ objectOrNull([gError localizedDescription]) ]);
+
+    if (emails.count == 0) {
+        if (errorCallback) {
+            errorCallback(@[ @"emails must be a non-empty array" ]);
+        }
+        return;
     }
+
+    [[Pushwoosh sharedInstance] setUser:userId emails:emails completion:emailsCompletionHandler(emails.count, successCallback, errorCallback)];
 }
 
 RCT_EXPORT_METHOD(setTags:(NSDictionary*)tags success:(RCTResponseSenderBlock)successCallback error:(RCTResponseSenderBlock)errorCallback) {

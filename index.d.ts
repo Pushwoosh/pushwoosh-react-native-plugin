@@ -51,8 +51,8 @@ declare module 'pushwoosh-react-native-plugin' {
     enableHuaweiPushNotifications(): void;
 
     //email methods
-    setUserEmails(userId: string, emails: (string | string[]), success?: () => void, fail?: (error: Error) => void): void;
-    setEmails(emails: (string | string[]), success?: () => void, fail?: (error: Error) => void): void; 
+    setUserEmails(userId: string, emails: (string | string[]), success?: () => void, fail?: (error: string) => void): void;
+    setEmails(emails: (string | string[]), success?: () => void, fail?: (error: string) => void): void; 
     //SMS and WhatsApp methods
     registerSMSNumber(phoneNumber: string): void;
     registerWhatsappNumber(phoneNumber: string): void;

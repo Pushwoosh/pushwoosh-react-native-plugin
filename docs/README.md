@@ -46,6 +46,8 @@ DeviceEventEmitter.addListener('pushOpened', (e: Event) => {
 <tr class="even"><td><a href="#getpushtoken">getPushToken(success)</a></td></tr>
 <tr class="even"><td><a href="#gethwid">getHwid(success)</a></td></tr>
 <tr class="even"><td><a href="#setuserid">setUserId(userId, success, fail)</a></td></tr>
+<tr class="even"><td><a href="#setemails">setEmails(emails, success, fail)</a></td></tr>
+<tr class="even"><td><a href="#setuseremails">setUserEmails(userId, emails, success, fail)</a></td></tr>
 <tr class="even"><td><a href="#postevent">postEvent(event, attributes)</a></td></tr>
 <tr class="even"><td><a href="#setapplicationiconbadgenumber">setApplicationIconBadgeNumber(badgeNumber)</a></td></tr>
 <tr class="even"><td><a href="#getapplicationiconbadgenumber">getApplicationIconBadgeNumber(callback)</a></td></tr>
@@ -290,6 +292,75 @@ This allows data and events to be matched across multiple user devices.
 <tr class="even"><td>function</td><td><b>fail</b></td><td>(optional) method failure callback.</td></tr>
 </tbody>
 </table>
+
+
+### setEmails
+
+```js
+setEmails(emails, success, fail)
+```
+
+Registers email address(es) for the current user. The addresses are associated with the user identifier currently set on the device; if `setUserId` was never called, the device HWID is used as the identifier. Use `setUserEmails` to set the user identifier and the addresses in a single call.
+
+<table width=100% style='background-color:#0EA7ED;'>
+<colgroup>
+<col width="10%" />
+<col width="20%" />
+<col width="70%" />
+</colgroup>
+<tbody>
+<tr>
+<th align="left" colspan="3"><strong>Parameters</strong></th>
+</tr>
+<tr class="even"><td>array</td><td><b>emails</b></td><td>Array of email addresses associated with the current user.</td></tr>
+<tr class="even"><td>function</td><td><b>success</b></td><td>(optional) method success callback.</td></tr>
+<tr class="even"><td>function</td><td><b>fail</b></td><td>(optional) method failure callback.</td></tr>
+</tbody>
+</table>
+
+Example:
+
+```js
+Pushwoosh.setEmails(["user@example.com"],
+    function() { console.warn("setEmails success"); },
+    function(error) { console.warn("setEmails failed: " + error); }
+);
+```
+
+
+### setUserEmails
+
+```js
+setUserEmails(userId, emails, success, fail)
+```
+
+Registers email address(es) for a specific user identifier. The method sets the user identifier and registers the addresses in a single call, so data and events can be matched across multiple channels (push, email) for the same user. A separate `setUserId` call is not required.
+
+<table width=100% style='background-color:#0EA7ED;'>
+<colgroup>
+<col width="10%" />
+<col width="20%" />
+<col width="70%" />
+</colgroup>
+<tbody>
+<tr>
+<th align="left" colspan="3"><strong>Parameters</strong></th>
+</tr>
+<tr class="even"><td>string</td><td><b>userId</b></td><td>Identifier of currently logged in user</td></tr>
+<tr class="even"><td>array</td><td><b>emails</b></td><td>Array of email addresses associated with the user.</td></tr>
+<tr class="even"><td>function</td><td><b>success</b></td><td>(optional) method success callback.</td></tr>
+<tr class="even"><td>function</td><td><b>fail</b></td><td>(optional) method failure callback.</td></tr>
+</tbody>
+</table>
+
+Example:
+
+```js
+Pushwoosh.setUserEmails("user-123", ["user@example.com"],
+    function() { console.warn("setUserEmails success"); },
+    function(error) { console.warn("setUserEmails failed: " + error); }
+);
+```
 
 
 ### postEvent
