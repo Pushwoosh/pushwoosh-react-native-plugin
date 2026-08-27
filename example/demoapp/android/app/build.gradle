@@ -76,9 +76,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.pushwoosh.demoapp"
+    namespace "com.example.sampleapp"
     defaultConfig {
-        applicationId "com.pushwoosh.demoapp"
+        applicationId "com.example.sampleapp"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

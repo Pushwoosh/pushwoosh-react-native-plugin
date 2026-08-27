@@ -1,4 +1,4 @@
-package com.pushwoosh.demoapp
+package com.example.demoapp
 
 import android.app.Application
 import com.facebook.react.PackageList
@@ -10,6 +10,7 @@ import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.load
 import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
 import com.facebook.soloader.SoLoader
+import com.pushwoosh.sampleapp.BuildConfig
 
 class MainApplication : Application(), ReactApplication {
 

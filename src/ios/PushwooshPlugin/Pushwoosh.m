@@ -78,6 +78,27 @@ static NSString * const kPushOpenEvent = @"PWPushOpen";
 static NSString * const kPushOpenJSEvent = @"pushOpened";
 static NSString * const kPushReceivedJSEvent = @"pushReceived";
 
+/// Returns the push link only when it is a deep link this app can route itself, otherwise nil.
+///
+/// http/https links are left to the native SDK: it checks the host's apple-app-site-association
+/// and either hands the link to the app's Universal Links handler (own domain) or opens the
+/// browser (anyone else's). Handing those to RCTLinking too made every external link land in JS
+/// as if it were an in-app destination.
+static NSURL * pwplugin_deepLinkURLFromPushLink(id link) {
+    if (![link isKindOfClass:[NSString class]] || [link length] == 0) {
+        return nil;
+    }
+
+    NSURL *url = [NSURL URLWithString:link];
+    NSString *scheme = url.scheme.lowercaseString;
+
+    if (scheme.length == 0 || [scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"]) {
+        return nil;
+    }
+
+    return url;
+}
+
 @interface PushwooshPlugin (InnerPushwooshPlugin)
 
 - (void) application:(UIApplication *)application pwplugin_didRegisterWithDeviceToken:(NSData *)deviceToken;
@@ -212,12 +233,12 @@ RCT_EXPORT_METHOD(init:(NSDictionary*)config success:(RCTResponseSenderBlock)suc
     }
     
     if (gStartPushData) {
-        NSString *link = gStartPushData[@"l"];
-        
+        NSURL *deepLink = pwplugin_deepLinkURLFromPushLink(gStartPushData[@"l"]);
+
         //get deeplink from the payload and write it to the launchOptions for proper RCTLinking behavior
-        if (link) {
+        if (deepLink) {
             NSMutableDictionary *launchOptions = self.bridge.launchOptions.mutableCopy;
-            launchOptions[UIApplicationLaunchOptionsURLKey] = [NSURL URLWithString:link];
+            launchOptions[UIApplicationLaunchOptionsURLKey] = deepLink;
             [self.bridge setValue:launchOptions forKey:@"launchOptions"];
         }
         
@@ -1001,9 +1022,9 @@ RCT_EXPORT_METHOD(getRichMediaType:(RCTResponseSenderBlock)callback) {
     if (onStart) {
         gStartPushData = pushNotification;
         // Save deep link URL for New Architecture (Linking.getInitialURL support)
-        NSString *link = pushNotification[@"l"];
-        if (link) {
-            gPushDeepLinkURL = [NSURL URLWithString:link];
+        NSURL *deepLink = pwplugin_deepLinkURLFromPushLink(pushNotification[@"l"]);
+        if (deepLink) {
+            gPushDeepLinkURL = deepLink;
         }
     }
 }
@@ -1011,9 +1032,9 @@ RCT_EXPORT_METHOD(getRichMediaType:(RCTResponseSenderBlock)callback) {
     if (onStart) {
         gStartPushData = pushNotification;
         // Save deep link URL for New Architecture (Linking.getInitialURL support)
-        NSString *link = pushNotification[@"l"];
-        if (link) {
-            gPushDeepLinkURL = [NSURL URLWithString:link];
+        NSURL *deepLink = pwplugin_deepLinkURLFromPushLink(pushNotification[@"l"]);
+        if (deepLink) {
+            gPushDeepLinkURL = deepLink;
         }
     }
 }
@@ -1040,9 +1061,9 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
     // Capture deep link from push notification on cold start
     if ([response.notification.request.trigger isKindOfClass:[UNPushNotificationTrigger class]]) {
         NSDictionary *userInfo = response.notification.request.content.userInfo;
-        NSString *link = userInfo[@"l"];
-        if (link) {
-            gPushDeepLinkURL = [NSURL URLWithString:link];
+        NSURL *deepLink = pwplugin_deepLinkURLFromPushLink(userInfo[@"l"]);
+        if (deepLink) {
+            gPushDeepLinkURL = deepLink;
         }
     }
 
@@ -1101,9 +1122,9 @@ static PWEarlyNotificationDelegate *gEarlyDelegate = nil;
             NSDictionary *launchOptions = notification.userInfo;
             NSDictionary *remoteNotification = launchOptions[UIApplicationLaunchOptionsRemoteNotificationKey];
             if (remoteNotification) {
-                NSString *link = remoteNotification[@"l"];
-                if (link && !gPushDeepLinkURL) {
-                    gPushDeepLinkURL = [NSURL URLWithString:link];
+                NSURL *deepLink = pwplugin_deepLinkURLFromPushLink(remoteNotification[@"l"]);
+                if (deepLink && !gPushDeepLinkURL) {
+                    gPushDeepLinkURL = deepLink;
                 }
             }
         }];

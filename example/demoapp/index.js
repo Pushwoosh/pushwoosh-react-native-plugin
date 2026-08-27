@@ -16,7 +16,7 @@ import Actions from './Actions';
 import Settings from './Settings';
 import Pushwoosh from 'pushwoosh-react-native-plugin';
 
-Pushwoosh.init({ "pw_appid": "11C10-EF18D" });
+Pushwoosh.init({ "pw_appid": "XXXXX-XXXXX" });
 
 const Tab = createBottomTabNavigator();
 

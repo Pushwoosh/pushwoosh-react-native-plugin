@@ -14,6 +14,14 @@ if linkage != nil
   use_frameworks! :linkage => linkage.to_sym
 end
 
+# The notification service extension links PushwooshFramework, which since 7.2 is split into
+# PushwooshCore and PushwooshBridge. Without its own pod target the extension gets none of
+# them and fails to build the module. It deliberately does not inherit from the app target:
+# an extension has no business pulling in React Native.
+target 'NotificationService' do
+  pod 'PushwooshXCFramework'
+end
+
 target 'demoapp' do
   config = use_native_modules!
 
