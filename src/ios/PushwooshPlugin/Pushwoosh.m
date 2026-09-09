@@ -70,6 +70,7 @@ static PWEmailsCompletion emailsCompletionHandler(NSUInteger addressCount, RCTRe
 
 static NSDictionary * gStartPushData = nil;
 static NSURL * gPushDeepLinkURL = nil;  // Deep link URL for New Architecture support
+static NSString * gEarlyHandledHash = nil;  // Last push hash the cold-start delegate accepted, to avoid double handling
 static NSString * const kRegistrationSuccesEvent = @"PWRegistrationSuccess";
 static NSString * const kRegistrationErrorEvent = @"PWRegistrationError";
 static NSString * const kPushReceivedEvent = @"PWPushReceived";
@@ -97,6 +98,17 @@ static NSURL * pwplugin_deepLinkURLFromPushLink(id link) {
     }
 
     return url;
+}
+
+// Bridgeless hands a module an RCTBridgeProxy: an NSProxy that carries none of NSObject's KVC and
+// turns an unknown selector into a logged no-op. object_getClass asks without messaging it.
+static BOOL pwplugin_isRealBridge(id bridge) {
+    if (bridge == nil) {
+        return NO;
+    }
+
+    Class bridgeProxyClass = NSClassFromString(@"RCTBridgeProxy");
+    return bridgeProxyClass == nil || object_getClass(bridge) != bridgeProxyClass;
 }
 
 @interface PushwooshPlugin (InnerPushwooshPlugin)
@@ -167,6 +179,12 @@ RCT_EXPORT_MODULE(Pushwoosh);
     return dispatch_get_main_queue();
 }
 
+// Overriding init makes React Native infer main queue setup on its own; saying so keeps that
+// contract explicit, since the module claims the notification center delegate right away.
++ (BOOL)requiresMainQueueSetup {
+    return YES;
+}
+
 + (NSString *)getPluginImplementationInfoPlistKey {
     return [[NSBundle mainBundle] objectForInfoDictionaryKey:kPushwooshPluginImplementationInfoPlistKey];
 }
@@ -235,11 +253,18 @@ RCT_EXPORT_METHOD(init:(NSDictionary*)config success:(RCTResponseSenderBlock)suc
     if (gStartPushData) {
         NSURL *deepLink = pwplugin_deepLinkURLFromPushLink(gStartPushData[@"l"]);
 
-        //get deeplink from the payload and write it to the launchOptions for proper RCTLinking behavior
         if (deepLink) {
-            NSMutableDictionary *launchOptions = self.bridge.launchOptions.mutableCopy;
-            launchOptions[UIApplicationLaunchOptionsURLKey] = deepLink;
-            [self.bridge setValue:launchOptions forKey:@"launchOptions"];
+            if (!gPushDeepLinkURL) {
+                gPushDeepLinkURL = deepLink;
+            }
+
+            // Writing the link into launchOptions is what makes RCTLinking report it, but only a
+            // real bridge accepts the write. Bridgeless reads it from the swizzled getInitialURL.
+            if (pwplugin_isRealBridge(self.bridge)) {
+                NSMutableDictionary *launchOptions = self.bridge.launchOptions.mutableCopy;
+                launchOptions[UIApplicationLaunchOptionsURLKey] = deepLink;
+                [self.bridge setValue:launchOptions forKey:@"launchOptions"];
+            }
         }
         
         [self sendJSEvent:kPushReceivedJSEvent withArgs:gStartPushData];
@@ -1000,9 +1025,15 @@ RCT_EXPORT_METHOD(getRichMediaType:(RCTResponseSenderBlock)callback) {
 
 #pragma mark - RCTEventEmitter
 
+// RCTEventEmitter withholds events until JS subscribes through NativeEventEmitter, which is what
+// raises its listener count. The plugin's public API is DeviceEventEmitter, which never raises it,
+// so observation stays off and every event goes out.
+- (instancetype)init {
+    return [super initWithDisabledObservation];
+}
+
 - (void)sendJSEvent:(NSString*)event withArgs:(NSDictionary*)args {
-//    [self sendEventWithName:event body:args];
-    [self.bridge.eventDispatcher sendDeviceEventWithName:event body:args];
+    [self sendEventWithName:event body:args];
 }
 
 - (NSArray<NSString *> *)supportedEvents {
@@ -1053,17 +1084,45 @@ API_AVAILABLE(ios(10.0))
 @property (nonatomic, weak) id<UNUserNotificationCenterDelegate> originalDelegate;
 @end
 
+// PLUGIN_NOTIFICATION_HANDLER suppresses the native delegate, and the plugin's own delegate is
+// installed in JS init — too late for a cold start, so nobody accepts the launch push. Both early
+// hooks below call this; the push hash keeps the second one from repeating it.
+static void pwplugin_acceptColdStartPushOnce(NSDictionary *userInfo) {
+    if (![userInfo isKindOfClass:[NSDictionary class]]) {
+        return;
+    }
+    if (![[[NSBundle mainBundle] objectForInfoDictionaryKey:kPushwooshPluginImplementationInfoPlistKey] boolValue]) {
+        return;
+    }
+    if (![PWMessage isPushwooshMessage:userInfo]) {
+        return;
+    }
+
+    NSString *hash = userInfo[@"p"];
+    if ([hash isKindOfClass:[NSString class]]) {
+        if ([gEarlyHandledHash isEqualToString:hash]) {
+            return;
+        }
+        gEarlyHandledHash = hash;
+    }
+
+    [[PushNotificationManager pushManager] handlePushAccepted:userInfo onStart:YES];
+}
+
 @implementation PWEarlyNotificationDelegate
 
 - (void)userNotificationCenter:(UNUserNotificationCenter *)center
 didReceiveNotificationResponse:(UNNotificationResponse *)response
          withCompletionHandler:(void (^)(void))completionHandler API_AVAILABLE(ios(10.0)) {
-    // Capture deep link from push notification on cold start
     if ([response.notification.request.trigger isKindOfClass:[UNPushNotificationTrigger class]]) {
         NSDictionary *userInfo = response.notification.request.content.userInfo;
-        NSURL *deepLink = pwplugin_deepLinkURLFromPushLink(userInfo[@"l"]);
-        if (deepLink) {
-            gPushDeepLinkURL = deepLink;
+        NSURL *appSchemeDeepLink = pwplugin_deepLinkURLFromPushLink(userInfo[@"l"]);
+
+        if (appSchemeDeepLink) {
+            // Routing it through the SDK too would deliver the deep link twice.
+            gPushDeepLinkURL = appSchemeDeepLink;
+        } else {
+            pwplugin_acceptColdStartPushOnce(userInfo);
         }
     }
 
@@ -1123,8 +1182,12 @@ static PWEarlyNotificationDelegate *gEarlyDelegate = nil;
             NSDictionary *remoteNotification = launchOptions[UIApplicationLaunchOptionsRemoteNotificationKey];
             if (remoteNotification) {
                 NSURL *deepLink = pwplugin_deepLinkURLFromPushLink(remoteNotification[@"l"]);
-                if (deepLink && !gPushDeepLinkURL) {
-                    gPushDeepLinkURL = deepLink;
+                if (deepLink) {
+                    if (!gPushDeepLinkURL) {
+                        gPushDeepLinkURL = deepLink;
+                    }
+                } else {
+                    pwplugin_acceptColdStartPushOnce(remoteNotification);
                 }
             }
         }];

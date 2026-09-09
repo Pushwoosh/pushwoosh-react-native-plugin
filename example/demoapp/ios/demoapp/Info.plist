@@ -6,6 +6,8 @@
 	<string></string>
 	<key>Pushwoosh_API_TOKEN</key>
 	<string>__YOUR_DEVICE_TYPE_API_TOKEN_FROM_PW_CONTROL_PANEL_</string>
+	<key>Pushwoosh_PLUGIN_NOTIFICATION_HANDLER</key>
+	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
@@ -58,6 +60,20 @@
 	<key>UIAppFonts</key>
 	<array>
 		<string>Ionicons.ttf</string>
+	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.pushwoosh.PushwooshSampleApp</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>pwdemo</string>
+				<string>pushwoosh</string>
+			</array>
+		</dict>
 	</array>
 </dict>
 </plist>

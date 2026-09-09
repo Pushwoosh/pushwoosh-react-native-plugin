@@ -123,10 +123,15 @@ const Actions = () => {
             *    \   /
             *     \_/
             */
-                Pushwoosh.setTags({ 'tags': inputValue1, 'value': inputValue2 },
+                if (!inputValue1) {
+                    Alert.alert('SET TAGS', 'Enter a tag name in the KEY field.');
+                    return;
+                }
+
+                Pushwoosh.setTags({ [inputValue1]: inputValue2 },
                 () => {
                     console.log("Tags were successfully set.");
-                    
+
                 },
                 (error) => {
                     console.error("Failed to set tags:", error);
@@ -223,6 +228,37 @@ const Actions = () => {
                 Pushwoosh.getUserId((userId) => {
                     Alert.alert('USER ID: ', userId);
                 });
+            }}/>
+            <Button buttonText="GET TAGS" onPress={() => {
+                /**
+                * Tags the device is currently associated with.
+                *
+                * PUSHWOOSH CODE
+                *    |   |
+                *   _|   |_
+                *   \     /
+                *    \   /
+                *     \_/
+                */
+                Pushwoosh.getTags((tags) => {
+                    Alert.alert('TAGS: ', JSON.stringify(tags, null, 2));
+                },
+                (error) => {
+                    Alert.alert('TAGS: ', `Failed to get tags: ${error}`);
+                });
+            }}/>
+            <Button buttonText="SHOW INBOX" onPress={() => {
+                /**
+                * Opens the Message Inbox screen with the messages delivered to this device.
+                *
+                * PUSHWOOSH CODE
+                *    |   |
+                *   _|   |_
+                *   \     /
+                *    \   /
+                *     \_/
+                */
+                Pushwoosh.presentInboxUI();
             }}/>
             <Button 
                 buttonText="SHOW PUSH NOTIFICATION ALERT"  onPress={() => { 
