@@ -201,9 +201,11 @@
  * @module pushwoosh-react-native-plugin
  */
 
-import { NativeModules } from 'react-native';
+import NativePushwoosh from './src/specs/NativePushwoosh';
 
-const PushwooshModule = NativeModules.Pushwoosh;
+// Resolved through TurboModuleRegistry: the codegen TurboModule on the New Architecture, the
+// bridge module on the legacy architecture.
+const PushwooshModule = NativePushwoosh;
 
 //Constant: RichMediaStyle
 //Rich Media presentation style constants.
@@ -348,7 +350,7 @@ class PushNotification {
 		if (!fail) {
 			fail = function(error) {};
 		}
-		PushwooshModule.register(success, fail);
+		PushwooshModule.registerForPushNotifications(success, fail);
 	}
 
 	//Function: unregister

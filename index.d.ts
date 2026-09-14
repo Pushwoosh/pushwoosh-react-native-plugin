@@ -87,6 +87,10 @@ declare module 'pushwoosh-react-native-plugin' {
     isCommunicationEnabled(success: (isEnabled: boolean)=> void): void;
     setCommunicationEnabled(enabled: boolean, success?: () => void, fail?: (error: Error) => void): void;
 
+    //Rich Media presentation style
+    setRichMediaType(type: number): void;
+    getRichMediaType(callback: (type: number) => void): void;
+    RichMediaStyle: { MODAL: number; LEGACY: number };
   }
 
   const Pushwoosh: Pushwoosh;

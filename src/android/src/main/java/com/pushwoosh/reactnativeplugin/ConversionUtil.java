@@ -6,14 +6,13 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.bridge.ReadableType;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.bridge.WritableNativeArray;
-import com.facebook.react.bridge.WritableNativeMap;
 import com.pushwoosh.inbox.data.InboxMessage;
 import com.pushwoosh.internal.utils.JsonUtils;
 import com.pushwoosh.internal.utils.PWLog;
@@ -115,7 +114,7 @@ public final class ConversionUtil {
 	}
 
 	public static WritableMap toWritableMap(JSONObject jsonObject) {
-		WritableNativeMap result = new WritableNativeMap();
+		WritableMap result = Arguments.createMap();
 
 		Iterator<String> keys = jsonObject.keys();
 		while (keys.hasNext()) {
@@ -152,7 +151,7 @@ public final class ConversionUtil {
 	}
 
 	public static WritableArray toWritableArray(JSONArray array) {
-		WritableNativeArray result = new WritableNativeArray();
+		WritableArray result = Arguments.createArray();
 
 		for (int i = 0; i < array.length(); i++) {
 			try {

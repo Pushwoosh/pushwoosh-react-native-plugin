@@ -25,7 +25,8 @@
 
 - [Integration Guide](https://docs.pushwoosh.com/platform-docs/pushwoosh-sdk/cross-platform-frameworks/react-native/integrating-react-native-plugin) — step-by-step setup
 - [API Reference](docs/README.md) — full API documentation
-- [Sample Project](https://github.com/Pushwoosh/pushwoosh-react-native-plugin/tree/master/example/demoapp) — ready-to-run demo app
+- [Sample Project](https://github.com/Pushwoosh/pushwoosh-react-native-plugin/tree/master/example/demoapp) — ready-to-run demo app on the current React Native (New Architecture)
+- [Legacy Sample Project](https://github.com/Pushwoosh/pushwoosh-react-native-plugin/tree/master/example/demoapp-legacy) — the same demo on React Native 0.74 with the legacy architecture
 
 ## Features
 
@@ -75,6 +76,29 @@ The wizard will automatically add all required configuration.
    ```
 
 The Pushwoosh plugin already includes the `firebase-messaging` dependency, so you do not need to add it manually.
+
+### React Native versions and the New Architecture
+
+The plugin is a Turbo Native Module and also works on the legacy bridge. One package covers both:
+
+| React Native | Architecture | How the plugin runs |
+|---|---|---|
+| 0.74 – 0.81, `newArchEnabled=false` (default) | Legacy bridge | Bridge module |
+| 0.74 – 0.81, `newArchEnabled=true` / `RCT_NEW_ARCH_ENABLED=1` | New Architecture | Codegen TurboModule |
+| 0.82 and later | New Architecture only (bridgeless) | Codegen TurboModule |
+
+No interop layer is involved on the New Architecture. Events keep their API on both architectures:
+
+```javascript
+import { DeviceEventEmitter } from 'react-native';
+
+DeviceEventEmitter.addListener('pushOpened', (push) => { /* ... */ });
+DeviceEventEmitter.addListener('pushReceived', (push) => { /* ... */ });
+```
+
+`presentInboxUI()` presents a native screen (a view controller on iOS, an Activity on Android) outside the React view tree, so it does not depend on Fabric. React Native below 0.74 is supported by plugin versions 6.1.x.
+
+Both setups ship as samples with identical screens: `example/demoapp` (React Native 0.87, New Architecture) and `example/demoapp-legacy` (React Native 0.74, legacy architecture).
 
 ## AI-Assisted Integration
 

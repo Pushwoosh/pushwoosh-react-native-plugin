@@ -1,0 +1,27 @@
+# Registration, and the notification centre emptied so the push flows below find only their own
+# notification. The app is left in the foreground on the Actions screen.
+appId: ${APP_ID}
+---
+- launchApp
+- runFlow:
+    file: ../common/lib/wait-for-app.yaml
+- tapOn:
+    id: "tab-settings"
+- extendedWaitUntil:
+    visible:
+      id: "register-switch"
+    timeout: 15000
+# On a device the app may already hold a push token, and the switch then starts on: leave it.
+- runFlow:
+    when:
+      visible:
+        id: "register-switch"
+        checked: false
+    file: ../common/lib/register-for-pushes.yaml
+- tapOn:
+    id: "clear-notification-center"
+- assertVisible:
+    id: "settings-result"
+    text: "Notification center cleared"
+- tapOn:
+    id: "tab-actions"

@@ -1,3 +1,7 @@
 example
 .git
 .github
+src/android/src/test
+src/android/src/testNewarch
+src/android/src/testOldarch
+src/ios/PushwooshPluginTests

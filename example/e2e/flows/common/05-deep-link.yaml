@@ -1,0 +1,19 @@
+# An app-scheme link opened while the app runs lands on the Deep Link screen with its parameters.
+appId: ${APP_ID}
+---
+- launchApp
+- runFlow:
+    file: lib/wait-for-app.yaml
+- openLink: "pwdemo://demo/screen?from=e2e"
+# iOS asks before handing a URL opened from outside to the app.
+- tapOn:
+    text: "Open"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "deep-link-url"
+      text: 'pwdemo://demo/screen\?from=e2e'
+    timeout: 15000
+- assertVisible:
+    id: "deep-link-from"
+    text: "e2e"

@@ -1,0 +1,19 @@
+# The runner delivered payloads/push-deep-link.apns while the app was in the foreground. Tapping
+# the notification opens the push's app-scheme link, which lands on the Deep Link screen.
+appId: ${APP_ID}
+---
+- extendedWaitUntil:
+    visible: "pushReceived: E2E deep link push"
+    timeout: 30000
+- runFlow:
+    file: ../common/lib/tap-notification-in-centre.yaml
+    env:
+      NOTIFICATION: "E2E deep link push"
+- extendedWaitUntil:
+    visible:
+      id: "deep-link-url"
+      text: 'pwdemo://demo/screen\?from=push'
+    timeout: 30000
+- tapOn:
+    id: "tab-actions"
+- assertVisible: "pushOpened: E2E deep link push"

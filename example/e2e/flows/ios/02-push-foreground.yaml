@@ -1,0 +1,14 @@
+# The runner delivered payloads/push.apns while the app was in the foreground: the plugin reports
+# it as pushReceived, and tapping the notification reports pushOpened.
+appId: ${APP_ID}
+---
+- extendedWaitUntil:
+    visible: "pushReceived: E2E push"
+    timeout: 30000
+- runFlow:
+    file: ../common/lib/tap-notification-in-centre.yaml
+    env:
+      NOTIFICATION: "E2E push"
+- extendedWaitUntil:
+    visible: "pushOpened: E2E push"
+    timeout: 30000

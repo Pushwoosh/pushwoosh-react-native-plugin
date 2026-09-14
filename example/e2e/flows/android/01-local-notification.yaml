@@ -1,0 +1,28 @@
+# A local notification goes through the plugin's notification extension like a push: its arrival
+# is a pushReceived event, tapping it in the shade a pushOpened event.
+appId: ${APP_ID}
+---
+- launchApp:
+    permissions:
+      notifications: allow
+- runFlow:
+    file: ../common/lib/wait-for-app.yaml
+- tapOn:
+    id: "tab-settings"
+- tapOn:
+    id: "create-local-notification"
+- assertVisible:
+    id: "settings-result"
+    text: "Local notification scheduled"
+- tapOn:
+    id: "tab-actions"
+- extendedWaitUntil:
+    visible: "pushReceived: Local notification from the demo"
+    timeout: 15000
+- swipe:
+    start: "50%, 2%"
+    end: "50%, 70%"
+- tapOn: "Local notification from the demo"
+- extendedWaitUntil:
+    visible: "pushOpened: Local notification from the demo"
+    timeout: 15000

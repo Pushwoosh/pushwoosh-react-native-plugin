@@ -1,0 +1,22 @@
+appId: ${APP_ID}
+---
+- tapOn:
+    id: "modal-rich-media-switch"
+- assertVisible:
+    id: "modal-rich-media-switch"
+    checked: false
+- launchApp
+- runFlow:
+    file: wait-for-app.yaml
+- tapOn:
+    id: "tab-settings"
+- extendedWaitUntil:
+    visible:
+      id: "modal-rich-media-switch"
+      checked: false
+    timeout: 10000
+- tapOn:
+    id: "modal-rich-media-switch"
+- assertVisible:
+    id: "modal-rich-media-switch"
+    checked: true

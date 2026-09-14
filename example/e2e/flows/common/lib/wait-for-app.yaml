@@ -1,0 +1,16 @@
+# Waits until the demo is usable. The Pushwoosh project behind the sample greets a launch with a
+# "Register for push" In-App that covers the whole screen, so the title is not necessarily the
+# first thing on it: wait for either, close the In-App when that is what showed up, then wait for
+# the title itself. Maestro matches text as a whole string, hence the alternation.
+appId: ${APP_ID}
+---
+- extendedWaitUntil:
+    visible: "PUSHWOOSH DEMO|CLOSE"
+    timeout: 60000
+- runFlow:
+    when:
+      visible: "CLOSE"
+    file: dismiss-in-app.yaml
+- extendedWaitUntil:
+    visible: "PUSHWOOSH DEMO"
+    timeout: 30000

@@ -1,0 +1,14 @@
+# The runner terminated the app and delivered payloads/push-deep-link.apns, so the push waits in
+# the notification centre. Tapping it starts the app cold, and the link has to reach the Deep Link
+# screen through Linking.getInitialURL().
+appId: ${APP_ID}
+---
+- runFlow:
+    file: ../common/lib/tap-notification-in-centre.yaml
+    env:
+      NOTIFICATION: "E2E deep link push"
+- extendedWaitUntil:
+    visible:
+      id: "deep-link-url"
+      text: 'pwdemo://demo/screen\?from=push'
+    timeout: 60000

@@ -1,0 +1,16 @@
+# Turns registration on and waits for the plugin's callback: a push token on a device, the missing
+# aps-environment entitlement on an unsigned simulator build. Either way register() called native
+# and native called back. Only for a switch that is currently off.
+appId: ${APP_ID}
+---
+- tapOn:
+    id: "register-switch"
+# The system asks for the notification permission unless the device was pre-authorised.
+- tapOn:
+    text: "Allow"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "settings-result"
+      text: "(Registered for pushes|Failed to register): .+"
+    timeout: 30000

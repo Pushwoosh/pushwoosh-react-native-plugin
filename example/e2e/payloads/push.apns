@@ -1,0 +1,8 @@
+{
+  "aps": {
+    "alert": { "title": "E2E", "body": "E2E push" },
+    "sound": "default"
+  },
+  "pw_msg": "1",
+  "p": "e2e-__HASH__"
+}

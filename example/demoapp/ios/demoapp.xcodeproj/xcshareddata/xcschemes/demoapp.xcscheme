@@ -32,9 +32,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "demoappTests.xctest"
-               BlueprintName = "demoappTests"
+               BlueprintIdentifier = "367F6507AC1928BF29DE790A"
+               BuildableName = "PushwooshPluginTests.xctest"
+               BlueprintName = "PushwooshPluginTests"
                ReferencedContainer = "container:demoapp.xcodeproj">
             </BuildableReference>
          </TestableReference>

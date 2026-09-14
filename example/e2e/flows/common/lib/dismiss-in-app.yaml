@@ -1,0 +1,5 @@
+# The demo's Pushwoosh project shows a "Register for push" In-App after the app opens; its rich
+# media page has a CLOSE button. Called with `when: visible: "CLOSE"`.
+appId: ${APP_ID}
+---
+- tapOn: "CLOSE"

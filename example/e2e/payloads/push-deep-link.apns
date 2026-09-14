@@ -1,0 +1,9 @@
+{
+  "aps": {
+    "alert": { "title": "E2E", "body": "E2E deep link push" },
+    "sound": "default"
+  },
+  "pw_msg": "1",
+  "p": "e2e-__HASH__",
+  "l": "pwdemo://demo/screen?from=push"
+}

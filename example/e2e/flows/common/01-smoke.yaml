@@ -1,0 +1,16 @@
+# The app starts, the SDK is initialised and knows the device: a HWID comes back.
+appId: ${APP_ID}
+---
+- launchApp:
+    clearState: true
+    permissions:
+      notifications: allow
+- runFlow:
+    file: lib/wait-for-app.yaml
+- tapOn:
+    id: "get-hwid"
+# An identifier, not just any non-empty text: the JS API has no error callback here, so a broken
+# bridge would report "HWID: null" or "HWID: undefined" and pass a looser pattern.
+- assertVisible:
+    id: "result"
+    text: "HWID: [0-9A-Za-z][0-9A-Za-z_:-]{15,}"

@@ -1,0 +1,18 @@
+# Opens the notification centre and taps the e2e notification. ${NOTIFICATION} is its body; the
+# runner clears the centre beforehand, so the notification is alone and one tap opens it instead
+# of expanding a group.
+appId: ${APP_ID}
+---
+- swipe:
+    start: "50%, 1%"
+    end: "50%, 70%"
+- extendedWaitUntil:
+    visible: ${NOTIFICATION}
+    timeout: 15000
+- tapOn: ${NOTIFICATION}
+# A notification the system grouped with an older one only expands on the first tap.
+- runFlow:
+    when:
+      visible: ${NOTIFICATION}
+    commands:
+      - tapOn: ${NOTIFICATION}

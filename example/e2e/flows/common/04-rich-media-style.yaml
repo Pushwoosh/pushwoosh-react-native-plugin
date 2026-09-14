@@ -1,0 +1,26 @@
+# The Rich Media style set through the plugin survives a relaunch and reads back through
+# getRichMediaType, whichever style the platform starts with.
+appId: ${APP_ID}
+---
+- launchApp
+- runFlow:
+    file: lib/wait-for-app.yaml
+# By id: iOS reads the tab out as "Settings, tab, 2 of 3", and Maestro matches text whole.
+- tapOn:
+    id: "tab-settings"
+- extendedWaitUntil:
+    visible:
+      id: "modal-rich-media-switch"
+    timeout: 10000
+- runFlow:
+    when:
+      visible:
+        id: "modal-rich-media-switch"
+        checked: true
+    file: lib/rich-media-modal-to-legacy.yaml
+- runFlow:
+    when:
+      visible:
+        id: "modal-rich-media-switch"
+        checked: false
+    file: lib/rich-media-legacy-to-modal.yaml

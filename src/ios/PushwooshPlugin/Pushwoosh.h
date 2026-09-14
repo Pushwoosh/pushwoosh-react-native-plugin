@@ -24,6 +24,12 @@
 #import "PushwooshInboxUI.h"
 #endif
 
+#ifdef RCT_NEW_ARCH_ENABLED
+#import <RNPushwooshSpec/RNPushwooshSpec.h>
+
+@interface PushwooshPlugin: RCTEventEmitter<NativePushwooshSpec, PushNotificationDelegate>
+#else
 @interface PushwooshPlugin: RCTEventEmitter<RCTBridgeModule, PushNotificationDelegate>
+#endif
 
 @end

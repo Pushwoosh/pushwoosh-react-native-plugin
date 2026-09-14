@@ -8,14 +8,14 @@ import android.graphics.Color;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
-import com.facebook.react.bridge.WritableNativeArray;
+import com.facebook.react.bridge.WritableArray;
 import com.pushwoosh.Pushwoosh;
 import com.pushwoosh.RegisterForPushNotificationsResultData;
 import com.pushwoosh.badge.PushwooshBadge;
@@ -50,9 +50,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PushwooshPlugin extends ReactContextBaseJavaModule implements LifecycleEventListener {
+public class PushwooshPlugin extends PushwooshPluginSpec implements LifecycleEventListener {
 
 	static final String TAG = "ReactNativePlugin";
+	// Same as the iOS class name: React Native resolves a TurboModule by class name first
+	public static final String MODULE_NAME = "PushwooshPlugin";
 	private static final String PUSH_OPEN_EVENT = "PwPushOpened";
 	private static final String PUSH_OPEN_JS_EVENT = "pushOpened";
 
@@ -91,7 +93,7 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 
 	@Override
 	public String getName() {
-		return "Pushwoosh";
+		return MODULE_NAME;
 	}
 
 	@ReactMethod
@@ -127,9 +129,12 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 			if (sStartPushData != null) {
 				sendEvent(PUSH_OPEN_JS_EVENT, ConversionUtil.stringToJSONObject(sStartPushData));
 			}
-		}
 
-		sInitialized = true;
+			// Under the same lock as the replay above: a push taking the lock between the replay
+			// and this flag would find sInitialized false, skip its own send, and never be
+			// replayed either.
+			sInitialized = true;
+		}
 
 		if (success != null) {
 			success.invoke();
@@ -137,7 +142,7 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	}
 
 	@ReactMethod
-	public void register(final Callback success, final Callback error) {
+	public void registerForPushNotifications(final Callback success, final Callback error) {
 		Pushwoosh.getInstance().registerForPushNotifications(new RegisterForPushNotificationCallback(success, error));
 	}
 
@@ -193,7 +198,7 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	}
 
 	@ReactMethod
-	public void removeListeners(Integer count) {
+	public void removeListeners(double count) {
 		// Required for NativeEventEmitter. No need to do anything here.
 	}
 
@@ -313,22 +318,22 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 
 		JSONObject params  = ConversionUtil.toJsonObject(data);
 
+		// optString answers "" for a missing key, never null: without a message there is nothing
+		// to show, and empty user data has no business reaching the payload.
 		String message = params.optString("msg");
-		if (message == null){
+		if (message.isEmpty()){
+			PWLog.error(TAG, "createLocalNotification: msg is required");
 			return;
 		}
 		int seconds = params.optInt("seconds");
 		Bundle extras = new Bundle();
 		String userData = params.optString("userData");
-		if (userData!=null){
+		if (!userData.isEmpty()){
 		    extras.putString("u", userData);
 		}
 
-		LocalNotification.Builder builder = new LocalNotification.Builder();
-		if (extras != null){
-			builder.setExtras(extras);
-		}
-		LocalNotification notification = builder
+		LocalNotification notification = new LocalNotification.Builder()
+		.setExtras(extras)
 		.setMessage(message)
 		.setDelay(seconds)
 		.build();
@@ -351,8 +356,8 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	}
 
 	@ReactMethod
-	public void setApplicationIconBadgeNumber(int badgeNumber) {
-		PushwooshBadge.setBadgeNumber(badgeNumber);
+	public void setApplicationIconBadgeNumber(double badgeNumber) {
+		PushwooshBadge.setBadgeNumber((int) badgeNumber);
 	}
 
 	@ReactMethod
@@ -361,8 +366,8 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	}
 
 	@ReactMethod
-	public void addToApplicationIconBadgeNumber(int badgeNumber) {
-		PushwooshBadge.addBadgeNumber(badgeNumber);
+	public void addToApplicationIconBadgeNumber(double badgeNumber) {
+		PushwooshBadge.addBadgeNumber((int) badgeNumber);
 	}
 
 	@ReactMethod
@@ -381,18 +386,22 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	}
 
 	@ReactMethod
-	public void setColorLED(int color) {
-		PushwooshNotificationSettings.setColorLED(color);
+	public void setColorLED(double color) {
+		// The spec types a colour as a JS number, so it arrives as a double, and an opaque ARGB
+		// value does not fit a signed int: 0xFFFF0000 is 4294901760. A direct double -> int
+		// narrowing clamps that to Integer.MAX_VALUE, while going through long keeps the bits the
+		// SDK expects (-65536).
+		PushwooshNotificationSettings.setColorLED((int) (long) color);
 	}
 
 	@ReactMethod
-	public void setSoundType(int type) {
-		PushwooshNotificationSettings.setSoundNotificationType(SoundType.fromInt(type));
+	public void setSoundType(double type) {
+		PushwooshNotificationSettings.setSoundNotificationType(SoundType.fromInt((int) type));
 	}
 
 	@ReactMethod
-	public void setVibrateType(int type) {
-		PushwooshNotificationSettings.setVibrateNotificationType(VibrateType.fromInt(type));
+	public void setVibrateType(double type) {
+		PushwooshNotificationSettings.setVibrateNotificationType(VibrateType.fromInt((int) type));
 	}
 
 
@@ -455,7 +464,7 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 				try {
 					if (result.isSuccess() && result.getData() != null) {
 						ArrayList<InboxMessage> messagesList = new ArrayList<>(result.getData());
-						WritableNativeArray writableArray = new WritableNativeArray();
+						WritableArray writableArray = Arguments.createArray();
 						for (InboxMessage message : messagesList) {
 							writableArray.pushMap(ConversionUtil.inboxMessageToWritableMap(message));
 						}
@@ -551,8 +560,8 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	}
 
 	@ReactMethod
-	public void setRichMediaType(int type) {
-		RichMediaType richMediaType = type == 0 ? RichMediaType.MODAL : RichMediaType.DEFAULT;
+	public void setRichMediaType(double type) {
+		RichMediaType richMediaType = (int) type == 0 ? RichMediaType.MODAL : RichMediaType.DEFAULT;
 		RichMediaManager.setRichMediaType(richMediaType);
 	}
 
@@ -560,6 +569,17 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	public void getRichMediaType(Callback callback) {
 		RichMediaType type = RichMediaManager.getRichMediaType();
 		callback.invoke(type.ordinal());
+	}
+
+	// iOS-only setting. Android shows a notification for a push that arrives in the foreground,
+	// which is what the iOS default reports; the methods exist so the spec is fully implemented.
+	@ReactMethod
+	public void setShowPushnotificationAlert(boolean showPushnotificationAlert) {
+	}
+
+	@ReactMethod
+	public void getShowPushnotificationAlert(Callback callback) {
+		callback.invoke(true);
 	}
 
 	///
@@ -580,11 +600,30 @@ public class PushwooshPlugin extends ReactContextBaseJavaModule implements Lifec
 	public void onHostDestroy() {
 		PWLog.noise(TAG, "Host destroyed");
 
-		sPushCallbackRegistered = false;
-		sStartPushData = null;
+		// A push can be delivered on the FCM thread while the host is going down, and every other
+		// accessor of these fields holds the lock.
+		synchronized (sStartPushLock) {
+			// Only for the module this host is taking down. A restarted host builds a new
+			// PushwooshPlugin, and the order of the two events is not guaranteed, so a late
+			// teardown must not reset what the new module has already set up.
+			if (INSTANCE != this) {
+				return;
+			}
 
-		sReceivedPushCallbackRegistered = false;
-		sReceivedPushData = null;
+			sPushCallbackRegistered = false;
+			sStartPushData = null;
+
+			sReceivedPushCallbackRegistered = false;
+			sReceivedPushData = null;
+
+			// These are what openPush()/messageReceived() consult before sending to JS. Left
+			// standing, a push arriving after the host died was handed to a context with no JS
+			// runtime, the broad catch there swallowed the failure, and the push was gone for
+			// good - the cache that would have replayed it on the next init() had just been
+			// cleared above. Cleared, the same push is cached and the next init() replays it.
+			sInitialized = false;
+			INSTANCE = null;
+		}
 	}
 
 	///

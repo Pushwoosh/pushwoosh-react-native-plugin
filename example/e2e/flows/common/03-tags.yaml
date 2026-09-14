@@ -1,0 +1,36 @@
+# setTags reaches the server and the tag comes back through getTags.
+appId: ${APP_ID}
+---
+- launchApp
+- runFlow:
+    file: lib/wait-for-app.yaml
+- tapOn:
+    id: "set-tags-input"
+- inputText: "e2e_key"
+- tapOn:
+    id: "set-tags-input-2"
+- inputText: "e2e_value"
+- tapOn:
+    id: "set-tags"
+- extendedWaitUntil:
+    visible:
+      id: "result"
+      text: "Tags set: e2e_key = e2e_value"
+    timeout: 30000
+- runFlow:
+    when:
+      visible: "CLOSE"
+    file: lib/dismiss-in-app.yaml
+# The keyboard covers the lower half of the screen, and the getters live below the setters.
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "get-tags"
+    direction: DOWN
+- tapOn:
+    id: "get-tags"
+- extendedWaitUntil:
+    visible:
+      id: "result"
+      text: 'Tags: .*"e2e_key":"e2e_value".*'
+    timeout: 30000

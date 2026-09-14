@@ -20,28 +20,135 @@ allprojects {
     }
 }
 
+// [major, minor] of the react-native the app resolves, or null when it cannot be found.
+// Every node_modules above the android project is a candidate: the template keeps react-native in
+// the one next door, a monorepo hoists it any number of levels up. The included build of the React
+// Native Gradle Plugin names the node_modules the app really resolves, though only a 0.74-style
+// settings.gradle exposes it - from 0.82 the include sits in pluginManagement and stays private.
+// `node --print` answers the way Metro does and comes last: it needs node on the Gradle PATH,
+// which an IDE launched from the Finder does not have.
+def reactNativeVersion() {
+    def candidates = []
+    for (def dir = rootProject.projectDir; dir != null; dir = dir.parentFile) {
+        candidates += new File(dir, "node_modules/react-native/package.json")
+    }
+    project.gradle.includedBuilds.each { included ->
+        candidates += new File(included.projectDir, "../../react-native/package.json")
+    }
+    try {
+        def resolved = ["node", "--print", "require.resolve('react-native/package.json')"]
+            .execute(null, rootProject.projectDir).text.trim()
+        if (!resolved.isEmpty()) {
+            candidates += new File(resolved)
+        }
+    } catch (Exception ignored) {
+    }
+
+    for (candidate in candidates) {
+        if (!candidate.isFile()) {
+            continue
+        }
+        def version = new groovy.json.JsonSlurper().parseText(candidate.text).version
+        def match = version =~ /^(\d+)\.(\d+)\./
+        if (match) {
+            return [match[0][1].toInteger(), match[0][2].toInteger()]
+        }
+    }
+    return null
+}
+
+// What the app asked for, or null when it did not ask. The React Native Gradle Plugin ORs the two
+// spellings, so either one set to true turns the New Architecture on and a plain
+// newArchEnabled=false does not veto a react-scoped true.
+def newArchProperty() {
+    def names = ["newArchEnabled", "react.newArchEnabled"]
+    if (names.any { project.hasProperty(it) && project.property(it).toString().toBoolean() }) {
+        return true
+    }
+    if (names.any { project.hasProperty(it) }) {
+        return false
+    }
+    return null
+}
+
+// The architecture is the app's choice; this answers it the way the React Native Gradle Plugin
+// does. Below 0.82 the app opts in with newArchEnabled; from 0.82 React Native is bridgeless only
+// and ignores the flag. Guessing wrong is silent and lands on the customer: src/oldarch compiled
+// into a bridgeless app leaves TurboModuleRegistry.get() answering null and every plugin call
+// throwing, with a green build. So an undecidable case fails the build instead.
+def resolveNewArchitectureEnabled() {
+    def version = reactNativeVersion()
+    if (version != null && (version[0] > 0 || version[1] >= 82)) {
+        return true
+    }
+
+    def asked = newArchProperty()
+    if (asked != null) {
+        return asked
+    }
+
+    if (version == null) {
+        throw new GradleException(
+            "pushwoosh-react-native-plugin: cannot tell which React Native architecture to build. " +
+            "No react-native/package.json was found from ${rootProject.projectDir} and neither " +
+            "newArchEnabled nor react.newArchEnabled is set. Set newArchEnabled in " +
+            "android/gradle.properties to the architecture the app runs.")
+    }
+    return false
+}
+
+// Once per configuration: the lookup walks the file system and may spawn node.
+if (!project.hasProperty("pushwooshNewArchEnabled")) {
+    project.ext.pushwooshNewArchEnabled = resolveNewArchitectureEnabled()
+}
+def isNewArchitectureEnabled = project.ext.pushwooshNewArchEnabled
+
 apply plugin: 'com.android.library'
+if (isNewArchitectureEnabled) {
+    // Generates NativePushwooshSpec from the spec in ../specs, configured by ../package.json
+    apply plugin: 'com.facebook.react'
+}
 
 android {
     compileSdkVersion 34
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 34
+        // What a consuming app must keep to run minified. The library itself is not minified, so
+        // proguardFiles here would configure nothing; consumerProguardFiles is what travels.
+        consumerProguardFiles 'proguard-rules.pro'
     }
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    sourceSets {
+        main {
+            if (isNewArchitectureEnabled) {
+                java.srcDirs += ["src/newarch/java"]
+            } else {
+                java.srcDirs += ["src/oldarch/java"]
+            }
+        }
+        // src/test runs under both architectures; the per-architecture suites assert what the
+        // switch above must have produced
+        test {
+            if (isNewArchitectureEnabled) {
+                java.srcDirs += ["src/testNewarch/java"]
+            } else {
+                java.srcDirs += ["src/testOldarch/java"]
+            }
         }
     }
 }
 
 ext {
-    pushwoosh = "6.12.0"
+    pushwoosh = "6.13.0"
 }
 
 dependencies {
-    implementation 'com.facebook.react:react-native:+'
+    implementation "com.facebook.react:react-android"
     implementation "com.pushwoosh:pushwoosh:${pushwoosh}"
     implementation "com.pushwoosh:pushwoosh-firebase:${pushwoosh}"
     implementation "com.pushwoosh:pushwoosh-huawei:${pushwoosh}"
@@ -54,5 +161,10 @@ dependencies {
     implementation "androidx.activity:activity:1.8.0"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22"
     implementation "com.google.firebase:firebase-messaging:23.1.0"
+
+    // Test-only, run with `make android-test`.
+    testImplementation "junit:junit:4.13.2"
+    testImplementation "org.robolectric:robolectric:4.14.1"
+    testImplementation "org.mockito:mockito-core:5.14.2"
 }
 

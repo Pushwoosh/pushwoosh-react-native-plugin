@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "codegenConfig": {
+    "name": "RNPushwooshSpec",
+    "type": "modules",
+    "jsSrcsDir": "specs",
+    "android": {
+      "javaPackageName": "com.pushwoosh.reactnativeplugin"
+    }
+  }
+}
