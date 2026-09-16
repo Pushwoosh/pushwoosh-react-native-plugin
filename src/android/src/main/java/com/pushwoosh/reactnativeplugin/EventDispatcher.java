@@ -9,6 +9,7 @@ import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
+import com.pushwoosh.internal.utils.PWLog;
 
 public class EventDispatcher {
 
@@ -37,7 +38,15 @@ public class EventDispatcher {
 
             List<Callback> list = subscribers.get(event);
             for (Callback subscriber : list) {
-                subscriber.invoke(objects);
+                try {
+                    subscriber.invoke(objects);
+                } catch (Exception e) {
+                    // A callback bound to a runtime that is already gone throws, and React Native
+                    // throws on a second invocation of a callback as well. The subscribers behind
+                    // it, and the clear() below, have to happen anyway - otherwise the bad callback
+                    // stays in the list and takes down every dispatch that follows.
+                    PWLog.exception(e);
+                }
             }
 
             // A native module is supposed to invoke its callback only once!

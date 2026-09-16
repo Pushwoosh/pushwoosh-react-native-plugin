@@ -1,0 +1,37 @@
+# The user leaves by Back and taps a notification afterwards. The activity is gone, the JS runtime
+# is not, and the push has to reach the bundle that is still running: JS calls init() once, so a
+# push parked for a second init() is lost until the process dies.
+appId: ${APP_ID}
+---
+- launchApp:
+    permissions:
+      notifications: allow
+- runFlow:
+    file: ../common/lib/wait-for-app.yaml
+- tapOn:
+    id: "tab-settings"
+- tapOn:
+    id: "clear-notification-center"
+- tapOn:
+    id: "create-local-notification"
+- assertVisible:
+    id: "settings-result"
+    text: "Local notification scheduled"
+- tapOn:
+    id: "tab-actions"
+- extendedWaitUntil:
+    visible: "pushReceived: Local notification from the demo"
+    timeout: 15000
+# Out of the app: the last Back destroys the activity, React Native keeps the context and the
+# bundle.
+- back
+- back
+- swipe:
+    start: "50%, 2%"
+    end: "50%, 70%"
+- tapOn: "Local notification from the demo"
+- runFlow:
+    file: ../common/lib/wait-for-app.yaml
+- extendedWaitUntil:
+    visible: "pushOpened: Local notification from the demo"
+    timeout: 15000

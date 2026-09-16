@@ -61,25 +61,45 @@ public class PushwooshPlugin extends PushwooshPluginSpec implements LifecycleEve
 	private static final String PUSH_RECEIVED_EVENT = Pushwoosh.PUSH_RECEIVE_EVENT;
 	private static final String PUSH_RECEIVED_JS_EVENT = "pushReceived";
 
-	private static EventDispatcher mEventDispatcher = new EventDispatcher();
+	// Per bundle. The callbacks belong to the JS runtime that subscribed them and "JS has called
+	// init()" is true of that runtime alone, so this state goes away with the module React Native
+	// tears down - a late teardown has nothing left to reach into the next module with.
+	private final EventDispatcher mEventDispatcher = new EventDispatcher();
+	private boolean mInitialized = false;
+	private boolean mPushCallbackRegistered = false;
+	private boolean mReceivedPushCallbackRegistered = false;
 
-	private static String sReceivedPushData;
-	private static boolean sReceivedPushCallbackRegistered = false;
-
-	private static String sStartPushData;
-	private static boolean sPushCallbackRegistered = false;
-
-	private static boolean sInitialized = false;
+	// Per process. A push handed over before JS could take it outlives the React instance it
+	// arrived at: the next init() replays it.
+	private static PendingPush sReceivedPush;
+	private static PendingPush sStartPush;
 	private static final Object sStartPushLock = new Object();
 
+	// A push and what has already been done with it. Both paths to JS are replayed to a bundle
+	// that comes later - the device event by init(), the deprecated callback by onPushOpen() /
+	// onPushReceived() - and each of them only until the push has gone that way once. Without
+	// that, every new React instance was handed the last push of the process again: a pushOpened
+	// re-routing a deep link the app had already handled, and a launch push taking the place of
+	// the one-shot callback registration the new bundle was making.
+	private static final class PendingPush {
+		final String data;
+		boolean sentAsEvent;
+		boolean sentToCallback;
+
+		PendingPush(String data) {
+			this.data = data;
+		}
+	}
+
+	// The module JS is talking to, published on the first call from JS rather than in the
+	// constructor: TurboModuleManager.invalidate() constructs the module JS never required, and
+	// such a stillborn one must not take the live module's place.
 	private static PushwooshPlugin INSTANCE = null;
 
 	private InboxUiStyleManager inboxUiInboxUiStyleManager;
 
 	public PushwooshPlugin(ReactApplicationContext reactContext) {
 		super(reactContext);
-
-		INSTANCE = this;
 
 		reactContext.addLifecycleEventListener(this);
 
@@ -122,18 +142,21 @@ public class PushwooshPlugin extends PushwooshPluginSpec implements LifecycleEve
 		Pushwoosh.getInstance().setAppId(appId);
 
 		synchronized (sStartPushLock) {
-			if (sReceivedPushData != null) {
-				sendEvent(PUSH_RECEIVED_JS_EVENT, ConversionUtil.stringToJSONObject(sReceivedPushData));
+			if (sReceivedPush != null && !sReceivedPush.sentAsEvent) {
+				sendEvent(PUSH_RECEIVED_JS_EVENT, ConversionUtil.stringToJSONObject(sReceivedPush.data));
+				sReceivedPush.sentAsEvent = true;
 			}
 
-			if (sStartPushData != null) {
-				sendEvent(PUSH_OPEN_JS_EVENT, ConversionUtil.stringToJSONObject(sStartPushData));
+			if (sStartPush != null && !sStartPush.sentAsEvent) {
+				sendEvent(PUSH_OPEN_JS_EVENT, ConversionUtil.stringToJSONObject(sStartPush.data));
+				sStartPush.sentAsEvent = true;
 			}
 
 			// Under the same lock as the replay above: a push taking the lock between the replay
-			// and this flag would find sInitialized false, skip its own send, and never be
-			// replayed either.
-			sInitialized = true;
+			// and this flag would find the gate closed, skip its own send, and never be replayed
+			// either.
+			mInitialized = true;
+			INSTANCE = this;
 		}
 
 		if (success != null) {
@@ -167,13 +190,16 @@ public class PushwooshPlugin extends PushwooshPluginSpec implements LifecycleEve
 	@ReactMethod
 	public void onPushOpen(Callback callback) {
 		synchronized (sStartPushLock) {
-			if (!sPushCallbackRegistered && sStartPushData != null) {
-				callback.invoke(ConversionUtil.toWritableMap(ConversionUtil.stringToJSONObject(sStartPushData)));
-				sPushCallbackRegistered = true;
+			INSTANCE = this;
+
+			if (!mPushCallbackRegistered && sStartPush != null && !sStartPush.sentToCallback) {
+				callback.invoke(ConversionUtil.toWritableMap(ConversionUtil.stringToJSONObject(sStartPush.data)));
+				sStartPush.sentToCallback = true;
+				mPushCallbackRegistered = true;
 				return;
 			}
 
-			sPushCallbackRegistered = true;
+			mPushCallbackRegistered = true;
 			mEventDispatcher.subscribe(PUSH_OPEN_EVENT, callback);
 		}
 	}
@@ -181,13 +207,16 @@ public class PushwooshPlugin extends PushwooshPluginSpec implements LifecycleEve
 	@ReactMethod
 	public void onPushReceived(Callback callback) {
 		synchronized (sStartPushLock) {
-			if (!sReceivedPushCallbackRegistered && sReceivedPushData != null) {
-				callback.invoke(ConversionUtil.toWritableMap(ConversionUtil.stringToJSONObject(sReceivedPushData)));
-				sReceivedPushCallbackRegistered = true;
+			INSTANCE = this;
+
+			if (!mReceivedPushCallbackRegistered && sReceivedPush != null && !sReceivedPush.sentToCallback) {
+				callback.invoke(ConversionUtil.toWritableMap(ConversionUtil.stringToJSONObject(sReceivedPush.data)));
+				sReceivedPush.sentToCallback = true;
+				mReceivedPushCallbackRegistered = true;
 				return;
 			}
 
-			sReceivedPushCallbackRegistered = true;
+			mReceivedPushCallbackRegistered = true;
 			mEventDispatcher.subscribe(PUSH_RECEIVED_EVENT, callback);
 		}
 	}
@@ -600,29 +629,32 @@ public class PushwooshPlugin extends PushwooshPluginSpec implements LifecycleEve
 	public void onHostDestroy() {
 		PWLog.noise(TAG, "Host destroyed");
 
-		// A push can be delivered on the FCM thread while the host is going down, and every other
-		// accessor of these fields holds the lock.
+		// Nothing is reset here: the host going down is the activity, not the JS runtime. React
+		// Native keeps the context and the JS bundle across activities, JS does not call init() or
+		// onPushOpen() a second time, and a push opened after the user left by Back has to reach
+		// that bundle. Everything JS set up is reset in invalidate(), where the runtime ends.
+	}
+
+	// React Native tears the module down with its React instance (legacy ModuleHolder.destroy(),
+	// TurboModuleManager.invalidate()). Everything JS set up lives on this module and goes with it;
+	// only the module's place as the live one has to be given up here. The cached push stays - the
+	// next init() replays it.
+	@Override
+	public void invalidate() {
+		super.invalidate();
+		PWLog.noise(TAG, "Module invalidated");
+
+		getReactApplicationContext().removeLifecycleEventListener(this);
+
+		// A push can be delivered on the FCM thread while the runtime is going down, and every
+		// other accessor of the field holds the lock.
 		synchronized (sStartPushLock) {
-			// Only for the module this host is taking down. A restarted host builds a new
-			// PushwooshPlugin, and the order of the two events is not guaranteed, so a late
-			// teardown must not reset what the new module has already set up.
-			if (INSTANCE != this) {
-				return;
+			// Only if this module is still the live one. The next module publishes itself on the
+			// first call from JS and the order of the two events is not guaranteed, so a late
+			// teardown must not unseat a module that has already taken over.
+			if (INSTANCE == this) {
+				INSTANCE = null;
 			}
-
-			sPushCallbackRegistered = false;
-			sStartPushData = null;
-
-			sReceivedPushCallbackRegistered = false;
-			sReceivedPushData = null;
-
-			// These are what openPush()/messageReceived() consult before sending to JS. Left
-			// standing, a push arriving after the host died was handed to a context with no JS
-			// runtime, the broad catch there swallowed the failure, and the push was gone for
-			// good - the cache that would have replayed it on the next init() had just been
-			// cleared above. Cleared, the same push is cached and the next init() replays it.
-			sInitialized = false;
-			INSTANCE = null;
 		}
 	}
 
@@ -635,12 +667,21 @@ public class PushwooshPlugin extends PushwooshPluginSpec implements LifecycleEve
 
 		try {
 			synchronized (sStartPushLock) {
-				sStartPushData = pushData;
-				if (sPushCallbackRegistered) {
-					mEventDispatcher.dispatchEvent(PUSH_OPEN_EVENT, ConversionUtil.toWritableMap(ConversionUtil.stringToJSONObject(pushData)));
+				PendingPush push = new PendingPush(pushData);
+				sStartPush = push;
+
+				PushwooshPlugin plugin = INSTANCE;
+				if (plugin == null || !plugin.hasLiveRuntime()) {
+					return;
 				}
-				if (sInitialized && INSTANCE != null) {
-					INSTANCE.sendEvent(PUSH_OPEN_JS_EVENT, ConversionUtil.stringToJSONObject(pushData));
+
+				if (plugin.mPushCallbackRegistered) {
+					plugin.mEventDispatcher.dispatchEvent(PUSH_OPEN_EVENT, ConversionUtil.toWritableMap(ConversionUtil.stringToJSONObject(pushData)));
+					push.sentToCallback = true;
+				}
+				if (plugin.mInitialized) {
+					plugin.sendEvent(PUSH_OPEN_JS_EVENT, ConversionUtil.stringToJSONObject(pushData));
+					push.sentAsEvent = true;
 				}
 			}
 		} catch (Exception e) {
@@ -653,17 +694,33 @@ public class PushwooshPlugin extends PushwooshPluginSpec implements LifecycleEve
 		mEventDispatcher.sendJSEvent(getReactApplicationContext(), event, ConversionUtil.toWritableMap(params));
 	}
 
+	// The React instance behind the module is still running. One on its way down is not: emitting
+	// into it throws, the catch around the callers swallows the failure, and the push is gone.
+	// Held back, it stays cached for the next init(). Callers hold sStartPushLock.
+	private boolean hasLiveRuntime() {
+		return getReactApplicationContext().hasActiveReactInstance();
+	}
+
 	static void messageReceived(String pushData) {
 		PWLog.info(TAG, "Push received: " + pushData);
 
 		try {
 			synchronized (sStartPushLock) {
-				sReceivedPushData = pushData;
-				if (sReceivedPushCallbackRegistered) {
-					mEventDispatcher.dispatchEvent(PUSH_RECEIVED_EVENT, ConversionUtil.toWritableMap(ConversionUtil.stringToJSONObject(pushData)));
+				PendingPush push = new PendingPush(pushData);
+				sReceivedPush = push;
+
+				PushwooshPlugin plugin = INSTANCE;
+				if (plugin == null || !plugin.hasLiveRuntime()) {
+					return;
 				}
-				if (sInitialized && INSTANCE != null) {
-					INSTANCE.sendEvent(PUSH_RECEIVED_JS_EVENT, ConversionUtil.stringToJSONObject(pushData));
+
+				if (plugin.mReceivedPushCallbackRegistered) {
+					plugin.mEventDispatcher.dispatchEvent(PUSH_RECEIVED_EVENT, ConversionUtil.toWritableMap(ConversionUtil.stringToJSONObject(pushData)));
+					push.sentToCallback = true;
+				}
+				if (plugin.mInitialized) {
+					plugin.sendEvent(PUSH_RECEIVED_JS_EVENT, ConversionUtil.stringToJSONObject(pushData));
+					push.sentAsEvent = true;
 				}
 			}
 		} catch (Exception e) {

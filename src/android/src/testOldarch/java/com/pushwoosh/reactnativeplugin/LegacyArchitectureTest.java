@@ -34,7 +34,7 @@ public class LegacyArchitectureTest {
     // Public methods of the module that are not bridge methods: NativeModule and
     // LifecycleEventListener callbacks.
     private static final Set<String> NOT_BRIDGE_METHODS = new HashSet<>(Arrays.asList(
-            "getName", "onHostResume", "onHostPause", "onHostDestroy"));
+            "getName", "invalidate", "onHostResume", "onHostPause", "onHostDestroy"));
 
     @Rule
     public final PluginTestRule pluginRule = new PluginTestRule();

@@ -21,9 +21,9 @@ import org.mockito.MockedStatic;
  * {@link JavaOnlyMap}/{@link JavaOnlyArray} instead. {@code Pushwoosh.getInstance()} returns the
  * mock from {@link #pushwoosh()}. Both static mocks are closed after the test.
  *
- * <p>The plugin keeps the launch push, the "JS called init()" flag and the module instance in
- * statics so a push tapped before React Native is up survives until JS is ready. Robolectric
- * shares the class between tests, so they are reset before each one.
+ * <p>The plugin keeps the launch push and the module JS is talking to in statics so a push tapped
+ * before React Native is up survives until JS is ready. Robolectric shares the class between
+ * tests, so they are reset before each one.
  */
 final class PluginTestRule extends ExternalResource {
 
@@ -55,13 +55,9 @@ final class PluginTestRule extends ExternalResource {
     }
 
     private static void resetPluginStatics() {
-        setStatic("sReceivedPushData", null);
-        setStatic("sReceivedPushCallbackRegistered", false);
-        setStatic("sStartPushData", null);
-        setStatic("sPushCallbackRegistered", false);
-        setStatic("sInitialized", false);
+        setStatic("sReceivedPush", null);
+        setStatic("sStartPush", null);
         setStatic("INSTANCE", null);
-        setStatic("mEventDispatcher", new EventDispatcher());
     }
 
     private static void setStatic(String name, Object value) {
