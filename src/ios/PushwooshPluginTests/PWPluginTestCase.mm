@@ -15,6 +15,7 @@ static NSString *const PWCommunicationEnabledDefaultsKey = @"PushwooshCommunicat
 
 @implementation PWPluginTestCase {
     RCTCallableJSModules *_callableJSModules;
+    NSMutableArray<RCTLinkingManager *> *_listeningLinkingManagers;
     id<UNUserNotificationCenterDelegate> _originalNotificationCenterDelegate;
 }
 
@@ -31,10 +32,18 @@ static NSString *const PWCommunicationEnabledDefaultsKey = @"PushwooshCommunicat
 
     _jsEvents = [NSMutableArray array];
     _plugin = [PushwooshPlugin new];
-    [self attachJSEventRecorder];
+    _listeningLinkingManagers = [NSMutableArray array];
+    [self attachJSEventRecorderToModule:_plugin];
 }
 
 - (void)tearDown {
+    // invalidate is what RN calls on host teardown: it drops the `url` listener the test added, so
+    // the next test does not record events through it.
+    for (RCTLinkingManager *linkingManager in _listeningLinkingManagers) {
+        [linkingManager invalidate];
+    }
+    [_listeningLinkingManagers removeAllObjects];
+
     // The launch push and its deep link live in statics of Pushwoosh.mm. Drain what the test left
     // behind so the next one starts clean: being started from a push again clears the "already
     // replayed" flag, onPushOpen: consumes the push and getInitialURL the link. Without the first
@@ -57,23 +66,33 @@ static NSString *const PWCommunicationEnabledDefaultsKey = @"PushwooshCommunicat
 
 // Bridgeless hands every module an RCTCallableJSModules through RCTBridgeModuleDecorator and
 // RCTEventEmitter emits through it; the recorder stands where the JS runtime would.
-- (void)attachJSEventRecorder {
-    NSMutableArray<NSDictionary *> *events = _jsEvents;
-    _callableJSModules = [RCTCallableJSModules new];
-    [_callableJSModules setBridgelessJSModuleMethodInvoker:^(NSString *moduleName, NSString *methodName, NSArray *args, dispatch_block_t onComplete) {
-        if ([moduleName isEqualToString:@"RCTDeviceEventEmitter"] && [methodName isEqualToString:@"emit"] && args.count > 0) {
-            [events addObject:@{ @"name" : args[0], @"body" : args.count > 1 ? args[1] : [NSNull null] }];
-        }
-        if (onComplete) {
-            onComplete();
-        }
-    }];
+- (void)attachJSEventRecorderToModule:(id<RCTBridgeModule>)module {
+    if (!_callableJSModules) {
+        NSMutableArray<NSDictionary *> *events = _jsEvents;
+        _callableJSModules = [RCTCallableJSModules new];
+        [_callableJSModules setBridgelessJSModuleMethodInvoker:^(NSString *moduleName, NSString *methodName, NSArray *args, dispatch_block_t onComplete) {
+            if ([moduleName isEqualToString:@"RCTDeviceEventEmitter"] && [methodName isEqualToString:@"emit"] && args.count > 0) {
+                [events addObject:@{ @"name" : args[0], @"body" : args.count > 1 ? args[1] : [NSNull null] }];
+            }
+            if (onComplete) {
+                onComplete();
+            }
+        }];
+    }
 
     RCTBridgeModuleDecorator *decorator = [[RCTBridgeModuleDecorator alloc] initWithViewRegistry:nil
                                                                                   moduleRegistry:nil
                                                                                    bundleManager:nil
                                                                                callableJSModules:_callableJSModules];
-    [decorator attachInteropAPIsToModule:_plugin];
+    [decorator attachInteropAPIsToModule:module];
+}
+
+- (RCTLinkingManager *)linkingManagerListeningForURLEvents {
+    RCTLinkingManager *linkingManager = [RCTLinkingManager new];
+    [self attachJSEventRecorderToModule:linkingManager];
+    [linkingManager addListener:@"url"];
+    [_listeningLinkingManagers addObject:linkingManager];
+    return linkingManager;
 }
 
 - (NSArray *)jsEventBodiesNamed:(NSString *)name {
@@ -100,12 +119,21 @@ static NSString *const PWCommunicationEnabledDefaultsKey = @"PushwooshCommunicat
 }
 
 - (id)initialURLFromLinkingManager {
-    __block id resolved = nil;
+    return [self requestInitialURL].firstObject;
+}
+
+- (void)waitForInitialURL:(NSMutableArray *)initialURL {
+    NSPredicate *resolved = [NSPredicate predicateWithFormat:@"@count > 0"];
+    [self waitForExpectations:@[ [self expectationForPredicate:resolved evaluatedWithObject:initialURL handler:nil] ] timeout:3];
+}
+
+- (NSMutableArray *)requestInitialURL {
+    NSMutableArray *results = [NSMutableArray array];
     RCTPromiseResolveBlock resolve = ^(id value) {
-        resolved = value;
+        [results addObject:value ?: [NSNull null]];
     };
     RCTPromiseRejectBlock reject = ^(NSString *code, NSString *message, NSError *error) {
-        resolved = error ?: message;
+        [results addObject:error ?: message];
     };
 
     // getInitialURL:reject: is an RCT_EXPORT_METHOD of RCTLinkingManager, swizzled by the plugin;
@@ -113,7 +141,15 @@ static NSString *const PWCommunicationEnabledDefaultsKey = @"PushwooshCommunicat
     RCTLinkingManager *linkingManager = [RCTLinkingManager new];
     SEL selector = NSSelectorFromString(@"getInitialURL:reject:");
     ((void (*)(id, SEL, RCTPromiseResolveBlock, RCTPromiseRejectBlock))objc_msgSend)(linkingManager, selector, resolve, reject);
-    return resolved;
+    return results;
+}
+
+- (void)postOpenURLNotification:(NSString *)url {
+    // RCTLinkingManager posts URL.absoluteString, not the raw string it was opened with.
+    NSString *canonicalURL = [NSURL URLWithString:url].absoluteString ?: url;
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"RCTOpenURLNotification"
+                                                        object:nil
+                                                      userInfo:@{ @"url" : canonicalURL }];
 }
 
 @end

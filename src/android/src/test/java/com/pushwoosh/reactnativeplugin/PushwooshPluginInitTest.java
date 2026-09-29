@@ -66,6 +66,19 @@ public class PushwooshPluginInitTest {
         verify(pluginRule.pushwoosh(), never()).setAppId(anyString());
     }
 
+    // Verifies that init() with no config at all is treated as a missing app id: config.hasKey()
+    // used to throw out of the bridge.
+    @Test
+    public void testInitReportsErrorWhenConfigIsNull() {
+        PushwooshPlugin plugin = new PushwooshPlugin(reactContext);
+
+        plugin.init(null, success, error);
+
+        verify(error).invoke("Pushwoosh Application id not specified");
+        verifyNoInteractions(success);
+        verify(pluginRule.pushwoosh(), never()).setAppId(anyString());
+    }
+
     // Verifies that init() hands the app id to the SDK and confirms to JS.
     @Test
     public void testInitSetsAppIdAndConfirms() {

@@ -7,8 +7,10 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.ReadableType;
 import com.pushwoosh.inbox.ui.PushwooshInboxStyle;
 import com.pushwoosh.inbox.ui.model.customizing.formatter.InboxDateFormatter;
+import com.pushwoosh.internal.utils.PWLog;
 
 import java.io.IOException;
 import java.net.URL;
@@ -53,22 +55,45 @@ class InboxUiStyleManager {
     }
 
     private void setDateFormat(ReadableMap mapStyle) {
-        if (!mapStyle.hasKey(DATE_FORMAT_KEY)) {
-            return;
-        }
-        String dateFormat = mapStyle.getString(DATE_FORMAT_KEY);
+        String dateFormat = getString(mapStyle, DATE_FORMAT_KEY);
         if (dateFormat != null && !dateFormat.isEmpty()) {
-            ReactInboxDateFormatter inboxDateFormatter = new ReactInboxDateFormatter(dateFormat);
-            PushwooshInboxStyle.INSTANCE.setDateFormatter(inboxDateFormatter);
+            try {
+                PushwooshInboxStyle.INSTANCE.setDateFormatter(new ReactInboxDateFormatter(dateFormat));
+            } catch (IllegalArgumentException e) {
+                PWLog.error(PushwooshPlugin.TAG, "Invalid inbox dateFormat pattern: " + dateFormat, e);
+            }
         }
     }
 
     private void setTexts(ReadableMap mapStyle) {
         PushwooshInboxStyle PWInboxStyle = PushwooshInboxStyle.INSTANCE;
-        if (mapStyle.hasKey(LIST_ERROR_MESSAGE_KEY))
-            PWInboxStyle.setListErrorMessage(mapStyle.getString(LIST_ERROR_MESSAGE_KEY));
-        if (mapStyle.hasKey(LIST_EMPTY_MESSAGE_KEY))
-            PWInboxStyle.setListEmptyText(mapStyle.getString(LIST_EMPTY_MESSAGE_KEY));
+        String listErrorMessage = getString(mapStyle, LIST_ERROR_MESSAGE_KEY);
+        if (listErrorMessage != null)
+            PWInboxStyle.setListErrorMessage(listErrorMessage);
+        String listEmptyMessage = getString(mapStyle, LIST_EMPTY_MESSAGE_KEY);
+        if (listEmptyMessage != null)
+            PWInboxStyle.setListEmptyText(listEmptyMessage);
+    }
+
+    // A production ReadableNativeMap throws out of presentInboxUI() on a typed read of a
+    // mismatched or null value, so the type is checked before the value is taken.
+    private boolean hasTypedValue(ReadableMap mapStyle, String key, ReadableType type, String label) {
+        if (!mapStyle.hasKey(key)) {
+            return false;
+        }
+        if (mapStyle.getType(key) != type) {
+            PWLog.error(PushwooshPlugin.TAG, "Inbox style " + key + " must be " + label + "; ignored.");
+            return false;
+        }
+        return true;
+    }
+
+    private String getString(ReadableMap mapStyle, String key) {
+        return hasTypedValue(mapStyle, key, ReadableType.String, "a string") ? mapStyle.getString(key) : null;
+    }
+
+    private Integer getColor(ReadableMap mapStyle, String key) {
+        return hasTypedValue(mapStyle, key, ReadableType.Number, "a number") ? mapStyle.getInt(key) : null;
     }
 
     private void setImages(ReadableMap mapStyle) {
@@ -87,11 +112,15 @@ class InboxUiStyleManager {
     }
 
     private Drawable getImage(ReadableMap mapStyle, String key) {
-        if (!mapStyle.hasKey(key)) {
+        if (!hasTypedValue(mapStyle, key, ReadableType.Map, "an object with a uri")) {
             return null;
         }
-        ReadableMap defaultImageIcon = mapStyle.getMap(key);
-        String uri = defaultImageIcon.getString(URI_KEY);
+        ReadableMap imageMap = mapStyle.getMap(key);
+        if (!imageMap.hasKey(URI_KEY) || imageMap.getType(URI_KEY) != ReadableType.String) {
+            PWLog.error(PushwooshPlugin.TAG, "Inbox style " + key + "." + URI_KEY + " must be a string; ignored.");
+            return null;
+        }
+        String uri = imageMap.getString(URI_KEY);
         try {
             return getDrawable(uri);
         } catch (IOException e) {
@@ -113,36 +142,49 @@ class InboxUiStyleManager {
     private void setColors(ReadableMap mapStyle) {
         PushwooshInboxStyle PWInboxStyle = PushwooshInboxStyle.INSTANCE;
 
-        if (mapStyle.hasKey(ACCENT_COLOR_KEY))
-            PWInboxStyle.setAccentColor(mapStyle.getInt(ACCENT_COLOR_KEY));
-        if (mapStyle.hasKey(HIGHLIGHT_COLOR_KEY))
-            PWInboxStyle.setHighlightColor(mapStyle.getInt(HIGHLIGHT_COLOR_KEY));
-        if (mapStyle.hasKey(BACKGROUND_COLOR_KEY))
-            PWInboxStyle.setBackgroundColor(mapStyle.getInt(BACKGROUND_COLOR_KEY));
-        if (mapStyle.hasKey(DIVIDER_COLOR_KEY))
-            PWInboxStyle.setDividerColor(mapStyle.getInt(DIVIDER_COLOR_KEY));
+        Integer accentColor = getColor(mapStyle, ACCENT_COLOR_KEY);
+        if (accentColor != null)
+            PWInboxStyle.setAccentColor(accentColor);
+        Integer highlightColor = getColor(mapStyle, HIGHLIGHT_COLOR_KEY);
+        if (highlightColor != null)
+            PWInboxStyle.setHighlightColor(highlightColor);
+        Integer backgroundColor = getColor(mapStyle, BACKGROUND_COLOR_KEY);
+        if (backgroundColor != null)
+            PWInboxStyle.setBackgroundColor(backgroundColor);
+        Integer dividerColor = getColor(mapStyle, DIVIDER_COLOR_KEY);
+        if (dividerColor != null)
+            PWInboxStyle.setDividerColor(dividerColor);
 
-        if (mapStyle.hasKey(DATE_COLOR_KEY))
-            PWInboxStyle.setDateColor(mapStyle.getInt(DATE_COLOR_KEY));
-        if (mapStyle.hasKey(READ_DATE_COLOR_KEY))
-            PWInboxStyle.setReadDateColor(mapStyle.getInt(READ_DATE_COLOR_KEY));
+        Integer dateColor = getColor(mapStyle, DATE_COLOR_KEY);
+        if (dateColor != null)
+            PWInboxStyle.setDateColor(dateColor);
+        Integer readDateColor = getColor(mapStyle, READ_DATE_COLOR_KEY);
+        if (readDateColor != null)
+            PWInboxStyle.setReadDateColor(readDateColor);
 
-        if (mapStyle.hasKey(TITLE_COLOR_KEY))
-            PWInboxStyle.setTitleColor(mapStyle.getInt(TITLE_COLOR_KEY));
-        if (mapStyle.hasKey(READ_TITLE_COLOR_KEY))
-            PWInboxStyle.setReadTitleColor(mapStyle.getInt(READ_TITLE_COLOR_KEY));
+        Integer titleColor = getColor(mapStyle, TITLE_COLOR_KEY);
+        if (titleColor != null)
+            PWInboxStyle.setTitleColor(titleColor);
+        Integer readTitleColor = getColor(mapStyle, READ_TITLE_COLOR_KEY);
+        if (readTitleColor != null)
+            PWInboxStyle.setReadTitleColor(readTitleColor);
 
-        if (mapStyle.hasKey(DESCRIPTION_COLOR_KEY))
-            PWInboxStyle.setDescriptionColor(mapStyle.getInt(DESCRIPTION_COLOR_KEY));
-        if (mapStyle.hasKey(READ_DESCRIPTION_COLOR_KEY))
-            PWInboxStyle.setReadDescriptionColor(mapStyle.getInt(READ_DESCRIPTION_COLOR_KEY));
+        Integer descriptionColor = getColor(mapStyle, DESCRIPTION_COLOR_KEY);
+        if (descriptionColor != null)
+            PWInboxStyle.setDescriptionColor(descriptionColor);
+        Integer readDescriptionColor = getColor(mapStyle, READ_DESCRIPTION_COLOR_KEY);
+        if (readDescriptionColor != null)
+            PWInboxStyle.setReadDescriptionColor(readDescriptionColor);
 
-        if (mapStyle.hasKey(BAR_BACKGROUND_COLOR))
-            PWInboxStyle.setBarBackgroundColor(mapStyle.getInt(BAR_BACKGROUND_COLOR));
-        if (mapStyle.hasKey(BAR_ACCENT_COLOR))
-            PWInboxStyle.setBarAccentColor(mapStyle.getInt(BAR_ACCENT_COLOR));
-        if (mapStyle.hasKey(BAR_TEXT_COLOR))
-            PWInboxStyle.setBarTextColor(mapStyle.getInt(BAR_TEXT_COLOR));
+        Integer barBackgroundColor = getColor(mapStyle, BAR_BACKGROUND_COLOR);
+        if (barBackgroundColor != null)
+            PWInboxStyle.setBarBackgroundColor(barBackgroundColor);
+        Integer barAccentColor = getColor(mapStyle, BAR_ACCENT_COLOR);
+        if (barAccentColor != null)
+            PWInboxStyle.setBarAccentColor(barAccentColor);
+        Integer barTextColor = getColor(mapStyle, BAR_TEXT_COLOR);
+        if (barTextColor != null)
+            PWInboxStyle.setBarTextColor(barTextColor);
     }
 
     private class ReactInboxDateFormatter implements InboxDateFormatter {

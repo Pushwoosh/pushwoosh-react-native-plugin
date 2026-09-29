@@ -34,6 +34,7 @@ import com.pushwoosh.inbox.PushwooshInbox;
 import com.pushwoosh.inbox.data.InboxMessage;
 import com.pushwoosh.inbox.data.InboxMessageType;
 import com.pushwoosh.inbox.exception.InboxMessagesException;
+import com.pushwoosh.inbox.ui.PushwooshInboxStyle;
 import com.pushwoosh.inbox.ui.presentation.view.activity.InboxActivity;
 import com.pushwoosh.notification.LocalNotification;
 import com.pushwoosh.notification.PushwooshNotificationSettings;
@@ -42,6 +43,7 @@ import com.pushwoosh.richmedia.RichMediaType;
 import com.pushwoosh.tags.TagsBundle;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -175,6 +177,16 @@ public class PushwooshPluginBridgeTest {
         verifyNoInteractions(success);
     }
 
+    // Verifies that readMessages() with no codes asks the SDK to read nothing instead of throwing.
+    @Test
+    public void testReadMessagesPassesEmptyListWhenCodesAreNull() {
+        try (MockedStatic<PushwooshInbox> inbox = mockStatic(PushwooshInbox.class)) {
+            plugin.readMessages(null);
+
+            inbox.verify(() -> PushwooshInbox.readMessages(Collections.emptyList()));
+        }
+    }
+
     // Verifies that the JS RichMediaStyle constants (MODAL = 0, LEGACY = 1) map onto the SDK's
     // RichMediaType and read back as the same constant.
     @Test
@@ -233,6 +245,15 @@ public class PushwooshPluginBridgeTest {
 
         Intent started = shadowOf(activity).getNextStartedActivity();
         assertEquals(InboxActivity.class.getName(), started.getComponent().getClassName());
+    }
+
+    // Verifies that presentInboxUI() without a current activity still applies the style and only
+    // logs: the Intent used to be built on the null activity before the null-check ran.
+    @Test
+    public void testPresentInboxUIAppliesStyleWhenCurrentActivityIsNull() {
+        plugin.presentInboxUI(JavaOnlyMap.of("listEmptyMessage", "No activity, no crash"));
+
+        assertEquals("No activity, no crash", PushwooshInboxStyle.INSTANCE.getListEmptyText().toString());
     }
 
     // Verifies that the iOS-only foreground alert setting still answers on Android, so the shared
@@ -299,6 +320,38 @@ public class PushwooshPluginBridgeTest {
         }
     }
 
+    // Verifies that a null colour is rejected before Color.parseColor() runs: passing it through
+    // used to throw NullPointerException and take the app down.
+    @Test
+    public void testSetNotificationIconBackgroundColorSetsNothingWhenColorIsNull() {
+        try (MockedStatic<PushwooshNotificationSettings> settings = mockStatic(PushwooshNotificationSettings.class)) {
+            plugin.setNotificationIconBackgroundColor(null);
+
+            settings.verifyNoInteractions();
+        }
+    }
+
+    // Verifies that an empty colour is rejected before Color.parseColor() runs: passing it through
+    // used to throw StringIndexOutOfBoundsException and take the app down.
+    @Test
+    public void testSetNotificationIconBackgroundColorSetsNothingWhenColorIsEmpty() {
+        try (MockedStatic<PushwooshNotificationSettings> settings = mockStatic(PushwooshNotificationSettings.class)) {
+            plugin.setNotificationIconBackgroundColor("");
+
+            settings.verifyNoInteractions();
+        }
+    }
+
+    // Verifies that a string Color.parseColor() rejects is still dropped without reaching the SDK.
+    @Test
+    public void testSetNotificationIconBackgroundColorSetsNothingWhenColorIsMalformed() {
+        try (MockedStatic<PushwooshNotificationSettings> settings = mockStatic(PushwooshNotificationSettings.class)) {
+            plugin.setNotificationIconBackgroundColor("not-a-colour");
+
+            settings.verifyNoInteractions();
+        }
+    }
+
     // Verifies that a local notification carries the JS message and delay to the SDK.
     @Test
     public void testCreateLocalNotificationSchedulesTheMessage() {
@@ -312,6 +365,15 @@ public class PushwooshPluginBridgeTest {
     @Test
     public void testCreateLocalNotificationWithoutMessageSchedulesNothing() {
         plugin.createLocalNotification(JavaOnlyMap.of("seconds", 5));
+
+        verify(pluginRule.pushwoosh(), never()).scheduleLocalNotification(any(LocalNotification.class));
+    }
+
+    // Verifies that createLocalNotification() with no data at all schedules nothing instead of
+    // throwing on the way into the conversion.
+    @Test
+    public void testCreateLocalNotificationWithNullDataSchedulesNothing() {
+        plugin.createLocalNotification(null);
 
         verify(pluginRule.pushwoosh(), never()).scheduleLocalNotification(any(LocalNotification.class));
     }

@@ -13,6 +13,8 @@
 #import <React/RCTBridgeModule.h>
 #import <pushwoosh-react-native-plugin/Pushwoosh.h>
 
+@class RCTLinkingManager;
+
 NS_ASSUME_NONNULL_BEGIN
 
 // RCT_EXPORT_METHOD declares the bridge methods in Pushwoosh.mm only. The tests call them the way
@@ -70,6 +72,20 @@ NS_ASSUME_NONNULL_BEGIN
 
 /// What `Linking.getInitialURL()` would resolve to now: the URL string, or NSNull when nothing is pending.
 - (id)initialURLFromLinkingManager;
+
+/// Calls `Linking.getInitialURL()`; the returned array gets the resolved value, empty while the call is held.
+- (NSMutableArray *)requestInitialURL;
+
+/// Waits until a call from requestInitialURL has resolved, at most a couple of seconds.
+- (void)waitForInitialURL:(NSMutableArray *)initialURL;
+
+/// What RCTLinkingManager posts when the app delegate forwards an opened URL or a Universal Link
+/// to it; every RCTLinkingManager with a JS listener turns it into the `url` event.
+- (void)postOpenURLNotification:(NSString *)url;
+
+/// A JS `Linking.addEventListener('url', ...)`: a fresh RCTLinkingManager whose `url` events land in
+/// `jsEvents`. Invalidated in tearDown, which drops the listener again.
+- (RCTLinkingManager *)linkingManagerListeningForURLEvents;
 
 @end
 

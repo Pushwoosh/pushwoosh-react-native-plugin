@@ -31,8 +31,12 @@ public final class ConversionUtil {
 	}
 
 	public static JSONObject toJsonObject(ReadableMap readableMap) {
-		ReadableMapKeySetIterator iterator = readableMap.keySetIterator();
 		JSONObject result = new JSONObject();
+		if (readableMap == null) {
+			PWLog.error(PushwooshPlugin.TAG, "Could not convert object: map is null.");
+			return result;
+		}
+		ReadableMapKeySetIterator iterator = readableMap.keySetIterator();
 		while (iterator.hasNextKey()) {
 			String key = iterator.nextKey();
 			ReadableType type = readableMap.getType(key);
@@ -215,6 +219,10 @@ public final class ConversionUtil {
 	
 	public static ArrayList<String> messageCodesArrayToArrayList(ReadableArray readableArray) {
 		ArrayList<String> result = new ArrayList<>();
+		if (readableArray == null) {
+			PWLog.error(PushwooshPlugin.TAG, "Could not convert message codes: array is null.");
+			return result;
+		}
 		for (int i = 0; i < readableArray.size(); i++) {
 			ReadableType indexType = readableArray.getType(i);
 			try {

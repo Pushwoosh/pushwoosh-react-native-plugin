@@ -45,13 +45,13 @@ class DemoForeignNotificationDelegate: NSObject, UNUserNotificationCenterDelegat
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-  var window: UIWindow?
-
   var reactNativeDelegate: ReactNativeDelegate?
   var reactNativeFactory: RCTReactNativeFactory?
 
   // UNUserNotificationCenter holds its delegate weakly.
   var foreignNotificationDelegate: DemoForeignNotificationDelegate?
+  // React Native started by a background launch, waiting for a scene to show it.
+  var backgroundWindow: UIWindow?
 
   func application(
     _ application: UIApplication,
@@ -70,27 +70,78 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     reactNativeDelegate = delegate
     reactNativeFactory = factory
 
-    window = UIWindow(frame: UIScreen.main.bounds)
+    // A background launch (a silent push, say) connects no scene; a foreground one connects it first.
+    DispatchQueue.main.async {
+      guard application.connectedScenes.isEmpty else {
+        return
+      }
+      let window = UIWindow(frame: UIScreen.main.bounds)
+      factory.startReactNative(withModuleName: "demoapp", in: window, launchOptions: launchOptions)
+      self.backgroundWindow = window
+    }
+
+    return true
+  }
+}
+
+// The iOS 27 SDK requires the scene life cycle: the scene owns the window and receives the links.
+class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+  var window: UIWindow?
+
+  func scene(
+    _ scene: UIScene,
+    willConnectTo session: UISceneSession,
+    options connectionOptions: UIScene.ConnectionOptions
+  ) {
+    guard let windowScene = scene as? UIWindowScene,
+          let appDelegate = UIApplication.shared.delegate as? AppDelegate,
+          let factory = appDelegate.reactNativeFactory else {
+      return
+    }
+
+    let window = UIWindow(windowScene: windowScene)
+    self.window = window
+
+    if let backgroundWindow = appDelegate.backgroundWindow {
+      window.rootViewController = backgroundWindow.rootViewController
+      backgroundWindow.rootViewController = nil
+      appDelegate.backgroundWindow = nil
+      window.makeKeyAndVisible()
+      return
+    }
 
     factory.startReactNative(
       withModuleName: "demoapp",
       in: window,
-      launchOptions: launchOptions
+      launchOptions: launchOptions(from: connectionOptions)
     )
-
-    return true
   }
 
-  // Only the app's own scheme is routed to JS. The Universal Links hook
-  // (application:continueUserActivity:) is deliberately absent: RCTLinkingManager answers YES to
-  // every BrowsingWeb activity, which makes the SDK treat an http link to someone else's site as
-  // handled and the browser never opens (SDK-916).
-  func application(
-    _ app: UIApplication,
-    open url: URL,
-    options: [UIApplication.OpenURLOptionsKey: Any] = [:]
-  ) -> Bool {
-    return RCTLinkingManager.application(app, open: url, options: options)
+  // The app's own scheme and its Universal Links both go to JS; a foreign http link opens in Safari (SDK-884).
+  func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+    guard let url = URLContexts.first?.url else {
+      return
+    }
+    RCTLinkingManager.application(UIApplication.shared, open: url, options: [:])
+  }
+
+  func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
+    RCTLinkingManager.application(UIApplication.shared, continue: userActivity, restorationHandler: { _ in })
+  }
+
+  // Linking.getInitialURL() reads the launch URL from launchOptions; a scene gets it in connectionOptions.
+  private func launchOptions(from connectionOptions: UIScene.ConnectionOptions) -> [UIApplication.LaunchOptionsKey: Any] {
+    var launchOptions: [UIApplication.LaunchOptionsKey: Any] = [:]
+    if let url = connectionOptions.urlContexts.first?.url {
+      launchOptions[.url] = url
+    }
+    if let activity = connectionOptions.userActivities.first(where: { $0.activityType == NSUserActivityTypeBrowsingWeb }) {
+      launchOptions[.userActivityDictionary] = [
+        UIApplication.LaunchOptionsKey.userActivityType.rawValue: activity.activityType,
+        "UIApplicationLaunchOptionsUserActivityKey": activity,
+      ]
+    }
+    return launchOptions
   }
 }
 

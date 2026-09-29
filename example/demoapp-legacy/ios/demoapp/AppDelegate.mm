@@ -46,6 +46,10 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
 // UNUserNotificationCenter holds its delegate weakly.
 static DemoForeignNotificationDelegate *gForeignNotificationDelegate = nil;
 
+@interface AppDelegate ()
+- (void)startReactNativeWithLaunchOptions:(NSDictionary *)launchOptions;
+@end
+
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
@@ -60,18 +64,23 @@ static DemoForeignNotificationDelegate *gForeignNotificationDelegate = nil;
   gForeignNotificationDelegate.previousDelegate = notificationCenter.delegate;
   notificationCenter.delegate = gForeignNotificationDelegate;
 
-  return [super application:application didFinishLaunchingWithOptions:launchOptions];
+  // A background launch (a silent push, say) connects no scene; a foreground one connects it first.
+  dispatch_async(dispatch_get_main_queue(), ^{
+    if (application.connectedScenes.count == 0) {
+      [self startReactNativeWithLaunchOptions:launchOptions];
+    }
+  });
+  return YES;
 }
 
-// Only the app's own scheme is routed to JS. The Universal Links hook
-// (application:continueUserActivity:) is deliberately absent: RCTLinkingManager answers YES to
-// every BrowsingWeb activity, which makes the SDK treat an http link to someone else's site as
-// handled and the browser never opens (SDK-916).
-- (BOOL)application:(UIApplication *)application
-            openURL:(NSURL *)url
-            options:(NSDictionary<UIApplicationOpenURLOptionsKey, id> *)options
+// Linking.getInitialURL() reads the bridge's launchOptions, and a scene app gets the launch URL only
+// in connectionOptions, so React Native starts once the scene connects.
+- (void)startReactNativeWithLaunchOptions:(NSDictionary *)launchOptions
 {
-  return [RCTLinkingManager application:application openURL:url options:options];
+  if (self.rootViewFactory) {
+    return;
+  }
+  [super application:[UIApplication sharedApplication] didFinishLaunchingWithOptions:launchOptions];
 }
 
 - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
@@ -86,6 +95,84 @@ static DemoForeignNotificationDelegate *gForeignNotificationDelegate = nil;
 #else
   return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
 #endif
+}
+
+@end
+
+// The iOS 27 SDK requires the scene life cycle. RCTAppDelegate builds the React Native root in a
+// window of its own; the scene starts it, moves the root into the scene's window and receives the links.
+@interface SceneDelegate : UIResponder <UIWindowSceneDelegate>
+@property (nonatomic, strong) UIWindow *window;
+@end
+
+@implementation SceneDelegate
+
+- (void)scene:(UIScene *)scene willConnectToSession:(UISceneSession *)session options:(UISceneConnectionOptions *)connectionOptions
+{
+  if (![scene isKindOfClass:[UIWindowScene class]]) {
+    return;
+  }
+
+  AppDelegate *appDelegate = (AppDelegate *)[UIApplication sharedApplication].delegate;
+  [appDelegate startReactNativeWithLaunchOptions:[self launchOptionsFromConnectionOptions:connectionOptions]];
+  UIViewController *rootViewController = appDelegate.window.rootViewController;
+  appDelegate.window.rootViewController = nil;
+
+  UIWindow *window = [[UIWindow alloc] initWithWindowScene:(UIWindowScene *)scene];
+  window.rootViewController = rootViewController;
+  self.window = window;
+  appDelegate.window = window;
+  [window makeKeyAndVisible];
+}
+
+// RCTAppDelegate refreshes Dimensions from this callback; the scene no longer belongs to it.
+- (void)windowScene:(UIWindowScene *)windowScene
+    didUpdateCoordinateSpace:(id<UICoordinateSpace>)previousCoordinateSpace
+        interfaceOrientation:(UIInterfaceOrientation)previousInterfaceOrientation
+             traitCollection:(UITraitCollection *)previousTraitCollection
+{
+  id<UIWindowSceneDelegate> appDelegate = (id<UIWindowSceneDelegate>)[UIApplication sharedApplication].delegate;
+  if ([appDelegate respondsToSelector:_cmd]) {
+    [appDelegate windowScene:windowScene
+        didUpdateCoordinateSpace:previousCoordinateSpace
+            interfaceOrientation:previousInterfaceOrientation
+                 traitCollection:previousTraitCollection];
+  }
+}
+
+// The app's own scheme and its Universal Links both go to JS; a foreign http link opens in Safari (SDK-884).
+- (void)scene:(UIScene *)scene openURLContexts:(NSSet<UIOpenURLContext *> *)URLContexts
+{
+  NSURL *url = URLContexts.anyObject.URL;
+  if (url) {
+    [RCTLinkingManager application:[UIApplication sharedApplication] openURL:url options:@{}];
+  }
+}
+
+- (void)scene:(UIScene *)scene continueUserActivity:(NSUserActivity *)userActivity
+{
+  [RCTLinkingManager application:[UIApplication sharedApplication]
+            continueUserActivity:userActivity
+              restorationHandler:^(NSArray<id<UIUserActivityRestoring>> *restorableObjects) {}];
+}
+
+- (NSDictionary *)launchOptionsFromConnectionOptions:(UISceneConnectionOptions *)connectionOptions
+{
+  NSMutableDictionary *launchOptions = [NSMutableDictionary dictionary];
+  NSURL *url = connectionOptions.URLContexts.anyObject.URL;
+  if (url) {
+    launchOptions[UIApplicationLaunchOptionsURLKey] = url;
+  }
+  for (NSUserActivity *activity in connectionOptions.userActivities) {
+    if ([activity.activityType isEqualToString:NSUserActivityTypeBrowsingWeb]) {
+      launchOptions[UIApplicationLaunchOptionsUserActivityDictionaryKey] = @{
+        UIApplicationLaunchOptionsUserActivityTypeKey : activity.activityType,
+        @"UIApplicationLaunchOptionsUserActivityKey" : activity,
+      };
+      break;
+    }
+  }
+  return launchOptions;
 }
 
 @end

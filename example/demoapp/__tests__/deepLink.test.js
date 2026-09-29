@@ -14,9 +14,9 @@ test('splits a deep link into scheme, host, path and query params', () => {
 });
 
 test('reads every query parameter and decodes escaped values', () => {
-    const { params } = parseDeepLink('pwdemo://demo/screen?from=t1&title=%D0%A1%D0%BF%D0%B0%D1%80%D1%82%D0%B0%D0%BA');
+    const { params } = parseDeepLink('pwdemo://demo/screen?from=t1&title=H%C3%A9llo%20w%C3%B6rld');
 
-    expect(params).toEqual({ from: 't1', title: 'Спартак' });
+    expect(params).toEqual({ from: 't1', title: 'Héllo wörld' });
 });
 
 test('returns an empty params object for a link without a query', () => {

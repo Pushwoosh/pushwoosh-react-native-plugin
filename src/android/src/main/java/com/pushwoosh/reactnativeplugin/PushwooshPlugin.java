@@ -130,7 +130,7 @@ public class PushwooshPlugin extends PushwooshPluginSpec implements LifecycleEve
 
 	@ReactMethod
 	public void init(ReadableMap config, Callback success, Callback error) {
-		String appId = config.hasKey("pw_appid") ? config.getString("pw_appid") : null;
+		String appId = config != null && config.hasKey("pw_appid") ? config.getString("pw_appid") : null;
 
 		if (appId == null) {
 			if (error != null) {
@@ -441,12 +441,11 @@ public class PushwooshPlugin extends PushwooshPluginSpec implements LifecycleEve
 		}
 
 		Activity currentActivity = getCurrentActivity();
-		Intent intent = new Intent(currentActivity, InboxActivity.class);
-		if (currentActivity != null) {
-			currentActivity.startActivity(intent);
-		}else {
+		if (currentActivity == null) {
 			PWLog.error(TAG, "current activity is null");
+			return;
 		}
+		currentActivity.startActivity(new Intent(currentActivity, InboxActivity.class));
 	}
 
 	@ReactMethod
@@ -564,6 +563,10 @@ public class PushwooshPlugin extends PushwooshPluginSpec implements LifecycleEve
 
 	@ReactMethod
 	public void setNotificationIconBackgroundColor(String color) {
+		if (color == null || color.isEmpty()) {
+			PWLog.error(TAG, "setNotificationIconBackgroundColor: color is required");
+			return;
+		}
 		int intColor;
 		try {
             intColor = Color.parseColor(color);

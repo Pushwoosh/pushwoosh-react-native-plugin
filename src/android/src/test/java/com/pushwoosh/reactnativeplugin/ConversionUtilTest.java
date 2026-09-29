@@ -16,6 +16,7 @@ import com.pushwoosh.inbox.data.InboxMessageType;
 import com.pushwoosh.tags.TagsBundle;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -58,6 +59,14 @@ public class ConversionUtilTest {
         assertEquals("value", json.getJSONObject("nested").getString("key"));
         assertEquals("first", json.getJSONArray("list").getString(0));
         assertEquals(7, json.getJSONArray("list").getInt(1));
+    }
+
+    // Verifies that a null map converts to an empty JSON object, so setTags(undefined) sends an
+    // empty bundle and createLocalNotification(undefined) hits its own "msg is required" guard
+    // instead of failing on keySetIterator().
+    @Test
+    public void testToJsonObjectReturnsEmptyObjectWhenMapIsNull() {
+        assertEquals(0, ConversionUtil.toJsonObject(null).length());
     }
 
     // Verifies that SDK JSON reaches JS with every type mapped, and 64-bit integers as strings:
@@ -106,6 +115,13 @@ public class ConversionUtilTest {
         ReadableArray codes = JavaOnlyArray.of("A1", 2, "B3");
 
         assertEquals(Arrays.asList("A1", "B3"), ConversionUtil.messageCodesArrayToArrayList(codes));
+    }
+
+    // Verifies that a null codes array converts to an empty list, so readMessages(undefined) from
+    // JS asks the SDK for nothing instead of failing on size().
+    @Test
+    public void testMessageCodesArrayToArrayListReturnsEmptyListWhenArrayIsNull() {
+        assertEquals(Collections.emptyList(), ConversionUtil.messageCodesArrayToArrayList(null));
     }
 
     // Verifies that an inbox message reaches JS with the fields the typings promise and the custom

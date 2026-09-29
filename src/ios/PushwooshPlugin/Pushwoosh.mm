@@ -72,6 +72,17 @@ static NSDictionary * gStartPushData = nil;
 static BOOL gStartPushReplayed = NO;  // Launch push already replayed into the JS events by init:
 static NSURL * gPushDeepLinkURL = nil;  // Deep link URL for New Architecture support
 static NSString * gEarlyHandledHash = nil;  // Last push hash the cold-start delegate accepted, to avoid double handling
+static NSString * gPendingWebLaunchLink = nil;  // http(s) link of the launch push, until the SDK hands it to RCTLinkingManager
+static NSUInteger gPendingWebLaunchLinkGeneration = 0;  // Bumped on every arm, so a stale delivery timeout leaves a newer link alone
+static NSString * gLastArmedWebLaunchLink = nil;  // Survives delivery, so re-arming the same push is recognised
+static BOOL gInitialURLAnswered = NO;  // JS called getInitialURL() since gLastArmedWebLaunchLink was first armed
+static BOOL gPluginInitialized = NO;  // init: ran, so JS is up and a tapped push is no longer a launch push
+static NSMutableArray<void (^)(NSString *)> * gInitialURLWaiters = nil;  // getInitialURL() calls held for the pending link
+static NSUInteger gInitialURLHoldGeneration = 0;  // Bumped on every settle, so a stale hold timeout leaves a newer hold alone
+// The SDK waits 0.2 s after accepting the push, then fetches apple-app-site-association with a 5 s timeout.
+static NSTimeInterval const kPWWebLaunchLinkDeliveryTimeout = 6.0;
+// Covers the SDK's delay and a cached or quick verdict without stalling an app whose link never reaches RN.
+static NSTimeInterval const kPWInitialURLHoldTimeout = 1.0;
 static NSString * const kRegistrationSuccesEvent = @"PWRegistrationSuccess";
 static NSString * const kRegistrationErrorEvent = @"PWRegistrationError";
 static NSString * const kPushReceivedEvent = @"PWPushReceived";
@@ -79,6 +90,25 @@ static NSString * const kPushOpenEvent = @"PWPushOpen";
 
 static NSString * const kPushOpenJSEvent = @"pushOpened";
 static NSString * const kPushReceivedJSEvent = @"pushReceived";
+
+static NSString * const kPWFrameworkType = @"React Native";
+static NSString * const kPWFrameworkVersion = @"7.0.2";
+
+/// Reports the framework type and the plugin version to the native core, on the cores that take them.
+/// Dispatched by selector name: setFrameworkType:version: lands in a core newer than the pinned one.
+static void pwplugin_setFrameworkTelemetry(NSString *type, NSString *version) {
+    Class configuration = [Pushwoosh configure];
+    SEL selector = NSSelectorFromString(@"setFrameworkType:version:");
+
+    if (![configuration respondsToSelector:selector]) {
+        return;
+    }
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+    [configuration performSelector:selector withObject:type withObject:version];
+#pragma clang diagnostic pop
+}
 
 /// Returns the push link only when it is a deep link this app can route itself, otherwise nil.
 ///
@@ -99,6 +129,78 @@ static NSURL * pwplugin_deepLinkURLFromPushLink(id link) {
     }
 
     return url;
+}
+
+/// Returns the http(s) push link as `URL.absoluteString`, the form RCTLinkingManager posts, otherwise nil.
+static NSString * pwplugin_webLinkFromPushLink(id link) {
+    if (![link isKindOfClass:[NSString class]] || [link length] == 0) {
+        return nil;
+    }
+
+    NSURL *url = [NSURL URLWithString:link];
+    NSString *scheme = url.scheme.lowercaseString;
+    if ([scheme isEqualToString:@"http"] || [scheme isEqualToString:@"https"]) {
+        return url.absoluteString;
+    }
+
+    return nil;
+}
+
+/// Answers every getInitialURL() call held for the pending link: with `url` when it arrived, otherwise
+/// with what RCTLinkingManager itself reports. JS has read its initial URL either way.
+static void pwplugin_settleInitialURLWaiters(NSString *url) {
+    NSArray<void (^)(NSString *)> *waiters = gInitialURLWaiters;
+    gInitialURLWaiters = nil;
+    gInitialURLHoldGeneration++;
+    gInitialURLAnswered = YES;
+    for (void (^waiter)(NSString *) in waiters) {
+        waiter(url);
+    }
+}
+
+/// Arms the launch push's web link for the SDK's delivery window; called by every launch-push site.
+/// A push without a web link disarms it, so a later Safari open of the same URL is not caught.
+static void pwplugin_rememberWebLaunchLink(NSDictionary *push) {
+    NSString *link = pwplugin_webLinkFromPushLink(push[@"l"]);
+    // The SDK accepts the same launch push at init() again, possibly after JS read getInitialURL().
+    if (!link || ![link isEqualToString:gLastArmedWebLaunchLink]) {
+        gInitialURLAnswered = NO;
+    }
+    gLastArmedWebLaunchLink = link;
+    gPendingWebLaunchLink = link;
+    NSUInteger generation = ++gPendingWebLaunchLinkGeneration;
+
+    if (!link) {
+        if (gInitialURLWaiters) {
+            pwplugin_settleInitialURLWaiters(nil);
+        }
+        return;
+    }
+
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(kPWWebLaunchLinkDeliveryTimeout * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        if (generation == gPendingWebLaunchLinkGeneration) {
+            gPendingWebLaunchLink = nil;
+            if (gInitialURLWaiters) {
+                pwplugin_settleInitialURLWaiters(nil);
+            }
+        }
+    });
+}
+
+/// Catches the launch push's Universal Link on its way to RCTLinkingManager: resolves held getInitialURL()
+/// calls, or parks it for the first one; a link after getInitialURL() answered is left to the `url` event.
+static void pwplugin_handleOpenURLNotification(NSNotification *notification) {
+    id url = notification.userInfo[@"url"];
+    if (!gPendingWebLaunchLink || ![url isKindOfClass:[NSString class]] || ![url isEqualToString:gPendingWebLaunchLink]) {
+        return;
+    }
+
+    gPendingWebLaunchLink = nil;
+    if (gInitialURLWaiters) {
+        pwplugin_settleInitialURLWaiters(url);
+    } else if (!gInitialURLAnswered) {
+        gPushDeepLinkURL = [NSURL URLWithString:url];
+    }
 }
 
 // Bridgeless hands a module an RCTBridgeProxy: an NSProxy that carries none of NSObject's KVC and
@@ -124,17 +226,7 @@ static BOOL pwplugin_isRealBridge(id bridge) {
 - (void)pwplugin_original_getInitialURL:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 @end
 
-// Swizzled getInitialURL for RCTLinkingManager (New Architecture support)
-static void pwplugin_getInitialURL(id self, SEL _cmd, RCTPromiseResolveBlock resolve, RCTPromiseRejectBlock reject) {
-    // If we have a saved deep link URL from push notification, return it
-    if (gPushDeepLinkURL) {
-        NSURL *url = gPushDeepLinkURL;
-        gPushDeepLinkURL = nil;  // Clear after use (one-time)
-        resolve(url.absoluteString);
-        return;
-    }
-
-    // Otherwise call the original implementation
+static void pwplugin_originalGetInitialURL(id self, RCTPromiseResolveBlock resolve, RCTPromiseRejectBlock reject) {
     SEL originalSelector = @selector(pwplugin_original_getInitialURL:reject:);
     if ([self respondsToSelector:originalSelector]) {
         void (*originalIMP)(id, SEL, RCTPromiseResolveBlock, RCTPromiseRejectBlock);
@@ -143,6 +235,41 @@ static void pwplugin_getInitialURL(id self, SEL _cmd, RCTPromiseResolveBlock res
     } else {
         resolve([NSNull null]);
     }
+}
+
+// Swizzled getInitialURL for RCTLinkingManager (New Architecture support)
+static void pwplugin_getInitialURL(id self, SEL _cmd, RCTPromiseResolveBlock resolve, RCTPromiseRejectBlock reject) {
+    // If we have a saved deep link URL from push notification, return it
+    if (gPushDeepLinkURL) {
+        NSURL *url = gPushDeepLinkURL;
+        gPushDeepLinkURL = nil;  // Clear after use (one-time)
+        gInitialURLAnswered = YES;
+        resolve(url.absoluteString);
+        return;
+    }
+
+    if (gPendingWebLaunchLink && !gInitialURLAnswered) {
+        if (!gInitialURLWaiters) {
+            gInitialURLWaiters = [NSMutableArray array];
+            NSUInteger hold = gInitialURLHoldGeneration;
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(kPWInitialURLHoldTimeout * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                if (hold == gInitialURLHoldGeneration) {
+                    pwplugin_settleInitialURLWaiters(nil);
+                }
+            });
+        }
+        [gInitialURLWaiters addObject:[^(NSString *url) {
+            if (url) {
+                resolve(url);
+            } else {
+                pwplugin_originalGetInitialURL(self, resolve, reject);
+            }
+        } copy]];
+        return;
+    }
+
+    gInitialURLAnswered = YES;
+    pwplugin_originalGetInitialURL(self, resolve, reject);
 }
 
 void pushwoosh_swizzle(Class cls, SEL fromChange, SEL toChange, IMP impl, const char * signature) {
@@ -210,7 +337,9 @@ RCT_EXPORT_METHOD(init:(NSDictionary*)config success:(RCTResponseSenderBlock)suc
         return;
     }
     
+    gPluginInitialized = YES;
     [PushNotificationManager initializeWithAppCode:appCode appName:nil];
+    pwplugin_setFrameworkTelemetry(kPWFrameworkType, kPWFrameworkVersion);
     [[PushNotificationManager pushManager] sendAppOpen];
     [PushNotificationManager pushManager].delegate = self;
 
@@ -1118,6 +1247,7 @@ RCT_EXPORT_METHOD(getRichMediaType:(RCTResponseSenderBlock)callback) {
     if (onStart) {
         gStartPushData = pushNotification;
         gStartPushReplayed = NO;
+        pwplugin_rememberWebLaunchLink(pushNotification);
         // Save deep link URL for New Architecture (Linking.getInitialURL support)
         NSURL *deepLink = pwplugin_deepLinkURLFromPushLink(pushNotification[@"l"]);
         if (deepLink) {
@@ -1129,6 +1259,7 @@ RCT_EXPORT_METHOD(getRichMediaType:(RCTResponseSenderBlock)callback) {
     if (onStart) {
         gStartPushData = pushNotification;
         gStartPushReplayed = NO;
+        pwplugin_rememberWebLaunchLink(pushNotification);
         // Save deep link URL for New Architecture (Linking.getInitialURL support)
         NSURL *deepLink = pwplugin_deepLinkURLFromPushLink(pushNotification[@"l"]);
         if (deepLink) {
@@ -1181,9 +1312,12 @@ static void pwplugin_acceptColdStartPushOnce(NSDictionary *userInfo) {
 - (void)userNotificationCenter:(UNUserNotificationCenter *)center
 didReceiveNotificationResponse:(UNNotificationResponse *)response
          withCompletionHandler:(void (^)(void))completionHandler API_AVAILABLE(ios(10.0)) {
-    if ([response.notification.request.trigger isKindOfClass:[UNPushNotificationTrigger class]]) {
+    BOOL dismissed = [response.actionIdentifier isEqualToString:UNNotificationDismissActionIdentifier];
+    // After init the plugin's own delegate or the app accepts the tap; a dismissed push opened nothing.
+    if (!gPluginInitialized && !dismissed && [response.notification.request.trigger isKindOfClass:[UNPushNotificationTrigger class]]) {
         NSDictionary *userInfo = response.notification.request.content.userInfo;
         NSURL *appSchemeDeepLink = pwplugin_deepLinkURLFromPushLink(userInfo[@"l"]);
+        pwplugin_rememberWebLaunchLink(userInfo);
 
         if (appSchemeDeepLink) {
             // Routing it through the SDK too would deliver the deep link twice.
@@ -1216,6 +1350,19 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
 
 static PWEarlyNotificationDelegate *gEarlyDelegate = nil;
 
+// Wraps the delegate the app set in didFinishLaunching. A scene-based app gets the launch push's
+// response before the main queue drains, so installing it any later loses the push.
+static void pwplugin_installEarlyNotificationDelegate(void) {
+    if (gEarlyDelegate) {
+        return;
+    }
+
+    UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+    gEarlyDelegate = [[PWEarlyNotificationDelegate alloc] init];
+    gEarlyDelegate.originalDelegate = center.delegate;
+    center.delegate = gEarlyDelegate;
+}
+
 @implementation RCTLinkingManager (PushwooshDeepLink)
 
 + (void)load {
@@ -1230,25 +1377,25 @@ static PWEarlyNotificationDelegate *gEarlyDelegate = nil;
             "v@:@@"
         );
 
-        // Set up early notification delegate to capture push on cold start
-        if (@available(iOS 10.0, *)) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
-                gEarlyDelegate = [[PWEarlyNotificationDelegate alloc] init];
-                gEarlyDelegate.originalDelegate = center.delegate;
-                center.delegate = gEarlyDelegate;
-            });
-        }
+        // RN keeps the notification name file-local; the string is its contract with the app delegate.
+        [[NSNotificationCenter defaultCenter] addObserverForName:@"RCTOpenURLNotification"
+                                                          object:nil
+                                                           queue:nil
+                                                      usingBlock:^(NSNotification *notification) {
+            pwplugin_handleOpenURLNotification(notification);
+        }];
 
-        // Also check launchOptions when app finishes launching
         [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidFinishLaunchingNotification
                                                           object:nil
                                                            queue:nil
                                                       usingBlock:^(NSNotification *notification) {
+            pwplugin_installEarlyNotificationDelegate();
+
             NSDictionary *launchOptions = notification.userInfo;
             NSDictionary *remoteNotification = launchOptions[UIApplicationLaunchOptionsRemoteNotificationKey];
             if (remoteNotification) {
                 NSURL *deepLink = pwplugin_deepLinkURLFromPushLink(remoteNotification[@"l"]);
+                pwplugin_rememberWebLaunchLink(remoteNotification);
                 if (deepLink) {
                     if (!gPushDeepLinkURL) {
                         gPushDeepLinkURL = deepLink;

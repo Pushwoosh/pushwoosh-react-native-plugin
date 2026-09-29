@@ -11,14 +11,32 @@
 //
 
 #import "PWPluginTestCase.h"
+#import <React/RCTLinkingManager.h>
 
 // The release gate rejects anything shaped like a real application code (XXXXX-XXXXX).
 static NSString *const PWTestAppCode = @"XXXXX-XXXXX";
+
+// A Universal Link as the SDK would deliver it: an http(s) `l` of the launch push.
+static NSString *const PWTestWebLink = @"https://example.com/promo";
 
 @interface PushwooshPluginInitTests : PWPluginTestCase
 @end
 
 @implementation PushwooshPluginInitTests
+
+- (UNNotificationResponse *)responseTappingPush:(NSDictionary *)push {
+    id content = OCMClassMock([UNNotificationContent class]);
+    OCMStub([content userInfo]).andReturn(push);
+    id request = OCMClassMock([UNNotificationRequest class]);
+    OCMStub([request content]).andReturn(content);
+    OCMStub([request trigger]).andReturn(OCMClassMock([UNPushNotificationTrigger class]));
+    id notification = OCMClassMock([UNNotification class]);
+    OCMStub([notification request]).andReturn(request);
+    id response = OCMClassMock([UNNotificationResponse class]);
+    OCMStub([response notification]).andReturn(notification);
+    OCMStub([response actionIdentifier]).andReturn(UNNotificationDefaultActionIdentifier);
+    return response;
+}
 
 - (NSDictionary *)launchPushWithLink:(NSString *)link {
     NSMutableDictionary *push = [@{ @"aps" : @{ @"alert" : @"Launch" }, @"pw_msg" : @1, @"p" : [NSUUID UUID].UUIDString } mutableCopy];
@@ -143,13 +161,263 @@ static NSString *const PWTestAppCode = @"XXXXX-XXXXX";
     XCTAssertEqualObjects([self initialURLFromLinkingManager], [NSNull null]);
 }
 
-// Verifies that an http(s) link stays with the native SDK (Universal Links or the browser) and
-// never shows up as the app's initial URL.
+// Verifies that an http(s) link stays with the native SDK (Universal Links or the browser): init()
+// does not hand it to getInitialURL(), which waits only briefly for the SDK and then answers null.
 - (void)testInitKeepsWebLinksAwayFromGetInitialURL {
     [self simulateLaunchPush:[self launchPushWithLink:@"https://example.com/promo"]];
-
     [self initPluginWithAppCode:PWTestAppCode];
 
+    NSMutableArray *initialURL = [self requestInitialURL];
+    XCTAssertEqualObjects(initialURL, @[]);
+    [self waitForInitialURL:initialURL];
+
+    XCTAssertEqualObjects(initialURL, @[ [NSNull null] ]);
+}
+
+// Verifies the usual cold-start race: JS asks Linking.getInitialURL() just before the SDK delivers
+// the link, and every call held meanwhile - React Navigation's and the app's own - gets it.
+- (void)testGetInitialURLCalledBeforeDeliveryResolvesEveryHeldCallWithTheLaunchLink {
+    [self simulateLaunchPush:[self launchPushWithLink:PWTestWebLink]];
+    [self initPluginWithAppCode:PWTestAppCode];
+
+    NSMutableArray *first = [self requestInitialURL];
+    NSMutableArray *second = [self requestInitialURL];
+    [self postOpenURLNotification:PWTestWebLink];
+
+    XCTAssertEqualObjects(first, @[ PWTestWebLink ]);
+    XCTAssertEqualObjects(second, @[ PWTestWebLink ]);
+    XCTAssertEqualObjects([self initialURLFromLinkingManager], [NSNull null]);
+}
+
+// Verifies that a later launch push without a web link releases a held getInitialURL() at once.
+- (void)testLaterLaunchPushWithoutWebLinkReleasesAHeldGetInitialURL {
+    [self simulateLaunchPush:[self launchPushWithLink:PWTestWebLink]];
+    [self initPluginWithAppCode:PWTestAppCode];
+    NSMutableArray *initialURL = [self requestInitialURL];
+
+    [self simulateLaunchPush:[self launchPushWithLink:nil]];
+
+    XCTAssertEqualObjects(initialURL, @[ [NSNull null] ]);
+}
+
+// Verifies that the launch push's Universal Link, handed to RCTLinkingManager by the SDK before
+// JS asks for it, is what a later Linking.getInitialURL() resolves to, and only once.
+- (void)testWebLaunchLinkReachesGetInitialURLWhenNobodyListensForURLEvents {
+    [self simulateLaunchPush:[self launchPushWithLink:PWTestWebLink]];
+    [self initPluginWithAppCode:PWTestAppCode];
+
+    [self postOpenURLNotification:PWTestWebLink];
+
+    XCTAssertEqualObjects([self initialURLFromLinkingManager], PWTestWebLink);
+    XCTAssertEqualObjects([self initialURLFromLinkingManager], [NSNull null]);
+}
+
+// Verifies that only the launch push's own link is caught: another URL opened meanwhile passes by
+// untouched, and the launch link is still expected afterwards.
+- (void)testOnlyTheLaunchPushWebLinkIsCaughtAndItSurvivesOtherURLs {
+    [self simulateLaunchPush:[self launchPushWithLink:PWTestWebLink]];
+    [self initPluginWithAppCode:PWTestAppCode];
+
+    [self postOpenURLNotification:@"https://example.com/other"];
+    [self postOpenURLNotification:PWTestWebLink];
+
+    XCTAssertEqualObjects([self initialURLFromLinkingManager], PWTestWebLink);
+}
+
+// Verifies that a link delivered after a held getInitialURL() gave up goes to the `url` event only,
+// so a later getInitialURL() (JS reload, OTA update) cannot route to an old push's screen.
+- (void)testLinkDeliveredAfterGetInitialURLAnsweredGoesToTheURLEventOnly {
+    [self simulateLaunchPush:[self launchPushWithLink:PWTestWebLink]];
+    [self initPluginWithAppCode:PWTestAppCode];
+    [self linkingManagerListeningForURLEvents];
+    NSMutableArray *initialURL = [self requestInitialURL];
+    [self waitForInitialURL:initialURL];
+    XCTAssertEqualObjects(initialURL, @[ [NSNull null] ]);
+
+    [self postOpenURLNotification:PWTestWebLink];
+
+    XCTAssertEqualObjects([self jsEventBodiesNamed:@"url"], @[ @{ @"url" : PWTestWebLink } ]);
+    XCTAssertEqualObjects([self initialURLFromLinkingManager], [NSNull null]);
+}
+
+// Verifies that the SDK accepting the same launch push again - it does so at init() when the plugin
+// does not own notifications - after JS has read getInitialURL() does not make a late link parkable.
+- (void)testSameLaunchPushArmedAgainAfterGetInitialURLAnsweredDoesNotParkTheLateLink {
+    NSDictionary *push = [self launchPushWithLink:PWTestWebLink];
+    [self simulateLaunchPush:push];
+    [self initPluginWithAppCode:PWTestAppCode];
+    NSMutableArray *initialURL = [self requestInitialURL];
+    [self waitForInitialURL:initialURL];
+    XCTAssertEqualObjects(initialURL, @[ [NSNull null] ]);
+
+    [self simulateLaunchPush:push];
+    [self postOpenURLNotification:PWTestWebLink];
+
+    XCTAssertEqualObjects([self initialURLFromLinkingManager], [NSNull null]);
+}
+
+// Verifies that the link stays armed only for the SDK's delivery window: the same URL opened later
+// (from Safari, say) is not taken for the launch push's link.
+- (void)testLinkDeliveredAfterTheDeliveryWindowIsNotCaught {
+    [self simulateLaunchPush:[self launchPushWithLink:PWTestWebLink]];
+    [self initPluginWithAppCode:PWTestAppCode];
+
+    XCTestExpectation *windowPassed = [self expectationWithDescription:@"delivery window passed"];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(6.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [windowPassed fulfill];
+    });
+    [self waitForExpectations:@[ windowPassed ] timeout:10];
+    [self postOpenURLNotification:PWTestWebLink];
+
+    XCTAssertEqualObjects([self initialURLFromLinkingManager], [NSNull null]);
+}
+
+// Verifies that a Universal Link opened without a launch push (the user tapped a link in Safari
+// while the app was closed) is not mistaken for a push link.
+- (void)testURLWithoutLaunchPushStaysOutOfGetInitialURL {
+    [self initPluginWithAppCode:PWTestAppCode];
+
+    [self postOpenURLNotification:PWTestWebLink];
+
+    XCTAssertEqualObjects([self initialURLFromLinkingManager], [NSNull null]);
+}
+
+// Verifies that a second init() does not re-arm a web link Linking.getInitialURL() already
+// consumed, and that the same URL delivered again is no longer caught.
+- (void)testSecondInitDoesNotReArmAConsumedWebLaunchLink {
+    [self simulateLaunchPush:[self launchPushWithLink:PWTestWebLink]];
+    [self initPluginWithAppCode:PWTestAppCode];
+    [self postOpenURLNotification:PWTestWebLink];
+    XCTAssertEqualObjects([self initialURLFromLinkingManager], PWTestWebLink);
+
+    [self initPluginWithAppCode:PWTestAppCode];
+    [self postOpenURLNotification:PWTestWebLink];
+
+    XCTAssertEqualObjects([self initialURLFromLinkingManager], [NSNull null]);
+}
+
+// Verifies that a launch push read from the launch options arms its web link too, before the SDK
+// (stubbed here) accepts it.
+- (void)testWebLaunchLinkFromLaunchOptionsReachesGetInitialURL {
+    NSDictionary *push = [self launchPushWithLink:PWTestWebLink];
+    [[NSNotificationCenter defaultCenter] postNotificationName:UIApplicationDidFinishLaunchingNotification
+                                                        object:nil
+                                                      userInfo:@{ UIApplicationLaunchOptionsRemoteNotificationKey : push }];
+
+    [self postOpenURLNotification:PWTestWebLink];
+
+    XCTAssertEqualObjects([self initialURLFromLinkingManager], PWTestWebLink);
+}
+
+// Verifies that a notification some other code posts under RN's name, without a string `url`,
+// neither crashes the plugin nor spends the pending link.
+- (void)testForeignOpenURLNotificationWithoutURLIsIgnored {
+    [self simulateLaunchPush:[self launchPushWithLink:PWTestWebLink]];
+    [self initPluginWithAppCode:PWTestAppCode];
+
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"RCTOpenURLNotification" object:nil userInfo:nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"RCTOpenURLNotification" object:nil userInfo:@{ @"url" : @42 }];
+    [self postOpenURLNotification:PWTestWebLink];
+
+    XCTAssertEqualObjects([self initialURLFromLinkingManager], PWTestWebLink);
+}
+
+// Verifies that a later launch push without a web link drops the earlier pending one: a link
+// from a push the user opened minutes ago must not be caught on this start.
+- (void)testLaterLaunchPushWithoutWebLinkDropsThePendingOne {
+    [self simulateLaunchPush:[self launchPushWithLink:PWTestWebLink]];
+    [self simulateLaunchPush:[self launchPushWithLink:nil]];
+    [self initPluginWithAppCode:PWTestAppCode];
+
+    [self postOpenURLNotification:PWTestWebLink];
+
+    XCTAssertEqualObjects([self initialURLFromLinkingManager], [NSNull null]);
+}
+
+// Verifies that the scheme check is case-insensitive, like the app-scheme one: an `HTTPS://` link
+// must not fall between the two channels.
+- (void)testWebLaunchLinkSchemeIsMatchedCaseInsensitively {
+    NSString *link = @"HTTPS://example.com/promo";
+    [self simulateLaunchPush:[self launchPushWithLink:link]];
+    [self initPluginWithAppCode:PWTestAppCode];
+
+    [self postOpenURLNotification:link];
+
+    XCTAssertEqualObjects([self initialURLFromLinkingManager], link);
+}
+
+// Verifies that a JS `url` listener (React Navigation subscribes on mount) does not keep the launch
+// link out of getInitialURL(): it reaches the listener and is parked once.
+- (void)testWebLaunchLinkIsParkedForGetInitialURLEvenWhenJSAlreadyListens {
+    [self simulateLaunchPush:[self launchPushWithLink:PWTestWebLink]];
+    [self initPluginWithAppCode:PWTestAppCode];
+    [self linkingManagerListeningForURLEvents];
+
+    [self postOpenURLNotification:PWTestWebLink];
+
+    XCTAssertEqualObjects([self jsEventBodiesNamed:@"url"], @[ @{ @"url" : PWTestWebLink } ]);
+    XCTAssertEqualObjects([self initialURLFromLinkingManager], PWTestWebLink);
+    XCTAssertEqualObjects([self initialURLFromLinkingManager], [NSNull null]);
+}
+
+// Verifies that with the JS `url` listener removed again RN delivers no event and the launch link
+// is still what getInitialURL() resolves to.
+- (void)testWebLaunchLinkReachesGetInitialURLAfterJSRemovedItsURLListener {
+    [self simulateLaunchPush:[self launchPushWithLink:PWTestWebLink]];
+    [self initPluginWithAppCode:PWTestAppCode];
+    RCTLinkingManager *linkingManager = [self linkingManagerListeningForURLEvents];
+    [linkingManager removeListeners:1];
+
+    [self postOpenURLNotification:PWTestWebLink];
+
+    XCTAssertEqualObjects([self jsEventBodiesNamed:@"url"], @[]);
+    XCTAssertEqualObjects([self initialURLFromLinkingManager], PWTestWebLink);
+}
+
+// Verifies that the link is matched in the URL.absoluteString form RCTLinkingManager posts, not
+// the raw push link with a non-ASCII character.
+- (void)testWebLaunchLinkWithNonCanonicalCharactersIsCanonicalizedBeforeMatching {
+    if (@available(iOS 17.0, *)) {
+    } else {
+        XCTSkip(@"NSURL percent-encodes a non-ASCII character only from iOS 17");
+    }
+    NSString *rawLink = @"https://example.com/promo?q=é";
+    [self simulateLaunchPush:[self launchPushWithLink:rawLink]];
+    [self initPluginWithAppCode:PWTestAppCode];
+
+    [self postOpenURLNotification:rawLink];
+
+    XCTAssertEqualObjects([self initialURLFromLinkingManager], @"https://example.com/promo?q=%C3%A9");
+    XCTAssertEqualObjects([self initialURLFromLinkingManager], [NSNull null]);
+}
+
+// Verifies that the SDK's onStart:NO callback for a push opened while the app runs never arms the
+// pending web link: only a launch push can be caught on its way to RCTLinkingManager.
+- (void)testPushWithoutOnStartDoesNotArmAPendingWebLink {
+    [[UIApplication sharedApplication] onPushAccepted:nil withNotification:[self launchPushWithLink:PWTestWebLink] onStart:NO];
+    [self initPluginWithAppCode:PWTestAppCode];
+
+    [self postOpenURLNotification:PWTestWebLink];
+
+    XCTAssertEqualObjects([self initialURLFromLinkingManager], [NSNull null]);
+}
+
+// Verifies that after init() the early cold-start delegate leaves a tapped push to the delegate
+// that owns notifications: it neither accepts the push a second time nor arms its web link.
+- (void)testEarlyDelegateLeavesATapAfterInitToTheOwningDelegate {
+    [self initPluginWithAppCode:PWTestAppCode];
+    OCMReject([self.pushManager handlePushAccepted:[OCMArg any] onStart:YES]);
+    id<UNUserNotificationCenterDelegate> earlyDelegate = [NSClassFromString(@"PWEarlyNotificationDelegate") new];
+    __block BOOL completed = NO;
+
+    [earlyDelegate userNotificationCenter:[UNUserNotificationCenter currentNotificationCenter]
+           didReceiveNotificationResponse:[self responseTappingPush:[self launchPushWithLink:PWTestWebLink]]
+                    withCompletionHandler:^{
+        completed = YES;
+    }];
+    [self postOpenURLNotification:PWTestWebLink];
+
+    XCTAssertTrue(completed);
     XCTAssertEqualObjects([self initialURLFromLinkingManager], [NSNull null]);
 }
 
@@ -203,6 +471,23 @@ static NSString *const PWTestAppCode = @"XXXXX-XXXXX";
                                                       userInfo:@{ UIApplicationLaunchOptionsRemoteNotificationKey : push }];
 
     XCTAssertEqualObjects([self initialURLFromLinkingManager], @"pwdemo://orders/42");
+}
+
+// Verifies that a later app-scheme launch push from the launch options drops an earlier pending
+// web link, so a push opened minutes ago cannot resurface on this start.
+- (void)testAppSchemeLaunchPushFromLaunchOptionsDropsAnEarlierPendingWebLink {
+    [self simulateLaunchPush:[self launchPushWithLink:PWTestWebLink]];
+
+    NSDictionary *push = [self launchPushWithLink:@"pwdemo://orders/42"];
+    OCMReject([self.pushManager handlePushAccepted:[OCMArg any] onStart:YES]);
+    [[NSNotificationCenter defaultCenter] postNotificationName:UIApplicationDidFinishLaunchingNotification
+                                                        object:nil
+                                                      userInfo:@{ UIApplicationLaunchOptionsRemoteNotificationKey : push }];
+
+    [self postOpenURLNotification:PWTestWebLink];
+
+    XCTAssertEqualObjects([self initialURLFromLinkingManager], @"pwdemo://orders/42");
+    XCTAssertEqualObjects([self initialURLFromLinkingManager], [NSNull null]);
 }
 
 @end
