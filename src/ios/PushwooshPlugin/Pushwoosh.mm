@@ -92,7 +92,7 @@ static NSString * const kPushOpenJSEvent = @"pushOpened";
 static NSString * const kPushReceivedJSEvent = @"pushReceived";
 
 static NSString * const kPWFrameworkType = @"React Native";
-static NSString * const kPWFrameworkVersion = @"7.0.2";
+static NSString * const kPWFrameworkVersion = @"7.0.3";
 
 /// Reports the framework type and the plugin version to the native core, on the cores that take them.
 /// Dispatched by selector name: setFrameworkType:version: lands in a core newer than the pinned one.
