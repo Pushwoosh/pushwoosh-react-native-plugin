@@ -76,8 +76,11 @@ NS_ASSUME_NONNULL_BEGIN
 /// Calls `Linking.getInitialURL()`; the returned array gets the resolved value, empty while the call is held.
 - (NSMutableArray *)requestInitialURL;
 
-/// Waits until a call from requestInitialURL has resolved, at most a couple of seconds.
+/// Waits until a call from requestInitialURL has resolved, at most a few seconds past the SDK's delivery window.
 - (void)waitForInitialURL:(NSMutableArray *)initialURL;
+
+/// Runs the main queue for `seconds`, so the plugin's timers fire meanwhile.
+- (void)waitSeconds:(NSTimeInterval)seconds;
 
 /// What RCTLinkingManager posts when the app delegate forwards an opened URL or a Universal Link
 /// to it; every RCTLinkingManager with a JS listener turns it into the `url` event.

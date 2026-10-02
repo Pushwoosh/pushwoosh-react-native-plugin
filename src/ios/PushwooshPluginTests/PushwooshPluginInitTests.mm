@@ -162,7 +162,7 @@ static NSString *const PWTestWebLink = @"https://example.com/promo";
 }
 
 // Verifies that an http(s) link stays with the native SDK (Universal Links or the browser): init()
-// does not hand it to getInitialURL(), which waits only briefly for the SDK and then answers null.
+// does not hand it to getInitialURL(), which waits for the SDK's delivery window and then answers null.
 - (void)testInitKeepsWebLinksAwayFromGetInitialURL {
     [self simulateLaunchPush:[self launchPushWithLink:@"https://example.com/promo"]];
     [self initPluginWithAppCode:PWTestAppCode];
@@ -187,6 +187,55 @@ static NSString *const PWTestWebLink = @"https://example.com/promo";
     XCTAssertEqualObjects(first, @[ PWTestWebLink ]);
     XCTAssertEqualObjects(second, @[ PWTestWebLink ]);
     XCTAssertEqualObjects([self initialURLFromLinkingManager], [NSNull null]);
+}
+
+// Verifies that a getInitialURL() held for the launch push's Universal Link waits for it through the
+// delivery window: the SDK may hand the link over seconds after the tap - it checks the host's
+// apple-app-site-association over the network first - and another URL opened meanwhile does not
+// answer the call.
+- (void)testGetInitialURLHeldForALinkDeliveredSecondsAfterTheTapResolvesWithIt {
+    [self simulateLaunchPush:[self launchPushWithLink:PWTestWebLink]];
+    [self initPluginWithAppCode:PWTestAppCode];
+    [self waitSeconds:1];
+    NSMutableArray *initialURL = [self requestInitialURL];
+
+    [self waitSeconds:4];
+    [self postOpenURLNotification:@"https://example.com/other"];
+    XCTAssertEqualObjects(initialURL, @[]);
+    [self postOpenURLNotification:PWTestWebLink];
+
+    XCTAssertEqualObjects(initialURL, @[ PWTestWebLink ]);
+}
+
+// Verifies that the delivery window runs from the tap: the SDK accepting the same launch push again
+// (at init(), when the plugin does not own notifications) does not extend it, so a getInitialURL()
+// held for a link that never comes answers by the end of the tap's window.
+- (void)testSameLaunchPushArmedAgainDoesNotExtendTheDeliveryWindow {
+    NSDictionary *push = [self launchPushWithLink:PWTestWebLink];
+    [self simulateLaunchPush:push];
+    [self waitSeconds:3];
+    [self simulateLaunchPush:push];
+    [self initPluginWithAppCode:PWTestAppCode];
+    NSMutableArray *initialURL = [self requestInitialURL];
+
+    [self waitSeconds:2];
+    XCTAssertEqualObjects(initialURL, @[]);
+    [self waitSeconds:1.5];
+
+    XCTAssertEqualObjects(initialURL, @[ [NSNull null] ]);
+}
+
+// Verifies that the SDK accepting the same launch push again after the tap's delivery window ended -
+// JS called init() that late - does not open the window again: nothing would end it, so a later
+// getInitialURL() would be held for good.
+- (void)testSameLaunchPushArmedAgainAfterTheDeliveryWindowDoesNotHoldGetInitialURL {
+    NSDictionary *push = [self launchPushWithLink:PWTestWebLink];
+    [self simulateLaunchPush:push];
+    [self waitSeconds:6.5];
+    [self simulateLaunchPush:push];
+    [self initPluginWithAppCode:PWTestAppCode];
+
+    XCTAssertEqualObjects([self requestInitialURL], @[ [NSNull null] ]);
 }
 
 // Verifies that a later launch push without a web link releases a held getInitialURL() at once.
@@ -249,6 +298,23 @@ static NSString *const PWTestWebLink = @"https://example.com/promo";
     NSMutableArray *initialURL = [self requestInitialURL];
     [self waitForInitialURL:initialURL];
     XCTAssertEqualObjects(initialURL, @[ [NSNull null] ]);
+
+    [self simulateLaunchPush:push];
+    [self postOpenURLNotification:PWTestWebLink];
+
+    XCTAssertEqualObjects([self initialURLFromLinkingManager], [NSNull null]);
+}
+
+// Verifies that the launch push's link, once it answered a held getInitialURL(), is not parked when
+// the SDK accepts the same push again within the window and delivers the link a second time: a later
+// getInitialURL() (JS reload, OTA update) would route to the old push's screen.
+- (void)testLinkDeliveredAgainAfterItAnsweredAHeldGetInitialURLIsNotParked {
+    NSDictionary *push = [self launchPushWithLink:PWTestWebLink];
+    [self simulateLaunchPush:push];
+    [self initPluginWithAppCode:PWTestAppCode];
+    NSMutableArray *initialURL = [self requestInitialURL];
+    [self postOpenURLNotification:PWTestWebLink];
+    XCTAssertEqualObjects(initialURL, @[ PWTestWebLink ]);
 
     [self simulateLaunchPush:push];
     [self postOpenURLNotification:PWTestWebLink];

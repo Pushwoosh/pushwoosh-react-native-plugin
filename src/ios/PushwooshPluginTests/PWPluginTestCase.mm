@@ -124,7 +124,15 @@ static NSString *const PWCommunicationEnabledDefaultsKey = @"PushwooshCommunicat
 
 - (void)waitForInitialURL:(NSMutableArray *)initialURL {
     NSPredicate *resolved = [NSPredicate predicateWithFormat:@"@count > 0"];
-    [self waitForExpectations:@[ [self expectationForPredicate:resolved evaluatedWithObject:initialURL handler:nil] ] timeout:3];
+    [self waitForExpectations:@[ [self expectationForPredicate:resolved evaluatedWithObject:initialURL handler:nil] ] timeout:8];
+}
+
+- (void)waitSeconds:(NSTimeInterval)seconds {
+    XCTestExpectation *elapsed = [self expectationWithDescription:@"time elapsed"];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(seconds * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [elapsed fulfill];
+    });
+    [self waitForExpectations:@[ elapsed ] timeout:seconds + 2];
 }
 
 - (NSMutableArray *)requestInitialURL {

@@ -75,14 +75,12 @@ static NSString * gEarlyHandledHash = nil;  // Last push hash the cold-start del
 static NSString * gPendingWebLaunchLink = nil;  // http(s) link of the launch push, until the SDK hands it to RCTLinkingManager
 static NSUInteger gPendingWebLaunchLinkGeneration = 0;  // Bumped on every arm, so a stale delivery timeout leaves a newer link alone
 static NSString * gLastArmedWebLaunchLink = nil;  // Survives delivery, so re-arming the same push is recognised
+static NSTimeInterval gWebLaunchLinkDeadline = 0;  // System uptime at which the window gLastArmedWebLaunchLink first opened ends
 static BOOL gInitialURLAnswered = NO;  // JS called getInitialURL() since gLastArmedWebLaunchLink was first armed
 static BOOL gPluginInitialized = NO;  // init: ran, so JS is up and a tapped push is no longer a launch push
 static NSMutableArray<void (^)(NSString *)> * gInitialURLWaiters = nil;  // getInitialURL() calls held for the pending link
-static NSUInteger gInitialURLHoldGeneration = 0;  // Bumped on every settle, so a stale hold timeout leaves a newer hold alone
 // The SDK waits 0.2 s after accepting the push, then fetches apple-app-site-association with a 5 s timeout.
 static NSTimeInterval const kPWWebLaunchLinkDeliveryTimeout = 6.0;
-// Covers the SDK's delay and a cached or quick verdict without stalling an app whose link never reaches RN.
-static NSTimeInterval const kPWInitialURLHoldTimeout = 1.0;
 static NSString * const kRegistrationSuccesEvent = @"PWRegistrationSuccess";
 static NSString * const kRegistrationErrorEvent = @"PWRegistrationError";
 static NSString * const kPushReceivedEvent = @"PWPushReceived";
@@ -90,25 +88,6 @@ static NSString * const kPushOpenEvent = @"PWPushOpen";
 
 static NSString * const kPushOpenJSEvent = @"pushOpened";
 static NSString * const kPushReceivedJSEvent = @"pushReceived";
-
-static NSString * const kPWFrameworkType = @"React Native";
-static NSString * const kPWFrameworkVersion = @"7.0.3";
-
-/// Reports the framework type and the plugin version to the native core, on the cores that take them.
-/// Dispatched by selector name: setFrameworkType:version: lands in a core newer than the pinned one.
-static void pwplugin_setFrameworkTelemetry(NSString *type, NSString *version) {
-    Class configuration = [Pushwoosh configure];
-    SEL selector = NSSelectorFromString(@"setFrameworkType:version:");
-
-    if (![configuration respondsToSelector:selector]) {
-        return;
-    }
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
-    [configuration performSelector:selector withObject:type withObject:version];
-#pragma clang diagnostic pop
-}
 
 /// Returns the push link only when it is a deep link this app can route itself, otherwise nil.
 ///
@@ -151,7 +130,6 @@ static NSString * pwplugin_webLinkFromPushLink(id link) {
 static void pwplugin_settleInitialURLWaiters(NSString *url) {
     NSArray<void (^)(NSString *)> *waiters = gInitialURLWaiters;
     gInitialURLWaiters = nil;
-    gInitialURLHoldGeneration++;
     gInitialURLAnswered = YES;
     for (void (^waiter)(NSString *) in waiters) {
         waiter(url);
@@ -162,12 +140,21 @@ static void pwplugin_settleInitialURLWaiters(NSString *url) {
 /// A push without a web link disarms it, so a later Safari open of the same URL is not caught.
 static void pwplugin_rememberWebLaunchLink(NSDictionary *push) {
     NSString *link = pwplugin_webLinkFromPushLink(push[@"l"]);
+    NSTimeInterval now = [NSProcessInfo processInfo].systemUptime;
+
     // The SDK accepts the same launch push at init() again, possibly after JS read getInitialURL().
-    if (!link || ![link isEqualToString:gLastArmedWebLaunchLink]) {
-        gInitialURLAnswered = NO;
+    // The window stays the one the tap opened: neither extended nor opened again once it ended.
+    if (link && [link isEqualToString:gLastArmedWebLaunchLink]) {
+        if (now < gWebLaunchLinkDeadline) {
+            gPendingWebLaunchLink = link;
+        }
+        return;
     }
+
+    gInitialURLAnswered = NO;
     gLastArmedWebLaunchLink = link;
     gPendingWebLaunchLink = link;
+    gWebLaunchLinkDeadline = now + kPWWebLaunchLinkDeliveryTimeout;
     NSUInteger generation = ++gPendingWebLaunchLinkGeneration;
 
     if (!link) {
@@ -248,15 +235,11 @@ static void pwplugin_getInitialURL(id self, SEL _cmd, RCTPromiseResolveBlock res
         return;
     }
 
+    // Held until the link arrives or its delivery window ends: the SDK may still be checking the
+    // host's apple-app-site-association, which takes seconds on a network round trip.
     if (gPendingWebLaunchLink && !gInitialURLAnswered) {
         if (!gInitialURLWaiters) {
             gInitialURLWaiters = [NSMutableArray array];
-            NSUInteger hold = gInitialURLHoldGeneration;
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(kPWInitialURLHoldTimeout * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-                if (hold == gInitialURLHoldGeneration) {
-                    pwplugin_settleInitialURLWaiters(nil);
-                }
-            });
         }
         [gInitialURLWaiters addObject:[^(NSString *url) {
             if (url) {
@@ -339,7 +322,6 @@ RCT_EXPORT_METHOD(init:(NSDictionary*)config success:(RCTResponseSenderBlock)suc
     
     gPluginInitialized = YES;
     [PushNotificationManager initializeWithAppCode:appCode appName:nil];
-    pwplugin_setFrameworkTelemetry(kPWFrameworkType, kPWFrameworkVersion);
     [[PushNotificationManager pushManager] sendAppOpen];
     [PushNotificationManager pushManager].delegate = self;
 
