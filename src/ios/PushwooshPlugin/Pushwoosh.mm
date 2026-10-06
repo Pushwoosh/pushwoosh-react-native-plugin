@@ -224,14 +224,23 @@ static void pwplugin_originalGetInitialURL(id self, RCTPromiseResolveBlock resol
     }
 }
 
+static char kPWInitialURLLaunchLinkKey;
+
+/// Answers getInitialURL() with the launch push's link and keeps it on the RCTLinkingManager that asked.
+/// React Native creates a new one for every JS runtime, so a JS reload or an OTA update starts without it.
+static void pwplugin_resolveWithLaunchLink(id linkingManager, NSString *url, RCTPromiseResolveBlock resolve) {
+    objc_setAssociatedObject(linkingManager, &kPWInitialURLLaunchLinkKey, url, OBJC_ASSOCIATION_COPY_NONATOMIC);
+    resolve(url);
+}
+
 // Swizzled getInitialURL for RCTLinkingManager (New Architecture support)
 static void pwplugin_getInitialURL(id self, SEL _cmd, RCTPromiseResolveBlock resolve, RCTPromiseRejectBlock reject) {
     // If we have a saved deep link URL from push notification, return it
     if (gPushDeepLinkURL) {
         NSURL *url = gPushDeepLinkURL;
-        gPushDeepLinkURL = nil;  // Clear after use (one-time)
+        gPushDeepLinkURL = nil;  // Spent: a reloaded JS runtime must not get it again
         gInitialURLAnswered = YES;
-        resolve(url.absoluteString);
+        pwplugin_resolveWithLaunchLink(self, url.absoluteString, resolve);
         return;
     }
 
@@ -243,7 +252,7 @@ static void pwplugin_getInitialURL(id self, SEL _cmd, RCTPromiseResolveBlock res
         }
         [gInitialURLWaiters addObject:[^(NSString *url) {
             if (url) {
-                resolve(url);
+                pwplugin_resolveWithLaunchLink(self, url, resolve);
             } else {
                 pwplugin_originalGetInitialURL(self, resolve, reject);
             }
@@ -252,6 +261,15 @@ static void pwplugin_getInitialURL(id self, SEL _cmd, RCTPromiseResolveBlock res
     }
 
     gInitialURLAnswered = YES;
+
+    // Every later call of this JS runtime gets the link the first one got, as with React Native's own
+    // launch URL: an app may read it in several places, an analytics SDK first and its router later.
+    NSString *launchLink = objc_getAssociatedObject(self, &kPWInitialURLLaunchLinkKey);
+    if (launchLink) {
+        resolve(launchLink);
+        return;
+    }
+
     pwplugin_originalGetInitialURL(self, resolve, reject);
 }
 

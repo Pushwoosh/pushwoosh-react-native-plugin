@@ -73,8 +73,11 @@ NS_ASSUME_NONNULL_BEGIN
 /// What `Linking.getInitialURL()` would resolve to now: the URL string, or NSNull when nothing is pending.
 - (id)initialURLFromLinkingManager;
 
-/// Calls `Linking.getInitialURL()`; the returned array gets the resolved value, empty while the call is held.
+/// Calls `Linking.getInitialURL()` from a new (reloaded) JS runtime; the returned array gets the resolved value, empty while the call is held.
 - (NSMutableArray *)requestInitialURL;
+
+/// Calls `Linking.getInitialURL()` through `linkingManager`, as JS calls it again within the same runtime.
+- (NSMutableArray *)requestInitialURLFrom:(RCTLinkingManager *)linkingManager;
 
 /// Waits until a call from requestInitialURL has resolved, at most a few seconds past the SDK's delivery window.
 - (void)waitForInitialURL:(NSMutableArray *)initialURL;

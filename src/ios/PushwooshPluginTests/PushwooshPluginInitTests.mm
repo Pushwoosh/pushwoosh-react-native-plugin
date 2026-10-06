@@ -189,6 +189,64 @@ static NSString *const PWTestWebLink = @"https://example.com/promo";
     XCTAssertEqualObjects([self initialURLFromLinkingManager], [NSNull null]);
 }
 
+// Verifies that every getInitialURL() of one JS runtime gets the launch push's app-scheme link, as with
+// React Native's own launch URL - an app may ask from several places, an analytics SDK first - while a
+// reloaded runtime, which React Native gives a new RCTLinkingManager, does not get it again.
+- (void)testEveryGetInitialURLOfOneJSRuntimeGetsTheLaunchDeepLink {
+    [self simulateLaunchPush:[self launchPushWithLink:@"pwdemo://inbox"]];
+    [self initPluginWithAppCode:PWTestAppCode];
+    RCTLinkingManager *runtime = [RCTLinkingManager new];
+
+    XCTAssertEqualObjects([self requestInitialURLFrom:runtime], @[ @"pwdemo://inbox" ]);
+    XCTAssertEqualObjects([self requestInitialURLFrom:runtime], @[ @"pwdemo://inbox" ]);
+    XCTAssertEqualObjects([self initialURLFromLinkingManager], [NSNull null]);
+}
+
+// Verifies the same for the launch push's Universal Link delivered before JS asked for it.
+- (void)testEveryGetInitialURLOfOneJSRuntimeGetsAWebLaunchLinkDeliveredBeforeTheFirstCall {
+    [self simulateLaunchPush:[self launchPushWithLink:PWTestWebLink]];
+    [self initPluginWithAppCode:PWTestAppCode];
+    [self postOpenURLNotification:PWTestWebLink];
+    RCTLinkingManager *runtime = [RCTLinkingManager new];
+
+    XCTAssertEqualObjects([self requestInitialURLFrom:runtime], @[ PWTestWebLink ]);
+    XCTAssertEqualObjects([self requestInitialURLFrom:runtime], @[ PWTestWebLink ]);
+    XCTAssertEqualObjects([self initialURLFromLinkingManager], [NSNull null]);
+}
+
+// Verifies the cold start an analytics SDK sets up (AppMetrica's activate() reads getInitialURL()): its
+// call is held while the native SDK checks the Universal Link, the app's own call comes after the link
+// arrived. Both get the link; a reloaded runtime does not.
+- (void)testGetInitialURLCalledAfterAHeldCallGotTheWebLaunchLinkGetsItToo {
+    [self simulateLaunchPush:[self launchPushWithLink:PWTestWebLink]];
+    [self initPluginWithAppCode:PWTestAppCode];
+    RCTLinkingManager *runtime = [RCTLinkingManager new];
+    NSMutableArray *held = [self requestInitialURLFrom:runtime];
+
+    [self postOpenURLNotification:PWTestWebLink];
+
+    XCTAssertEqualObjects(held, @[ PWTestWebLink ]);
+    XCTAssertEqualObjects([self requestInitialURLFrom:runtime], @[ PWTestWebLink ]);
+    XCTAssertEqualObjects([self initialURLFromLinkingManager], [NSNull null]);
+}
+
+// Verifies that a runtime whose held getInitialURL() gave up at the end of the delivery window keeps
+// getting null: the link arriving later goes to the `url` event only.
+- (void)testGetInitialURLOfARuntimeAnsweredNullByTheWindowStaysNullWhenTheLinkArrivesLate {
+    [self simulateLaunchPush:[self launchPushWithLink:PWTestWebLink]];
+    [self initPluginWithAppCode:PWTestAppCode];
+    [self linkingManagerListeningForURLEvents];
+    RCTLinkingManager *runtime = [RCTLinkingManager new];
+    NSMutableArray *held = [self requestInitialURLFrom:runtime];
+    [self waitForInitialURL:held];
+    XCTAssertEqualObjects(held, @[ [NSNull null] ]);
+
+    [self postOpenURLNotification:PWTestWebLink];
+
+    XCTAssertEqualObjects([self jsEventBodiesNamed:@"url"], @[ @{ @"url" : PWTestWebLink } ]);
+    XCTAssertEqualObjects([self requestInitialURLFrom:runtime], @[ [NSNull null] ]);
+}
+
 // Verifies that a getInitialURL() held for the launch push's Universal Link waits for it through the
 // delivery window: the SDK may hand the link over seconds after the tap - it checks the host's
 // apple-app-site-association over the network first - and another URL opened meanwhile does not

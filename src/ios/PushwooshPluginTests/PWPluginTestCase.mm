@@ -136,6 +136,10 @@ static NSString *const PWCommunicationEnabledDefaultsKey = @"PushwooshCommunicat
 }
 
 - (NSMutableArray *)requestInitialURL {
+    return [self requestInitialURLFrom:[RCTLinkingManager new]];
+}
+
+- (NSMutableArray *)requestInitialURLFrom:(RCTLinkingManager *)linkingManager {
     NSMutableArray *results = [NSMutableArray array];
     RCTPromiseResolveBlock resolve = ^(id value) {
         [results addObject:value ?: [NSNull null]];
@@ -146,7 +150,6 @@ static NSString *const PWCommunicationEnabledDefaultsKey = @"PushwooshCommunicat
 
     // getInitialURL:reject: is an RCT_EXPORT_METHOD of RCTLinkingManager, swizzled by the plugin;
     // it has no declaration to call through.
-    RCTLinkingManager *linkingManager = [RCTLinkingManager new];
     SEL selector = NSSelectorFromString(@"getInitialURL:reject:");
     ((void (*)(id, SEL, RCTPromiseResolveBlock, RCTPromiseRejectBlock))objc_msgSend)(linkingManager, selector, resolve, reject);
     return results;

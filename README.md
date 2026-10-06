@@ -54,6 +54,17 @@ npm install pushwoosh-react-native-plugin --save
 cd ios && pod install
 ```
 
+#### Notification Service Extension
+
+Add a Notification Service Extension to track message delivery and show media attachments on iOS: follow [the native guide](https://docs.pushwoosh.com/developer/pushwoosh-sdk/ios-sdk/setting-up-pushwoosh-ios-sdk/basic-integration-guide/#4-message-delivery-tracking).
+
+The extension runs as a separate process and does not see the application code passed to `Pushwoosh.init()`. Give it the code in one of two ways:
+
+- **`Pushwoosh_APPID` in the app's `Info.plist`.** The extension inherits it from the app, there is no need to repeat it in the extension's `Info.plist`. With plugin versions older than 6.1.59 (iOS SDK before 7.1.0) add it to the extension's `Info.plist` as well.
+- **An App Group shared by the app and the extension.** Add the same App Group to both targets (**Signing & Capabilities > App Groups**) and set `PW_APP_GROUPS_NAME` to its identifier in both `Info.plist` files. The extension then reads the application code the app stored there. The App Group is also needed to keep the badge in sync, and for the extension to reach a reverse proxy set with `setReverseProxy()`.
+
+Without the application code the extension sends no delivery event, and with older iOS SDK versions every notification is shown only after about 30 seconds, when the extension times out.
+
 ### Android Setup (Firebase Cloud Messaging)
 
 Push notifications on Android require Firebase Cloud Messaging (FCM).
