@@ -22,7 +22,6 @@ const Settings = () => {
     }, []);
 
     const toggleSwitchNotification = (isChecked) => {
-        setIsEnabledRegister(isChecked);
         if (isChecked) {
             /**
              * To register for push notifications, call the following method:
@@ -36,15 +35,19 @@ const Settings = () => {
              */
             Pushwoosh.register(
                 (token) => {
+                    setIsEnabledRegister(true);
                     report(`Registered for pushes: ${token}`);
                 },
                 (error) => {
+                    setIsEnabledRegister(false);
                     report(`Failed to register: ${error}`);
                 }
             );
         } else {
             /**
-             * To unregister for push notifications, call the following method:
+             * To unregister from push notifications, call the following method. Both callbacks
+             * are optional, but a screen that reports success before native answers cannot tell
+             * a failed unregistration from a successful one:
              *
              * PUSHWOOSH CODE
              *    |   |
@@ -53,8 +56,16 @@ const Settings = () => {
              *    \   /
              *     \_/
              */
-            Pushwoosh.unregister();
-            report('Unregistered from pushes');
+            Pushwoosh.unregister(
+                () => {
+                    setIsEnabledRegister(false);
+                    report('Unregistered from pushes');
+                },
+                (error) => {
+                    setIsEnabledRegister(true);
+                    report(`Failed to unregister: ${error}`);
+                }
+            );
         }
     };
 

@@ -13,6 +13,7 @@
 /// plugin forwards to it.
 @interface PWRecordingNotificationDelegate : NSObject <UNUserNotificationCenterDelegate>
 @property (nonatomic, assign) NSUInteger willPresentCalls;
+@property (nonatomic, strong, nullable) XCTestExpectation *onWillPresent;
 @end
 
 @implementation PWRecordingNotificationDelegate
@@ -21,6 +22,7 @@
        willPresentNotification:(UNNotification *)notification
          withCompletionHandler:(void (^)(UNNotificationPresentationOptions))completionHandler {
     self.willPresentCalls++;
+    [self.onWillPresent fulfill];
     completionHandler(UNNotificationPresentationOptionNone);
 }
 
@@ -170,6 +172,8 @@
     centre.delegate = appDelegate;
     [self initPluginWithAppCode:@"XXXXX-XXXXX"];
     OCMStub([self.pushManager showPushnotificationAlert]).andReturn(YES);
+    XCTestExpectation *handedOver = [self expectationWithDescription:@"app delegate called"];
+    appDelegate.onWillPresent = handedOver;
     __block NSUInteger completions = 0;
     __block UNNotificationPresentationOptions answered = 0;
 
@@ -186,11 +190,7 @@
     XCTAssertEqual(completions, 1);
     XCTAssertEqual(answered, UNNotificationPresentationOptionSound | UNNotificationPresentationOptionBadge | UNNotificationPresentationOptionAlert);
 
-    XCTestExpectation *handedOver = [self expectationWithDescription:@"app delegate called"];
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        [handedOver fulfill];
-    });
-    [self waitForExpectations:@[ handedOver ] timeout:3];
+    [self waitForExpectations:@[ handedOver ] timeout:10];
 
     XCTAssertEqual(appDelegate.willPresentCalls, 1);
     XCTAssertEqual(completions, 1);

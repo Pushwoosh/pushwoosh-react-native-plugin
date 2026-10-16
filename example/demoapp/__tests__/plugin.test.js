@@ -85,6 +85,7 @@ const forwarding = [
   ['register', [], [F, F]],
   ['register', [cb, cb], [cb, cb]],
   ['unregister', [], [F, F]],
+  ['unregister', [cb, cb], [cb, cb]],
   ['onPushOpen', [cb], [cb]],
   ['setUserEmails', ['user-1', 'a@b.c'], ['user-1', ['a@b.c'], F, F]],
   [

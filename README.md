@@ -54,6 +54,85 @@ npm install pushwoosh-react-native-plugin --save
 cd ios && pod install
 ```
 
+That is the whole iOS setup for the app target. The native Pushwoosh SDK comes from the CocoaPods trunk pods
+`PushwooshXCFramework` and `PushwooshInboxUIXCFramework`, the same way as in 7.0.x, so upgrading the
+plugin needs nothing but `pod install` either.
+
+**CocoaPods trunk becomes read-only on December 2, 2026.** From then on the native SDK gets no
+updates through pods: the plugin keeps building on the last version published there, and new native
+releases come only as the Swift package
+[Pushwoosh-XCFramework](https://github.com/Pushwoosh/Pushwoosh-XCFramework). On React Native 0.75
+or newer `pod install` prints a warning about it until the app moves to the package, see
+[Moving to the Swift package](#moving-to-the-swift-package). React Native 0.74 cannot take Swift
+packages through CocoaPods and stays on the trunk pods.
+
+#### Moving to the Swift package
+
+Recommended on React Native 0.75 or newer (the sample and CI run 0.87), before December 2026. With
+the package the app gets the native SDK version each plugin release pins, also after trunk freezes.
+If you do not move, nothing breaks: the app keeps building on the trunk pods, but its native SDK
+stays at the last version published to trunk.
+
+1. Load the plugin's Podfile helper at the top of `ios/Podfile` and call it after
+   `react_native_post_install`:
+
+   ```ruby
+   # Resolve the Pushwoosh Podfile helper with node as well, so a hoisted node_modules works too
+   require Pod::Executable.execute_command('node', ['-p',
+     'require.resolve(
+       "pushwoosh-react-native-plugin/scripts/pushwoosh-spm.rb",
+       {paths: [process.argv[1]]},
+     )', __dir__]).strip
+
+   post_install do |installer|
+     react_native_post_install(installer, config[:reactNativePath], :mac_catalyst_enabled => false)
+     pushwoosh_spm_post_install(installer)
+   end
+   ```
+
+   The `require` has to stay at the top level of the Podfile, before the targets: the plugin
+   switches to the package when `pod install` reads its podspec, and it checks for the helper at
+   that moment. A `require` inside `post_install` comes too late, and the app stays on the trunk
+   pods. With the plugin in a plain `<app>/node_modules` the shorter
+   `require_relative '../node_modules/pushwoosh-react-native-plugin/scripts/pushwoosh-spm'` does the
+   same job.
+2. If the project has a Notification Service Extension, pass its target name:
+   `pushwoosh_spm_post_install(installer, extra_targets: ['NotificationService'])`. The same goes for
+   any other target that references the SDK's classes directly, such as a unit-test bundle that
+   mocks them.
+3. Remove every `pod 'PushwooshXCFramework'` and `pod 'PushwooshInboxUIXCFramework'` line from the
+   Podfile, in all targets. A trunk pod next to the package puts a second copy of the native SDK
+   into the app: `pod install` warns about it, and the build fails with
+   `Multiple commands produce .../PushwooshFramework.framework`.
+4. Run `pod install` and build. The December warning is gone, and `Podfile.lock` no longer lists
+   `PushwooshXCFramework`.
+
+The helper adds the package, at the version the plugin pins, and its `PushwooshFramework`,
+`PushwooshCore` and `PushwooshBridge` products to every app target that links the plugin. Running
+`pod install` again changes nothing, and on React Native below 0.75 the helper does nothing at all.
+Both static (the default) and dynamic (`USE_FRAMEWORKS=dynamic`) linking work.
+
+**A notice you can ignore.** With the helper, `pod install` prints React Native's own `Pod
+pushwoosh-react-native-plugin is using swift package(s) ... with static linking, this might cause
+linker errors`: it is expected, the helper is exactly what makes static linking work.
+
+**First build.** Resolving the package needs network access; without it Xcode stops with a package
+resolution error. On a cold package cache the first resolve can fail with `already exists in file
+system` while two projects fetch the package's binaries at once: run the build (or `pod install`)
+again.
+
+**Expo.** `expo prebuild` regenerates `ios/Podfile`, and its output does not show the `pod install`
+warning. Without changes a managed Expo project builds on the trunk pods. To move it to the package,
+turn on `ios.useSwiftPackage` of the Pushwoosh Expo config plugin (`pushwoosh-expo-plugin` newer than
+2.0.7): prebuild then writes the helper lines into the generated Podfile, see
+[iOS: Swift package](https://github.com/Pushwoosh/pushwoosh-expo-plugin#ios-swift-package). A project
+that keeps the generated `ios/` directory checked in can edit its Podfile as above instead.
+
+**Message Inbox UI.** On the package, `presentInboxUI()` runs on a framework that ships inside the
+plugin: the trunk 7.0.42 build of the Inbox UI without its Mac Catalyst slice, which npm cannot pack
+(it is a symlink) and the plugin does not build for anyway. On the trunk pods it comes from
+`PushwooshInboxUIXCFramework` 7.0.42, as before.
+
 #### Notification Service Extension
 
 Add a Notification Service Extension to track message delivery and show media attachments on iOS: follow [the native guide](https://docs.pushwoosh.com/developer/pushwoosh-sdk/ios-sdk/setting-up-pushwoosh-ios-sdk/basic-integration-guide/#4-message-delivery-tracking).
@@ -64,6 +143,13 @@ The extension runs as a separate process and does not see the application code p
 - **An App Group shared by the app and the extension.** Add the same App Group to both targets (**Signing & Capabilities > App Groups**) and set `PW_APP_GROUPS_NAME` to its identifier in both `Info.plist` files. The extension then reads the application code the app stored there. The App Group is also needed to keep the badge in sync, and for the extension to reach a reverse proxy set with `setReverseProxy()`.
 
 Without the application code the extension sends no delivery event, and with older iOS SDK versions every notification is shown only after about 30 seconds, when the extension times out.
+
+On the trunk pods the extension takes the SDK through a `pod 'PushwooshXCFramework'` line in its
+Podfile target. After [moving to the Swift package](#moving-to-the-swift-package) it takes the same
+package instead: pass its target name to the helper,
+`pushwoosh_spm_post_install(installer, extra_targets: ['NotificationService'])`, or add the package
+to that target in Xcode. Its version has to match the plugin's, otherwise the package resolution
+fails with a version conflict.
 
 ### Android Setup (Firebase Cloud Messaging)
 

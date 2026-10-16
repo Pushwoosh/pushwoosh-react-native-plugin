@@ -4,6 +4,13 @@ require Pod::Executable.execute_command('node', ['-p',
     "react-native/scripts/react_native_pods.rb",
     {paths: [process.argv[1]]},
   )', __dir__]).strip
+# Links the plugin's Swift package into the app and the extension; see the helper's header.
+# Resolved with node as well, so a hoisted node_modules works too.
+require Pod::Executable.execute_command('node', ['-p',
+  'require.resolve(
+    "pushwoosh-react-native-plugin/scripts/pushwoosh-spm.rb",
+    {paths: [process.argv[1]]},
+  )', __dir__]).strip
 
 platform :ios, min_ios_version_supported
 prepare_react_native_project!
@@ -14,12 +21,9 @@ if linkage != nil
   use_frameworks! :linkage => linkage.to_sym
 end
 
-# The notification service extension links PushwooshFramework, which since 7.2 is split into
-# PushwooshCore and PushwooshBridge. Without its own pod target the extension gets none of
-# them and fails to build the module. It deliberately does not inherit from the app target:
-# an extension has no business pulling in React Native.
+# The extension takes the SDK from the plugin's Swift package via pushwoosh_spm_post_install below;
+# a trunk pod here would duplicate it, and inheriting from the app would drag in React Native.
 target 'NotificationService' do
-  pod 'PushwooshXCFramework'
 end
 
 target 'demoapp' do
@@ -31,9 +35,8 @@ target 'demoapp' do
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
-  # Unit tests of the plugin's Objective-C++ module (Sources/src/ios/PushwooshPluginTests), run with
-  # `make ios-test`. search_paths: the bundle resolves the plugin, React and the SDK through the
-  # host app instead of linking a second copy of them; only the mocking library is its own.
+  # Plugin Objective-C++ unit tests (Sources/src/ios/PushwooshPluginTests), `make ios-test`: search_paths
+  # resolves plugin and React through the host app; extra_targets below adds the SDK package for OCMock.
   target 'PushwooshPluginTests' do
     inherit! :search_paths
     pod 'OCMock', '~> 3.9'
@@ -46,5 +49,6 @@ target 'demoapp' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+    pushwoosh_spm_post_install(installer, extra_targets: ['NotificationService', 'PushwooshPluginTests'])
   end
 end
